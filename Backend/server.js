@@ -3,12 +3,12 @@ require('dotenv').config({path:'./config.env'});
 const { Client } = require('pg')
 
 const client = new Client({
-  // host: process.env.DATABASE_HOST,
-  // database: process.env.DATABASE_NAME,
-  // user: process.env.DATABASE_USER,
-  // password: process.env.DATABASE_PASSWORD,
-  // port: process.env.DATABASE_PORT,
-  connectionString: process.env.DATABASE_URL2,
+  host: process.env.DATABASE_HOST,
+  database: process.env.DATABASE_NAME,
+  user: process.env.DATABASE_USER,
+  password: process.env.DATABASE_PASSWORD,
+  port: process.env.DATABASE_PORT,
+  connectionString: process.env.DATABASE_URL,
 });
 
 const app = express();
@@ -23,6 +23,7 @@ client.connect((err) => {
     console.log("Database: ", process.env.DATABASE_NAME)
     console.log("User: ", process.env.DATABASE_USER)
     console.log("Password: ", process.env.DATABASE_PASSWORD)
+    console.log("URL: ", process.env.DATABASE_URL)
   } 
   else {
     console.log('connected')
@@ -30,6 +31,7 @@ client.connect((err) => {
     console.log("Database: ", process.env.DATABASE_NAME)
     console.log("User: ", process.env.DATABASE_USER)
     console.log("Password: ", process.env.DATABASE_PASSWORD)
+    console.log("URL: ", process.env.DATABASE_URL)
   }
 })
 
