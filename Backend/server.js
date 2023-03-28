@@ -3,12 +3,12 @@ require('dotenv').config({path:'./config.env'});
 const { Client } = require('pg')
 
 const client = new Client({
-  host: process.env.DATABASE_HOST,
-  database: process.env.DATABASE_NAME,
-  user: process.env.DATABASE_USER,
-  password: process.env.DATABASE_PASSWORD,
-  port: process.env.DATABASE_PORT,
-  connectionString: process.env.DATABASE_URL,
+  // host: process.env.DATABASE_HOST,
+  // database: process.env.DATABASE_NAME,
+  // user: process.env.DATABASE_USER,
+  // password: process.env.DATABASE_PASSWORD,
+  // port: process.env.DATABASE_PORT,
+  connectionString: process.env.DATABASE_URL2,
 });
 
 const app = express();
