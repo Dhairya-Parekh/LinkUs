@@ -38,6 +38,41 @@ app.listen(PORT, () => {
 });
 
 app.get('/hello_world',(req,res) => {
-  return res.json({ "Hello": "World" });
+  const query = `
+    SELECT *
+    FROM lol
+  `;
+  client.query(query, (err, res_q) => {
+    if (err) {
+      console.error(err);
+    } else {
+      console.log("Query executed successfully");
+      console.log(res_q.rows);
+      return res.json(res_q.rows);
+    }
+  });  
+});
+
+app.get('/hello_world2',(req,res) => {
+  const query = `create table lol (id serial primary key, name varchar(255) not null);`;
+  client.query(query, (err, res_q) => {
+    if (err) {
+      console.error(err);
+    } else {
+      console.log("Query create table executed successfully");
+      console.log(res_q.rows);
+      const query2 = `insert into lol (1, 'test');`;
+      client.query(query2, (err, res_q2) => {
+        if (err) {
+          console.error(err);
+        } else {
+          console.log("Query insert into table executed successfully");
+          console.log(res_q2.rows);
+          return res.json(res_q2.rows);
+        }
+      });
+      return res.json(res_q.rows);
+    }
+  });
 });
 
