@@ -56,14 +56,14 @@ app.get('/hello_world',(req,res) => {
 });
 
 app.get('/hello_world2',(req,res) => {
-  const query = `create table lol (id serial primary key, name varchar(255) not null);`;
+  const query = `drop table lol if exists; create table lol (id serial primary key, name varchar(255) not null);`;
   client.query(query, (err, res_q) => {
     if (err) {
       console.error(err);
     } else {
       console.log("Query create table executed successfully");
       console.log(res_q.rows);
-      const query2 = `insert into lol (1, 'test');`;
+      const query2 = `insert into lol values (1, 'test');`;
       client.query(query2, (err, res_q2) => {
         if (err) {
           console.error(err);
@@ -77,4 +77,5 @@ app.get('/hello_world2',(req,res) => {
     }
   });
 });
+
 
