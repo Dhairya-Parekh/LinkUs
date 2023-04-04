@@ -19,63 +19,13 @@ const PORT = process.env.BACKEND_PORT || 8080;
 client.connect((err) => {
   if (err) {
     console.error('connection error', err.stack)
-    console.log("Host: ", process.env.DATABASE_HOST)
-    console.log("Database: ", process.env.DATABASE_NAME)
-    console.log("User: ", process.env.DATABASE_USER)
-    console.log("Password: ", process.env.DATABASE_PASSWORD)
-    console.log("URL: ", process.env.DATABASE_URL)
   } 
   else {
-    console.log('connected')
-    console.log("Host: ", process.env.DATABASE_HOST)
-    console.log("Database: ", process.env.DATABASE_NAME)
-    console.log("User: ", process.env.DATABASE_USER)
-    console.log("Password: ", process.env.DATABASE_PASSWORD)
-    console.log("URL: ", process.env.DATABASE_URL)
+    console.log('connected to database')
   }
 })
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
-
-app.get('/hello_world',(req,res) => {
-  const query = `
-    SELECT *
-    FROM lol
-  `;
-  client.query(query, (err, res_q) => {
-    if (err) {
-      console.error(err);
-    } else {
-      console.log("Query executed successfully");
-      console.log(res_q.rows);
-      return res.json(res_q.rows);
-    }
-  });  
-});
-
-app.get('/hello_world2',(req,res) => {
-  const query = `drop table lol if exists; create table lol (id serial primary key, name varchar(255) not null);`;
-  client.query(query, (err, res_q) => {
-    if (err) {
-      console.error(err);
-    } else {
-      console.log("Query create table executed successfully");
-      console.log(res_q.rows);
-      const query2 = `insert into lol values (1, 'test');`;
-      client.query(query2, (err, res_q2) => {
-        if (err) {
-          console.error(err);
-        } else {
-          console.log("Query insert into table executed successfully");
-          console.log(res_q2.rows);
-          return res.json(res_q2.rows);
-        }
-      });
-      return res.json(res_q.rows);
-    }
-  });
-});
-
 
