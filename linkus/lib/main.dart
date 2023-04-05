@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'authenticator.dart';
-import 'signup.dart';
-import 'login.dart';
+import 'package:linkus/app.dart';
+import 'package:linkus/authenticator.dart';
+import 'package:linkus/login.dart';
+import 'package:linkus/signup.dart';
+
 
 void main() {
-  runApp(const App());
+  runApp(const LinkUs());
 }
 
-class App extends StatelessWidget {
-  const App({super.key});
+class LinkUs extends StatelessWidget {
+  const LinkUs({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,27 +19,13 @@ class App extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const Authenticator(),
-        '/signup': (context) => const Dummy(),
+        '/signup': (context) => const SignUpPage(),
         '/login': (context) => const LoginPage(),
-        '/home': (context) => const Dummy3(),
+        '/home': (context) => const App(),
       },
     );
   }
 }
-
-class Dummy extends StatelessWidget {
-  const Dummy({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('Dummy'),
-      ),
-    );
-  }
-}
-
 
 class Dummy3 extends StatelessWidget {
   const Dummy3({super.key});
