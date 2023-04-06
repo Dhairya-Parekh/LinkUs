@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+const { v4: uuidv4 } = require('uuid');
 require('dotenv').config({ path: './config.env' });
 const { Client } = require('pg');
 
@@ -21,6 +21,12 @@ const GROUP_ACTION_ENUM = {
   CHANGE: 'chg',
   ADD: 'add',
   GET_ADDED: 'get',
+}
+
+const MESSAGE_ACTION_ENUM = {
+  REACT: 'rea',
+  DELETE: 'del',
+  REC: 'rec',
 }
 
 client.connect((err) => {
@@ -135,17 +141,14 @@ const new_message = (body) => {
   return new Promise(function (resolve, reject) {
     const { sender_id, group_id, link } = body;
     link_id = uuidv4();
-    client.query('insert into links (link_id, sender_id, group_id, title, ) values ($1, $2, $3)', [group_id, group_name, group_info], (error, results) => {
+    time_stamp = Date.now();
+    client.query('insert into links (link_id, sender_id, group_id, title, link, info, timestamp) values ($1, $2, $3, $4, $5, $6, $7)', [link_id, sender_id, group_id, link.title, link.link, link.info, time_stamp], (error, results) => {
       if (error) {
         reject(error);
       }
-      client.query('insert into participants (group_id, user_id, roles) values ($1, $2, $3)', [group_id, user_id, ROLE_ENUM.ADMIN], (error, results1) => {
-        if (error) {
-          reject(error);
-        }
-      })
       resolve({
-        group_id: group_id
+        link_id: link_id,
+        time_stamp: time_stamp
       });
     })
   })
@@ -153,18 +156,106 @@ const new_message = (body) => {
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
-const add_to_participants = (body) => {
+const add_send_message_to_message_action = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { receiver_id, sender_id, link_id } = body;
+    client.query('insert into message_actions(receiver_id, sender_id, link_id, time_stamp, action_type) values ($1, $2, $3, $4, $5)', [receiver_id, sender_id, link_id, Date.now(), MESSAGE_ACTION_ENUM.REC], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve();
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const get_group_members = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { group_id } = body;
+    client.query('select user_id from participants where group_id = $1', [group_id], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve(
+        results.rows
+      );
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const remove_from_participants = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { user_id, group_id } = body;
+    client.query('delete from participants where user_id = $1 and group_id = $2', [user_id, group_id], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve({
+        time_stamp: Date.now()
+      });
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const add_remove_user_to_group_action = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { receiver_id, group_id, affected_id, time_stamp } = body;
+    client.query('insert into group_actions(receiver_id, group_id, affected_id, time_stamp, action_type) values ($1, $2, $3, $4, $5)', [receiver_id, group_id, affected_id, time_stamp, GROUP_ACTION_ENUM.REMOVE], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve();
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const change_role = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { user_id, group_id, role } = body;
+    client.query('update participants set role = $1 where user_id = $2 and group_id = $3', [role, user_id, group_id], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve({
+        time_stamp: Date.now()
+      });
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const add_change_role_to_group_action = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { receiver_id, group_id, affected_id, affected_role, time_stamp } = body;
+    client.query('insert into group_actions(receiver_id, group_id, affected_id, affcted_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [receiver_id, group_id, affected_id, affected_role, time_stamp, GROUP_ACTION_ENUM.CHANGE], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve();
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const add_to_existing = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, group_id } = body;
     client.query('insert into participants(user_id, group_id, roles) values ($1, $2, $3)', [user_id, group_id, ROLE_ENUM.MEMBER], (error, results) => {
       if (error) {
         reject(error);
       }
-      client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [user_id, group_id, user_id, ROLE_ENUM.MEMBER, Date.now(), GROUP_ACTION_ENUM.ADD], (error, results1) => {
-        resolve(
-          true
-        );
-      })
+      resolve({
+        time_stamp: Date.now()
+      });
     })
   })
 }
@@ -175,5 +266,12 @@ module.exports = {
   login,
   signup,
   new_group,
-  add_to_participants
+  add_to_participants,
+  new_message,
+  add_send_message_to_message_action,
+  add_remove_user_to_group_action,
+  get_group_members,
+  remove_from_participants,
+  change_role,
+  add_change_role_to_group_action
 }
