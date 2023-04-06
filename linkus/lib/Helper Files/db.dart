@@ -18,8 +18,20 @@ class Link {
   final String sender;
   final String title;
   final DateTime time;
+  final String description;
+  final int likes;
+  final int dislikes;
+  final String link;
 
-  Link({required this.sender, required this.title, required this.time});
+  Link({
+    required this.sender,
+    required this.title,
+    required this.time,
+    required this.description,
+    required this.likes,
+    required this.dislikes,
+    required this.link,
+  });
 }
 
 class LocalDatabase {
@@ -56,7 +68,14 @@ class LocalDatabase {
     final List<Link> bookmarks = List.generate(
       10,
       (index) => Link(
-          sender: "Sender B", title: "Link ${index + 1}", time: DateTime.now()),
+        title: 'Link ${index + 1}',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        sender: 'John Doe B',
+        likes: 10,
+        dislikes: 2,
+        link: 'https://www.google.com',
+        time: DateTime.now(),
+      ),
     );
 
     return bookmarks;
@@ -83,9 +102,14 @@ class LocalDatabase {
     final List<Link> links = List.generate(
       10,
       (index) => Link(
-          sender: "Sender $groupId",
-          title: "Link ${index + 1}",
-          time: DateTime.now()),
+        title: 'Link ${index + 1}',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        sender: 'John Doe B',
+        likes: 10,
+        dislikes: 2,
+        link: 'https://google.com',
+        time: DateTime.now(),
+      ),
     );
 
     return links;
