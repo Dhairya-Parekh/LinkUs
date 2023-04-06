@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:linkus/Common%20Widgets/link_list.dart';
 import 'package:linkus/Common%20Widgets/loading.dart';
 import 'package:linkus/Helper%20Files/db.dart';
+import 'package:linkus/groupinfo.dart';
 
 class GroupPage extends StatefulWidget {
   final int groupId;
@@ -34,6 +35,18 @@ class _GroupPageState extends State<GroupPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Group Chat'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info),
+            onPressed: () {
+              // navigate to group info page
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const GroupInfoPage()),
+              );
+            },
+          ),
+        ],
       ),
       body: _areLinksLoading
           ? const Loading()

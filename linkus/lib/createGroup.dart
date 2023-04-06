@@ -29,7 +29,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
               const SizedBox(height: 8),
               TextField(
                 controller: groupNameController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Group Name',
                   border: OutlineInputBorder(),
                 ),
@@ -68,7 +68,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                 Expanded(
                   child: TextField(
                     controller: _usernameController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: "Enter username...",
                       border: OutlineInputBorder(),
                     ),

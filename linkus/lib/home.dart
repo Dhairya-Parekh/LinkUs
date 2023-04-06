@@ -66,6 +66,7 @@ class _HompePageState extends State<HompePage> {
                               MaterialPageRoute(
                                   builder: (context) =>
                                       GroupPage(groupId: index)));
+                                      // const GroupChatPage()));
                         },
                         child: Card(
                           child: Padding(
