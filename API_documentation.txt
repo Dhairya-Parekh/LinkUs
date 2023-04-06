@@ -1,1 +1,347 @@
-API Documentation to be added later
+APIs 
+Local storage:
+	last updated timestamp
+	userid
+Client Side
+
+Update new message actions:
+	Type : void
+	Name : add_messages
+	Params : <list<{
+			sender_id: <int>,
+			group_id: <int>,
+			link: {
+				title: <string>,
+				link: <string>,
+				desc: <string>,
+				tags: <list<strings>>,
+				timestamp: <time_stamp>
+			}
+		}>>
+
+Update delete message actions:
+	Type : void
+	Name : delete_messages
+	Params : <list<{
+			link_id: <int>
+		}>>
+
+Update react message actions:
+	Type : void
+	Name : add_reacts
+	Params : <list<{
+			user_id: <int>,
+			link_id: <int>,
+			react: <string>
+		}>>
+
+Update change role actions:
+	Type : void
+	Name : change_role
+	Params : {
+		user_id : <int>,
+		group_id : <int>,
+		role : <string>
+	}
+
+Update kick actions:
+	Type : void
+	Name : remove_member
+	Params : {
+		user_id : <int>,
+		group_id : <int>
+	}
+
+Update add actions:
+	Type : void
+	Name : add_member
+	Params : {
+		user_id : <int>,
+		group_id : <int>,
+		role : <string>
+	}
+
+Read groups :
+	Type : void
+	Name : remove_member
+	Params : {
+		user_id : <int>,
+		group_id : <int>
+	}
+
+Search groups:
+	Type : void
+	Name : remove_member
+	Params : {
+		user_id : <int>,
+		group_id : <int>
+	}
+
+Read links for a particular group:
+	Type : json
+	Name : links_of_group
+	Params : {
+		group_id : <int>
+	}
+	Returns : {
+		links : <list<{
+				link_id : <int>,
+				title: <string>,
+				link: <string>,
+				desc: <string>,
+				tags: <list<strings>>
+			}>>
+	}
+
+Search links global
+	Type : json
+	Name : search_all
+	Params : {
+	}
+	Returns : {
+		links : <list<{
+				link_id : <int>,
+				group_id : <int>,
+				title: <string>,
+				link: <string>,
+				desc: <string>
+			}>>
+	}
+
+Search links for group:
+	Type : json
+	Name : search_group
+	Params : {
+		group_id : <int>
+	}
+	Returns : {
+		links : <list<{
+				link_id : <int>,
+				title: <string>,
+				link: <string>,
+				desc: <string>
+			}>>
+	}
+
+Sort the links based on a parameter and a filter:
+	Type : json
+	Name : sort_links
+	Params : {
+		sort_by : <string>,
+		tags: <list<strings>>
+	}
+	Returns : {
+		links : <list<{
+				link_id : <int>,
+				title: <string>,
+				link: <string>,
+				desc: <string>
+			}>>
+	}
+
+Read group members with their roles:
+	Type : json
+	Name : get_members
+	Params : {
+		group_id : <int>
+	}
+	Returns : {
+		users : <list<{
+				user_name: <string>,
+				role: <string>
+			}>>
+	}
+
+Read bookmarks:
+	Type : json
+	Name : get_bookmarks
+	Returns : {
+		links : <list<{
+				link_id : <int>,
+				title: <string>,
+				link: <string>,
+				desc: <string>,
+				tags: <list<strings>>
+			}>>
+	}
+
+Update bookmarks:
+	Type : void
+	Name : update_bookmark
+	Params : {
+		link_id : <int>
+		action : <string>
+	}
+
+
+Server Side
+
+Reset:
+
+Login:
+	Type: post 
+	URL: /login
+	Body: {
+		user_name : <string>,
+		password : <string>
+	}
+	Return: {
+		isAuthenticated: <bool>,
+		userid: <integer>
+	}
+
+Sign Up:
+	Type: post 
+	URL: /signup
+	Body: {
+		user_name : <string>,
+		password : <string>,
+		email : <string>
+	}
+	Return: {
+		isAuthenticated: <bool>,
+		userid: <int>
+	}
+
+New group:
+	Type: post 
+	URL: /create_group
+	Body: {
+		user_id : <int>,
+		group_name : <string>,
+		members : <list<int>>
+	}
+	Return: {
+		group_id : <int>
+	}
+
+Fetch Updates:
+	Type: get
+	URL: /get_updates
+	Params: {
+		last_opened: <time_stamp>,
+		user_id: <int>
+	}
+	Return: {
+		new_messages: <list<{
+			sender_id: <int>,
+			group_id: <int>,
+			link: {
+				link_id : <int>,
+				title: <string>,
+				link: <string>,
+				desc: <string>,
+				tags: <list<strings>>,
+				timestamp: <time_stamp>
+			}
+		}>>,
+		delete_messages: <list<{
+			link_id: <int>
+		}>>,
+		react: <list<{
+			user_id: <int>,
+			link_id: <int>,
+			react: <string>
+		}>>,
+		change_role: <list<{
+			user_id: <int>,
+			group_id: <int>,
+			role: <string>
+		}>>,
+		remove_member: <list<{
+			user_id: <int>,
+			group_id: <int>
+		}>>,
+		add_user: <list<{
+			user_id: <int>,
+			group_id: <int>,
+			user_name: <string>,
+			role: <string>
+		}>>,
+		get_added: <list<{
+			group_id: <int>,
+			members: <list<{
+				user_id: <int>,
+				user_name: <string>,
+				roles: <string>
+			}>>
+		}>>,
+	}
+
+Broadcast message:
+	Type: post 
+	URL: /send_message
+	Body: {
+		sender_id : <int>,
+		group_id : <int>,
+		link: {
+			title: <string>,
+			link: <string>,
+			desc: <string>,
+			tags: <list<strings>>
+		}
+	}
+	
+	Return: {
+		link_id: <int>,
+		timestamp: <time_stamp>
+	}
+
+Broadcast react:
+	Type: post 
+	URL: /react
+	Body: {
+		sender_id : <int>,
+		link_id : <int>,
+		group_id : <int>,
+		react : <string>
+	}
+	Return: {
+		timestamp : <time_stamp>
+	}
+
+Broadcast delete:
+	Type: post 
+	URL: /delete_message
+	Body: {
+		link_id : <int>,
+		group_id : <int>
+	}
+	Return: {
+		timestamp : <time_stamp>
+	}
+	
+Broadcast add:
+	Type: post 
+	URL: /add_user
+	Body: {
+		user_id : <int>,
+		group_id : <int>,
+		new_member_id : <int>
+	}
+	Return: {
+		timestamp : <time_stamp>
+	}
+
+Broadcast change role:
+	Type: post 
+	URL: /change_role
+	Body : {
+		user_id : <int>,
+		group_id : <int>,
+		role : <string>
+	}
+	Return: {
+		timestamp : <time_stamp>
+	}
+
+Broadcast kick:
+	Type: post 
+	URL: /remove_member
+	Body: {
+		user_id : <int>,
+		group_id : <int>
+	}
+	Return: {
+		isAuthenticated: <bool>
+	}
