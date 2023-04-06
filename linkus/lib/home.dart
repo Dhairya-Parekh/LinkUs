@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:linkus/Common%20Widgets/loading.dart';
-import 'package:linkus/db.dart';
+import 'package:linkus/Helper%20Files/db.dart';
+import 'package:linkus/group.dart';
 
 class HompePage extends StatefulWidget {
   final String username;
@@ -31,9 +32,6 @@ class _HompePageState extends State<HompePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text("Home"),
-      // ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -53,10 +51,10 @@ class _HompePageState extends State<HompePage> {
               ),
             ),
           ),
-          _areGroupsLoading
-              ? const Loading()
-              : Expanded(
-                  child: ListView.builder(
+          Expanded(
+            child: _areGroupsLoading
+                ? const Loading()
+                : ListView.builder(
                     itemCount: groups.length,
                     itemBuilder: (context, index) {
                       final group = groups[index];
@@ -64,6 +62,11 @@ class _HompePageState extends State<HompePage> {
                         onTap: () {
                           // Replace with navigation to group page
                           print("Navigating to group ${group.name}");
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      GroupPage(groupId: index)));
                         },
                         child: Card(
                           child: Padding(
@@ -74,7 +77,7 @@ class _HompePageState extends State<HompePage> {
                       );
                     },
                   ),
-                ),
+          ),
         ],
       ),
     );

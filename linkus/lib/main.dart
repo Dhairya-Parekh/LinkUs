@@ -26,16 +26,3 @@ class LinkUs extends StatelessWidget {
     );
   }
 }
-
-class Dummy3 extends StatelessWidget {
-  const Dummy3({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('Dummy 3'),
-      ),
-    );
-  }
-}

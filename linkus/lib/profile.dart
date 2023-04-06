@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:linkus/Common%20Widgets/link_list.dart';
 import 'package:linkus/Common%20Widgets/loading.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
-import 'package:linkus/db.dart';
+import 'package:linkus/Helper%20Files/db.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -13,7 +14,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   String username = '';
   String email = '';
-  List<String> bookmarks = [];
+  List<Link> bookmarks = [];
   bool _isUserInfoLoading = true;
   bool _isBookmarksLoading = true;
 
@@ -74,15 +75,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 const SizedBox(height: 20),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: bookmarks.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        leading: const Icon(Icons.bookmark),
-                        title: Text(bookmarks[index]),
-                      );
-                    },
-                  ),
+                  child: LinkList(links: bookmarks),
                 ),
                 ElevatedButton(
                   onPressed: () {
