@@ -1,31 +1,130 @@
 const express = require("express");
-require('dotenv').config({path:'./config.env'});
-const { Client } = require('pg')
+const query = require('./query');
 
-const client = new Client({
-  host: process.env.DATABASE_HOST,
-  database: process.env.DATABASE_NAME,
-  user: process.env.DATABASE_USER,
-  password: process.env.DATABASE_PASSWORD,
-  port: process.env.DATABASE_PORT,
-  connectionString: process.env.DATABASE_URL,
-});
 
 const app = express();
 
 // set port, listen for requests
 const PORT = process.env.BACKEND_PORT || 8080;
 
-client.connect((err) => {
-  if (err) {
-    console.error('connection error', err.stack)
-  } 
-  else {
-    console.log('connected to database')
-  }
-})
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
+
+// app.use((req, res, next) => {
+//   res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+//   res.header("Access-Control-Allow-Credentials", "true");
+//   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//   next();
+// });
+
+// parsing the incoming data
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+app.post('/login', (req, res) => {
+  query.login(req.body)
+    .then(response => {
+      res.status(200).send(response);
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+})
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+app.post('/signup', (req, res) => {
+  query.signup(req.body)
+    .then(response => {
+      res.status(200).send(response);
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+})
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+app.post('/create_group', (req, res) => {
+  query.new_group(req.body)
+    .then(response => {
+      for(let i = 0; i < req.body.members.length; i++){
+        if(req.body.members[i] != req.body.user_id){
+          temp_body = {user_id : req.body.members[i], group_id : response.group_id}
+          query.add_to_participants(temp_body);
+        }
+      }
+      res.status(200).send(response);
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+})
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+app.post('/send_message', (req, res) => {
+  query.new_message(req.body)
+    .then(response => {
+      for(let i = 0; i < req.body.members.length; i++){
+        if(req.body.members[i] != req.body.user_id){
+          temp_body = {user_id : req.body.members[i], group_id : response.group_id}
+          query.add_to_participants(temp_body);
+        }
+      }
+      res.status(200).send(response);
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+})
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
 

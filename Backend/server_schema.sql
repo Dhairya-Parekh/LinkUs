@@ -1,3 +1,12 @@
+DROP TABLE IF EXISTS message_actions;
+DROP TABLE IF EXISTS group_actions;
+DROP TABLE IF EXISTS reacts;
+DROP TABLE IF EXISTS tags;
+DROP TABLE IF EXISTS links;
+DROP TABLE IF EXISTS participants;
+DROP TABLE IF EXISTS groups;
+DROP TABLE IF EXISTS users;
+
 CREATE TABLE users
 (
     user_id numeric(4,0) not null,
@@ -17,8 +26,8 @@ CREATE TABLE groups
 
 CREATE TABLE participants
 (
-    group_id numeric(4,0) not null,
     user_id numeric(4,0) not null,
+    group_id numeric(4,0) not null,
     roles varchar(3) not null,
     primary key (group_id, user_id),
     foreign key (group_id) references groups on delete CASCADE,
@@ -28,22 +37,22 @@ CREATE TABLE participants
 CREATE TABLE links
 (
     link_id numeric(4,0) not null,
-    group_id numeric(4,0) not null,
     sender_id numeric(4,0) default null,
-    title varchar(50) default "New Book",
+    group_id numeric(4,0) not null,
+    title varchar(50) default 'New Book',
     link varchar(256) not null,
+    info varchar(100) default null,
     time_stamp timestamp not null,
-    descrpition varchar(100) default null,
     primary key (link_id),
     foreign key (group_id) references groups on delete CASCADE,
-    foreign key (user_id) references users on delete set default
+    foreign key (sender_id) references users on delete set default
 );
 
 CREATE TABLE tags
 (
     link_id numeric(4,0) not null,
     tags varchar(15) not null,
-    primary key (user_id, tags),
+    primary key (link_id, tags),
     foreign key (link_id) references links on delete CASCADE
 );
 
