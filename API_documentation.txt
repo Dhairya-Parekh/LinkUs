@@ -212,7 +212,10 @@ New group:
 		user_id : <int>,
 		group_name : <string>,
 		group_info : <string>,
-		members : <list<int>>
+		members : <list<{
+				participant_id: <int>,
+				role: <string>
+			}>>
 	}
 	Return: {
 		success: <bool>,
