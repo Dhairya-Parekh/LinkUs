@@ -3,6 +3,7 @@ import 'package:linkus/Common%20Widgets/loading.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
 import 'package:linkus/home.dart';
 import 'package:linkus/profile.dart';
+import 'package:linkus/createGroup.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -26,7 +27,7 @@ class _AppState extends State<App> {
           this.username = username;
           _tabs = [
             HompePage(username: username),
-            const SecondTab(),
+            const CreateGroupPage(),
             const ProfilePage(),
           ];
           _isLoading = false;
