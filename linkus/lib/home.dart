@@ -22,7 +22,7 @@ class _HompePageState extends State<HompePage> {
   }
 
   Future<void> _loadGroups() async {
-    final fetchedGroups = await fetchGroups();
+    final fetchedGroups = await LocalDatabase.fetchGroups();
     setState(() {
       groups = fetchedGroups;
       _areGroupsLoading = false;
@@ -61,7 +61,6 @@ class _HompePageState extends State<HompePage> {
                       return GestureDetector(
                         onTap: () {
                           // Replace with navigation to group page
-                          print("Navigating to group ${group.name}");
                           Navigator.push(
                               context,
                               MaterialPageRoute(

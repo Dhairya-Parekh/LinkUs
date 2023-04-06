@@ -20,7 +20,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Fetch bookmarks from API
   Future<void> loadBookmarks() async {
-    final response = await fetchBookmarks();
+    final response = await LocalDatabase.fetchBookmarks();
     setState(() {
       bookmarks = response;
       _isBookmarksLoading = false;

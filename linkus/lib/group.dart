@@ -16,7 +16,7 @@ class _GroupPageState extends State<GroupPage> {
   bool _areLinksLoading = true;
 
   Future<void> _loadLinks() async {
-    final links = await fetchLinks(widget.groupId);
+    final links = await LocalDatabase.fetchLinks(widget.groupId);
     setState(() {
       _links = links;
       _areLinksLoading = false;
