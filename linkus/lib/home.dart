@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:linkus/Common%20Widgets/loading.dart';
+import 'package:linkus/Helper%20Files/api.dart';
 import 'package:linkus/Helper%20Files/db.dart';
 import 'package:linkus/group.dart';
+import 'package:linkus/Helper%20Files/local_storage.dart';
+;
 
 class HompePage extends StatefulWidget {
   final String username;
@@ -28,7 +31,30 @@ class _HompePageState extends State<HompePage> {
       _areGroupsLoading = false;
     });
   }
-
+  Future<void> _refresh() async {
+    // get userid and last updated time
+    final int userId = await getUserId();
+    final int lastFetched = await getLastFetched();
+    // fetch updates from server
+    final Map<String, dynamic> updates = await API.get_updates(lastFetched, userId);
+    final List<Map<String, dynamic>> newMessages = updates['new_messages'];
+    final List<Map<String, dynamic>> deleteMessages = updates['delete_messages'];
+    final List<Map<String, dynamic>> react = updates['react'];
+    final List<Map<String, dynamic>> changeRole = updates['change_role'];
+    final List<Map<String, dynamic>> removeMember = updates['remove_member'];
+    final List<Map<String, dynamic>> addUser = updates['add_user'];
+    final List<Map<String, dynamic>> getAdded = updates['get_added'];
+    // update local database
+    await LocalDatabase.updateMessages(newMessages);
+    await LocalDatabase.deleteMessages(deleteMessages);
+    await LocalDatabase.updateReactions(react);
+    await LocalDatabase.updateRoles(changeRole);
+    await LocalDatabase.removeMembers(removeMember);
+    await LocalDatabase.addUsers(addUser);
+    await LocalDatabase.getAdded(getAdded);
+    // update last fetched time
+    
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

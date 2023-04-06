@@ -46,3 +46,18 @@ Future<Map<String, dynamic>> getUserInfo() async {
     "email": email,
   };
 }
+
+Future<int> getUserId() async {
+  await Future.delayed(const Duration(seconds: 3), () {});
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final int userid = prefs.getInt('userid') ?? 0;
+  return userid;
+}
+
+Future<int> getLastFetched() async {
+  await Future.delayed(const Duration(seconds: 3), () {});
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final int lastFetched = prefs.getInt('last_fetched') ?? 0;
+  return lastFetched;
+}
+

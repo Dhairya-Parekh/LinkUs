@@ -90,4 +90,40 @@ class LocalDatabase {
 
     return links;
   }
+
+  static Future<void> updateMessages(List<Map<String, dynamic>> newMessages) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 3));
+  }
+  
+  static Future<void> deleteMessages(List<Map<String, dynamic>> deleteMessages) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 3));
+  }
+
+  static Future<void> updateReactions(List<Map<String, dynamic>> react) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 3));
+  }
+
+  static Future<void> updateRoles(List<Map<String, dynamic>> changeRole) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 3));
+  }
+
+  static Future<void> removeMembers(List<Map<String, dynamic>> removeMember) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 3));
+  }
+
+  static Future<void> addUsers(List<Map<String, dynamic>> addUser) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 3));
+  }
+
+  static Future<void> getAdded(List<Map<String, dynamic>> addGroup) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 3));
+  }
+  
 }
