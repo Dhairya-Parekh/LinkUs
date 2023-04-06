@@ -215,7 +215,9 @@ New group:
 		members : <list<int>>
 	}
 	Return: {
-		group_id : <int>
+		success: <bool>,
+		group_id : <int>,
+		message: <string>
 	}
 
 Fetch Updates:
@@ -269,6 +271,7 @@ Fetch Updates:
 				roles: <string>
 			}>>
 		}>>,
+		timestamp: <time_stamp>
 	}
 
 Broadcast message:
