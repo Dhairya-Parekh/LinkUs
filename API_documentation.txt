@@ -211,6 +211,7 @@ New group:
 	Body: {
 		user_id : <int>,
 		group_name : <string>,
+		group_info : <string>,
 		members : <list<int>>
 	}
 	Return: {
@@ -279,7 +280,7 @@ Broadcast message:
 		link: {
 			title: <string>,
 			link: <string>,
-			desc: <string>,
+			info: <string>,
 			tags: <list<strings>>
 		}
 	}
