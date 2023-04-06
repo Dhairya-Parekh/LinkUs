@@ -352,5 +352,5 @@ Broadcast kick:
 		group_id : <int>
 	}
 	Return: {
-		isAuthenticated: <bool>
+		timestamp : <time_stamp>
 	}
