@@ -186,8 +186,9 @@ Login:
 		password : <string>
 	}
 	Return: {
-		isAuthenticated: <bool>,
-		userid: <integer>
+		success: <bool>,
+		userid: <int>,
+        message: <string>
 	}
 
 Sign Up:
@@ -199,8 +200,9 @@ Sign Up:
 		email : <string>
 	}
 	Return: {
-		isAuthenticated: <bool>,
-		userid: <int>
+		success: <bool>,
+		userid: <int>,
+        message: <string>
 	}
 
 New group:
