@@ -65,7 +65,7 @@ class _HompePageState extends State<HompePage> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      GroupPage(groupId: index)));
+                                      GroupPage(group: group)));
                                       // const GroupChatPage()));
                         },
                         child: Card(

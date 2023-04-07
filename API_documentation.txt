@@ -62,23 +62,37 @@ Update add actions:
 	}
 
 Read groups :
-	Type : void
-	Name : remove_member
+	Type : list<json>
+	Name : read_groups
 	Params : {
 		user_id : <uuid type char 16>,
 		group_id : <uuid type char 16>
+	}
+	Returns : {
+		groups : <list<{
+				group_id : <int>,
+				group_name: <string>,
+				group_info: <string>
+			}>>
 	}
 
 Search groups:
-	Type : void
-	Name : remove_member
+	Type : list<json>
+	Name : search_group
 	Params : {
 		user_id : <uuid type char 16>,
 		group_id : <uuid type char 16>
 	}
+	Returns : {
+		groups : <list<{
+				group_id : <int>,
+				group_name: <string>,
+				group_info: <string>
+			}>>
+	}
 
 Read links for a particular group:
-	Type : json
+	Type : list<json>
 	Name : links_of_group
 	Params : {
 		group_id : <uuid type char 16>
@@ -94,7 +108,7 @@ Read links for a particular group:
 	}
 
 Search links global
-	Type : json
+	Type : list<json>
 	Name : search_all
 	Params : {
 	}
@@ -109,7 +123,7 @@ Search links global
 	}
 
 Search links for group:
-	Type : json
+	Type : list<json>
 	Name : search_group
 	Params : {
 		group_id : <uuid type char 16>
@@ -124,7 +138,7 @@ Search links for group:
 	}
 
 Sort the links based on a parameter and a filter:
-	Type : json
+	Type : list<json>
 	Name : sort_links
 	Params : {
 		sort_by : <string>,
@@ -140,7 +154,7 @@ Sort the links based on a parameter and a filter:
 	}
 
 Read group members with their roles:
-	Type : json
+	Type : list<json>
 	Name : get_members
 	Params : {
 		group_id : <uuid type char 16>
@@ -153,7 +167,7 @@ Read group members with their roles:
 	}
 
 Read bookmarks:
-	Type : json
+	Type : list<json>
 	Name : get_bookmarks
 	Returns : {
 		links : <list<{

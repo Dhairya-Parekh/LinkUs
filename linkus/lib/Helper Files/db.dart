@@ -104,7 +104,7 @@ class LocalDatabase {
       (index) => Link(
         title: 'Link ${index + 1}',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        sender: 'John Doe B',
+        sender: 'John Doe B $groupId',
         likes: 10,
         dislikes: 2,
         link: 'https://google.com',
@@ -113,5 +113,124 @@ class LocalDatabase {
     );
 
     return links;
+  }
+
+  static Future<Map<String,dynamic>> getGroupInfo(int groupId) async{
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 3));
+
+    // Generate dummy data
+    final Map<String,dynamic> groupInfo = {
+      "name": "Group $groupId",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      "members": [
+        {
+          "name": "John Doe A",
+          "role": "Admin",
+        },
+        {
+          "name": "John Doe B",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe C",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe D",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe E",
+          "role": "Admin",
+        },
+        {
+          "name": "John Doe F",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe G",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe H",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe I",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe J",
+          "role": "Admin",
+        },
+        {
+          "name": "John Doe K",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe L",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe M",
+          "role": "Admin",
+        },
+        {
+          "name": "John Doe N",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe O",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe P",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe Q",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe R",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe S",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe T",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe U",
+          "role": "Admin",
+        },
+        {
+          "name": "John Doe V",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe W",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe X",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe Y",
+          "role": "Member",
+        },
+        {
+          "name": "John Doe Z",
+          "role": "Member",
+        },
+      ],
+      "isAdmin" : true,
+    };
+    return groupInfo;
   }
 }

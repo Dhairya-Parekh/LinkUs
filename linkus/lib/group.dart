@@ -5,8 +5,8 @@ import 'package:linkus/Helper%20Files/db.dart';
 import 'package:linkus/groupinfo.dart';
 
 class GroupPage extends StatefulWidget {
-  final int groupId;
-  const GroupPage({super.key, required this.groupId});
+  final Group group;
+  const GroupPage({super.key, required this.group});
 
   @override
   State<GroupPage> createState() => _GroupPageState();
@@ -17,7 +17,7 @@ class _GroupPageState extends State<GroupPage> {
   bool _areLinksLoading = true;
 
   Future<void> _loadLinks() async {
-    final links = await LocalDatabase.fetchLinks(widget.groupId);
+    final links = await LocalDatabase.fetchLinks(widget.group.id);
     setState(() {
       _links = links;
       _areLinksLoading = false;
@@ -42,7 +42,7 @@ class _GroupPageState extends State<GroupPage> {
               // navigate to group info page
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const GroupInfoPage()),
+                MaterialPageRoute(builder: (context) => GroupInfoPage(group: widget.group)),
               );
             },
           ),
