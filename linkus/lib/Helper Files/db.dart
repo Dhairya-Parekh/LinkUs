@@ -2,15 +2,15 @@ import 'package:sqflite/sqflite.dart';
 import 'dart:io';
 
 class Group {
-  final int id;
-  final String name;
+  final String groupId;
+  final String groupName;
 
-  Group({required this.id, required this.name});
+  Group({required this.groupId, required this.groupName});
 
   factory Group.fromJson(Map<String, dynamic> json) {
     return Group(
-      id: json["id"],
-      name: json["name"],
+      groupId: json["id"],
+      groupName: json["name"],
     );
   }
 }
@@ -35,21 +35,40 @@ class Link {
   });
 }
 
+class ShortLink {
+  final String linkId;
+  final String senderName;
+  final String title;
+  final DateTime timeStamp;
+
+  ShortLink({
+    required this.linkId,
+    required this.senderName,
+    required this.title,
+    required this.timeStamp,
+  });
+}
+
+enum GroupRole {
+  admin,
+  member,
+}
+
 class LocalDatabase {
   static final LocalDatabase _instance = LocalDatabase._internal();
   factory LocalDatabase() => _instance;
   static Database? _database;
   LocalDatabase._internal();
-  
+
   static Future<void> loadSchemaFile(Database db) async {
-  final schemaFile = File('client_schema.sql');
-  final schemaSql = await schemaFile.readAsString();
-  final batch = db.batch();
-  final sqlStatements = schemaSql.split(';');
-  for (final statement in sqlStatements) {
-    batch.execute(statement);
-  }
-  await batch.commit();
+    final schemaFile = File('client_schema.sql');
+    final schemaSql = await schemaFile.readAsString();
+    final batch = db.batch();
+    final sqlStatements = schemaSql.split(';');
+    for (final statement in sqlStatements) {
+      batch.execute(statement);
+    }
+    await batch.commit();
   }
 
   static Future<Database> get database async {
@@ -58,35 +77,9 @@ class LocalDatabase {
     }
     _database = await openDatabase('my_database.db', version: 1,
         onCreate: (Database db, int version) async {
-          await loadSchemaFile(db);
+      await loadSchemaFile(db);
     });
     return _database!;
-  }
-
-
-
-  static Future<List<Link>> fetchBookmarks() async {
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 3));
-    // final Database db = await database;
-    // final List<Map<String, dynamic>> users =
-    //     await db.rawQuery('SELECT * FROM users');
-    // print(users)
-    // Generate dummy data
-    final List<Link> bookmarks = List.generate(
-      10,
-      (index) => Link(
-        title: 'Link ${index + 1}',
-        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        sender: 'John Doe B',
-        likes: 10,
-        dislikes: 2,
-        link: 'https://www.google.com',
-        time: DateTime.now(),
-      ),
-    );
-
-    return bookmarks;
   }
 
   static Future<List<Group>> fetchGroups() async {
@@ -96,167 +89,152 @@ class LocalDatabase {
     // Generate dummy data
     final List<Group> groups = List.generate(
       15,
-      (index) => Group(id: index + 1, name: "Group ${index + 1}"),
+      (index) => Group(
+        groupId: "${index + 1}",
+        groupName: "Group ${index + 1}",
+      ),
     );
 
     return groups;
   }
 
-  static Future<List<Link>> fetchLinks(int groupId) async {
+  static Future<List<ShortLink>> fetchLinks(String groupId) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
 
     // Generate dummy data
-    final List<Link> links = List.generate(
+    final List<ShortLink> links = List.generate(
       10,
-      (index) => Link(
+      (index) => ShortLink(
+        linkId: "${index + 1}",
         title: 'Link ${index + 1}',
-        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        sender: 'John Doe B $groupId',
-        likes: 10,
-        dislikes: 2,
-        link: 'https://google.com',
-        time: DateTime.now(),
+        senderName: 'John Doe S $groupId',
+        timeStamp: DateTime.now(),
       ),
     );
 
     return links;
   }
 
-  static Future<Map<String, dynamic>> getGroupInfo(int groupId) async {
+  static Future<List<ShortLink>> fetchBookmarks() async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 3));
+    // final Database db = await database;
+    // final List<Map<String, dynamic>> users =
+    //     await db.rawQuery('SELECT * FROM users');
+    // print(users)
+    // Generate dummy data
+    final List<ShortLink> bookmarks = List.generate(
+      10,
+      (index) => ShortLink(
+        linkId: "${index + 1}",
+        title: 'Link ${index + 1}',
+        senderName: 'John Doe B',
+        timeStamp: DateTime.now(),
+      ),
+    );
+
+    return bookmarks;
+  }
+
+  static Future<Map<String, dynamic>> getGroupInfo(String groupId) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
 
     // Generate dummy data
     final Map<String, dynamic> groupInfo = {
-      "name": "Group $groupId",
-      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      "groupName": "Group $groupId",
+      "groupDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
       "members": [
         {
-          "name": "John Doe A",
-          "role": "Admin",
+          "userId": "10",
+          "userName": "John Doe",
+          "role": GroupRole.admin,
         },
         {
-          "name": "John Doe B",
-          "role": "Member",
+          "userId": "20",
+          "userName": "Jane Doe S",
+          "role": GroupRole.admin,
         },
         {
-          "name": "John Doe C",
-          "role": "Member",
+          "userId": "30",
+          "userName": "John Smith",
+          "role": GroupRole.member,
         },
         {
-          "name": "John Doe D",
-          "role": "Member",
+          "userId": "40",
+          "userName": "Jane Smith S",
+          "role": GroupRole.member,
         },
         {
-          "name": "John Doe E",
-          "role": "Admin",
+          "userId": "50",
+          "userName": "John Doe B",
+          "role": GroupRole.member,
         },
         {
-          "name": "John Doe F",
-          "role": "Member",
+          "userId": "60",
+          "userName": "Jane Doe A",
+          "role": GroupRole.member,
         },
         {
-          "name": "John Doe G",
-          "role": "Member",
+          "userId": "70",
+          "userName": "John Smith C",
+          "role": GroupRole.member,
         },
         {
-          "name": "John Doe H",
-          "role": "Member",
-        },
-        {
-          "name": "John Doe I",
-          "role": "Member",
-        },
-        {
-          "name": "John Doe J",
-          "role": "Admin",
-        },
-        {
-          "name": "John Doe K",
-          "role": "Member",
-        },
-        {
-          "name": "John Doe L",
-          "role": "Member",
-        },
-        {
-          "name": "John Doe M",
-          "role": "Admin",
-        },
-        {
-          "name": "John Doe N",
-          "role": "Member",
-        },
-        {
-          "name": "John Doe O",
-          "role": "Member",
-        },
-        {
-          "name": "John Doe P",
-          "role": "Member",
-        },
-        {
-          "name": "John Doe Q",
-          "role": "Member",
-        },
-        {
-          "name": "John Doe R",
-          "role": "Member",
-        },
-        {
-          "name": "John Doe S",
-          "role": "Member",
-        },
-        {
-          "name": "John Doe T",
-          "role": "Member",
-        },
-        {
-          "name": "John Doe U",
-          "role": "Admin",
-        },
-        {
-          "name": "John Doe V",
-          "role": "Member",
-        },
-        {
-          "name": "John Doe W",
-          "role": "Member",
-        },
-        {
-          "name": "John Doe X",
-          "role": "Member",
-        },
-        {
-          "name": "John Doe Y",
-          "role": "Member",
-        },
-        {
-          "name": "John Doe Z",
-          "role": "Member",
+          "userId": "80",
+          "userName": "Jane Smith T",
+          "role": GroupRole.member,
         },
       ],
-      "isAdmin": true,
     };
     return groupInfo;
   }
 
-  static Future<int> getUserId(String username) async {
+  static Future<Map<String, dynamic>> getLinkInfo(String linkId) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
 
     // Generate dummy data
-    const int userId = 1;
-    return userId;
+    final linkInfo = {
+      "title": "Link $linkId",
+      "link": "https://www.google.com",
+      "info": "Lorem ipsum dolor sit amet, consectetur adipiscing",
+      "senderName": "John Doe",
+      "timeStamp": DateTime.now(),
+      "likes": 10,
+      "dislikes": 2,
+      "tags": ["tag1", "tag2", "tag3"],
+    };
+    return linkInfo;
   }
 
-  static Future<void> changeRole(int groupId, int userId, String role) async {
+  static Future<void> updateRoles(
+      List<Map<String, dynamic>> changeRoleActions) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
 
     // Generate dummy data
-    print("Changed role of user $userId in group $groupId to $role");
+    for (final action in changeRoleActions) {
+      final String groupId = action['groupId'];
+      final String userId = action['userId'];
+      final GroupRole role = action['role'];
+      print(
+          "Changed role of user $userId in group $groupId to ${role == GroupRole.admin ? "admin" : "member"}");
+    }
+  }
+
+  static Future<Map<String, dynamic>> getGroupSpecificUserInfo(
+      String userId, String groupId) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 3));
+
+    // Generate dummy data
+    final jsonResponse = {
+      "userId": userId,
+      "isAdmin": true,
+    };
+    return jsonResponse;
   }
 
   static Future<void> kickUser(int groupId, int userId) async {
@@ -266,16 +244,15 @@ class LocalDatabase {
     // Generate dummy data
     print("Kicked user $userId from group $groupId");
   }
-  
 
-  static Future<void> updateMessages(List<Map<String, dynamic>> newMessages) async {
+  static Future<void> updateMessages(
+      List<Map<String, dynamic>> newMessages) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
-    
-    
   }
-  
-  static Future<void> deleteMessages(List<Map<String, dynamic>> deleteMessages) async {
+
+  static Future<void> deleteMessages(
+      List<Map<String, dynamic>> deleteMessages) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
   }
@@ -285,14 +262,17 @@ class LocalDatabase {
     await Future.delayed(const Duration(seconds: 3));
   }
 
-  static Future<void> updateRoles(List<Map<String, dynamic>> changeRole) async {
+  static Future<void> removeMembers(
+      List<Map<String, dynamic>> removeMemberActions) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
-  }
 
-  static Future<void> removeMembers(List<Map<String, dynamic>> removeMember) async {
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 3));
+    // Generate dummy data
+    for (final action in removeMemberActions) {
+      final String groupId = action['groupId'];
+      final String userId = action['userId'];
+      print("Removed user $userId from group $groupId");
+    }
   }
 
   static Future<void> addUsers(List<Map<String, dynamic>> addUser) async {
@@ -304,5 +284,4 @@ class LocalDatabase {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
   }
-  
 }

@@ -3,6 +3,7 @@ import 'package:linkus/Common%20Widgets/loading.dart';
 import 'package:linkus/Helper%20Files/api.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
 
+//TODO: Give button to navigate to register page
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 

@@ -14,7 +14,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   String username = '';
   String email = '';
-  List<Link> bookmarks = [];
+  List<ShortLink> bookmarks = [];
   bool _isUserInfoLoading = true;
   bool _isBookmarksLoading = true;
 

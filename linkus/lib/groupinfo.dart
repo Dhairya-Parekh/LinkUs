@@ -18,11 +18,16 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
   Map<String, dynamic> groupInfo = {};
   bool _isGroupInfoLoading = true;
   int _isMemberInfoLoading = -1;
+  Map<String, dynamic> userInfo = {};
 
   Future<void> _loadGroupInfo() async {
-    final info = await LocalDatabase.getGroupInfo(widget.group.id);
+    final ginfo = await LocalDatabase.getGroupInfo(widget.group.groupId);
+    // TODO: Change user id to actual user id
+    final uinfo = await LocalDatabase.getGroupSpecificUserInfo(
+        "userId", widget.group.groupId);
     setState(() {
-      groupInfo = info;
+      groupInfo = ginfo;
+      userInfo = uinfo;
       _isGroupInfoLoading = false;
     });
   }
@@ -32,16 +37,21 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
     // Navigator.pop(context);
   }
 
-  Future<void> _changeMemberRole(int index, String role) async {
+  Future<void> _changeMemberRole(int index, GroupRole role) async {
     setState(() {
       _isMemberInfoLoading = index;
     });
-    int userID =
-        await LocalDatabase.getUserId(groupInfo["members"][index]["name"]);
-    Map<String, dynamic> response =
-        await API.changeRole(widget.group.id, userID, role);
+    String userID = groupInfo["members"][index]["userId"];
+    Map<String, dynamic> response = await API.broadcastChangeRole(
+        widget.group.groupId, userID, userInfo["userId"], role);
     if (response["success"] == true) {
-      await LocalDatabase.changeRole(widget.group.id, userID, role);
+      await LocalDatabase.updateRoles([
+        {
+          "groupId": widget.group.groupId,
+          "userId": userID,
+          "role": role,
+        }
+      ]);
       setState(() {
         groupInfo["members"][index]["role"] = role;
         _isMemberInfoLoading = -1;
@@ -50,19 +60,20 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
   }
 
   Future<void> _kickMember(int index) async {
-    // await LocalDatabase.kickMember(
-    //     widget.group.id, groupInfo["members"][index]["id"]);
-    // setState(() {
-    //   groupInfo["members"].removeAt(index);
-    // });
     setState(() {
       _isMemberInfoLoading = index;
     });
-    int userID =
-        await LocalDatabase.getUserId(groupInfo["members"][index]["name"]);
-    Map<String, dynamic> response = await API.kickUser(widget.group.id, userID);
+    String userID = groupInfo["members"][index]["userId"];
+    Map<String, dynamic> response = await API.broadcastKick(
+        widget.group.groupId, userID, userInfo["userId"]
+    );
     if (response["success"] == true) {
-      await LocalDatabase.kickUser(widget.group.id, userID);
+      await LocalDatabase.removeMembers([
+        {
+          "groupId": widget.group.groupId,
+          "userId": userID,
+        }
+      ]);
       setState(() {
         groupInfo["members"].removeAt(index);
         _isMemberInfoLoading = -1;
@@ -80,7 +91,7 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.group.name),
+        title: Text(widget.group.groupName),
       ),
       body: _isGroupInfoLoading
           ? const Loading()
@@ -102,28 +113,21 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
                     itemCount: groupInfo["members"].length,
                     itemBuilder: (BuildContext context, int index) {
                       return ListTile(
-                        title: Text(groupInfo["members"][index]["name"]),
-                        trailing: groupInfo["isAdmin"]
+                        title: Text(groupInfo["members"][index]["userName"]),
+                        trailing: userInfo["isAdmin"]
                             ? _isMemberInfoLoading == index
                                 ? const CircularProgressIndicator()
                                 : _isMemberInfoLoading != -1
                                     ? null
                                     : PopupMenuButton<String>(
                                         onSelected: (String value) {
-                                          // change member role
-                                          // setState(() {
-                                          //   if (value == "Make admin") {
-                                          //     groupInfo["members"].insert(
-                                          //         0, groupInfo["members"].removeAt(index));
-                                          //   } else {
-                                          //     groupInfo["members"].add(groupInfo["members"].removeAt(index));
-                                          //   }
-                                          // });
                                           if (value == "Make admin") {
-                                            _changeMemberRole(index, "admin");
+                                            _changeMemberRole(
+                                                index, GroupRole.admin);
                                           } else if (value == "Make member") {
-                                            _changeMemberRole(index, "member");
-                                          } else {
+                                            _changeMemberRole(
+                                                index, GroupRole.member);
+                                          } else if (value == "Kick") {
                                             // kick member
                                             _kickMember(index);
                                           }
@@ -146,7 +150,10 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
                                         },
                                       )
                             : null,
-                        subtitle: Text(groupInfo["members"][index]["role"]),
+                        subtitle: Text(groupInfo["members"][index]["role"] ==
+                                GroupRole.admin
+                            ? "Admin"
+                            : "Member"),
                       );
                     },
                   ),
@@ -164,7 +171,7 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Text(
-                    groupInfo["description"],
+                    groupInfo["groupDesc"],
                     style: const TextStyle(fontSize: 16.0),
                   ),
                 ),

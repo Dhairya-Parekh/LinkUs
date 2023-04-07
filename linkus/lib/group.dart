@@ -14,12 +14,11 @@ class GroupPage extends StatefulWidget {
 }
 
 class _GroupPageState extends State<GroupPage> {
-
-  List<Link> _links = [];
+  List<ShortLink> _links = [];
   bool _areLinksLoading = true;
 
   Future<void> _loadLinks() async {
-    final links = await LocalDatabase.fetchLinks(widget.group.id);
+    final links = await LocalDatabase.fetchLinks(widget.group.groupId);
     setState(() {
       _links = links;
       _areLinksLoading = false;
@@ -32,11 +31,11 @@ class _GroupPageState extends State<GroupPage> {
     _loadLinks();
   }
 
-  Future<void> showpopup() async {
+  Future<void> showNewMessagePopUp() async {
     return showDialog(
       context: context,
       builder: (context) {
-        return MessagePopUp(groupId: widget.group.id);
+        return MessagePopUp(groupId: widget.group.groupId);
       },
     );
   }
@@ -45,23 +44,25 @@ class _GroupPageState extends State<GroupPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Group Chat'),
+        title: Text(widget.group.groupName),
         actions: [
           IconButton(
-              icon: const Icon(Icons.info),
-              onPressed: () {
-                // navigate to group info page
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => GroupInfoPage(group: widget.group)),
-                );
-              }),
+            icon: const Icon(Icons.info),
+            onPressed: () {
+              // navigate to group info page
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => GroupInfoPage(group: widget.group),
+                ),
+              );
+            },
+          ),
         ],
       ),
       body: _areLinksLoading ? const Loading() : LinkList(links: _links),
       floatingActionButton: FloatingActionButton(
-        onPressed: showpopup,
+        onPressed: showNewMessagePopUp,
         child: const Icon(Icons.add),
       ),
     );
