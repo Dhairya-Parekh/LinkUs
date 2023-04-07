@@ -26,7 +26,7 @@ const GROUP_ACTION_ENUM = {
 const MESSAGE_ACTION_ENUM = {
   REACT: 'rea',
   DELETE: 'del',
-  REC: 'rec',
+  RECEIVE: 'rec',
 }
 
 client.connect((err) => {
@@ -158,8 +158,8 @@ const new_message = (body) => {
 
 const add_send_message_to_message_action = (body) => {
   return new Promise(function (resolve, reject) {
-    const { receiver_id, sender_id, link_id } = body;
-    client.query('insert into message_actions(receiver_id, sender_id, link_id, time_stamp, action_type) values ($1, $2, $3, $4, $5)', [receiver_id, sender_id, link_id, Date.now(), MESSAGE_ACTION_ENUM.REC], (error, results) => {
+    const { receiver_id, sender_id, link_id, time_stamp } = body;
+    client.query('insert into message_actions(receiver_id, sender_id, link_id, time_stamp, action_type) values ($1, $2, $3, $4, $5)', [receiver_id, sender_id, link_id, time_stamp, MESSAGE_ACTION_ENUM.RECEIVE], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -292,6 +292,50 @@ const remove_link = (body) => {
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
+const add_delete_message_to_message_action = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { receiver_id, sender_id, link_id, time_stamp } = body;
+    client.query('insert into message_actions(receiver_id, sender_id, link_id, time_stamp, action_type) values ($1, $2, $3, $4, $5)', [receiver_id, sender_id, link_id, time_stamp, MESSAGE_ACTION_ENUM.DELETE], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve();
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const react_to_link = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { user_id, link_id, react } = body;
+    client.query('insert into reacts(user_id, link_id, react) values ($1, $2, $3)', [user_id, link_id, react], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve({
+        time_stamp: Date.now()
+      });
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const add_react_to_message_action = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { receiver_id, sender_id, link_id, time_stamp } = body;
+    client.query('insert into message_actions(receiver_id, sender_id, link_id, time_stamp, action_type) values ($1, $2, $3, $4, $5)', [receiver_id, sender_id, link_id, time_stamp, MESSAGE_ACTION_ENUM.REACT], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve();
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 module.exports = {
   login,
@@ -307,5 +351,8 @@ module.exports = {
   add_change_role_to_group_action,
   add_one_to_participants,
   add_new_member_to_group_action,
-  remove_link
+  remove_link,
+  add_delete_message_to_message_action,
+  react_to_link,
+  add_react_to_message_action
 }

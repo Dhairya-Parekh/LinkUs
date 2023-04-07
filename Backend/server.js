@@ -22,6 +22,7 @@ app.listen(PORT, () => {
 // parsing the incoming data
 // app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
+
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 query.get_group_members({group_id: 123})
 app.post('/login', (req, res) => {
@@ -78,7 +79,7 @@ app.post('/send_message', (req, res) => {
       .then(response1 => {
         for(let i = 0; i < response1.length; i++){
           if(response1[i].user_id != req.body.user_id){
-            temp_body = {receiver_id : response1[i].user_id, sender_id : req.body.user_id, link_id : response.link_id}
+            temp_body = {receiver_id : response1[i].user_id, sender_id : req.body.user_id, link_id : response.link_id, time_stamp : response.time_stamp}
             query.add_send_message_to_message_action(temp_body);
           }
         }
@@ -92,27 +93,26 @@ app.post('/send_message', (req, res) => {
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
+app.post('/react', (req, res) => {
+  temp_body = {user_id: req.body.sender_id, link_id: req.body.link_id, react: req.body.react}
+  query.react_to_link(temp_body)
+    .then(response => {
+      temp_body = {group_id: req.body.group_id}
+      query.get_group_members(temp_body)
+      .then(response1 => {
+        for(let i = 0; i < response1.length; i++){
+          if(response1[i].user_id != req.body.sender_id){
+            temp_body = {receiver_id : response1[i].user_id, sender_id: req.body.user_id, link_id: req.body.link_id, time_stamp: response.time_stamp}
+            query.add_react_to_message_action(temp_body);
+          }
+        }
+        res.status(200).send(response);
+      })
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+})
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -125,8 +125,8 @@ app.post('/delete_message', (req, res) => {
       .then(response1 => {
         for(let i = 0; i < response1.length; i++){
           if(response1[i].user_id != req.body.user_id){
-            temp_body = {receiver_id : response1[i].user_id, group_id: req.body.group_id, affected_id: req.body.new_member_id, affected_role: req.body.role, time_stamp: response.time_stamp}
-            query.add_new_member_to_group_action(temp_body);
+            temp_body = {receiver_id : response1[i].user_id, sender_id: req.body.user_id, link_id: req.body.link_id, time_stamp: response.time_stamp}
+            query.add_delete_message_to_message_action(temp_body);
           }
         }
         res.status(200).send(response);
