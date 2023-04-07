@@ -119,14 +119,14 @@ const new_group = (body) => {
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
-const add_to_participants = (body) => {
+const add_all_to_participants = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, group_id } = body;
     client.query('insert into participants(user_id, group_id, roles) values ($1, $2, $3)', [user_id, group_id, ROLE_ENUM.MEMBER], (error, results) => {
       if (error) {
         reject(error);
       }
-      client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [user_id, group_id, user_id, ROLE_ENUM.MEMBER, Date.now(), GROUP_ACTION_ENUM.ADD], (error, results1) => {
+      client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [user_id, group_id, user_id, ROLE_ENUM.MEMBER, Date.now(), GROUP_ACTION_ENUM.GET], (error, results1) => {
         resolve(
           true
         );
@@ -246,7 +246,7 @@ const add_change_role_to_group_action = (body) => {
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
-const add_to_existing = (body) => {
+const add_one_to_participants = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, group_id } = body;
     client.query('insert into participants(user_id, group_id, roles) values ($1, $2, $3)', [user_id, group_id, ROLE_ENUM.MEMBER], (error, results) => {
@@ -262,16 +262,50 @@ const add_to_existing = (body) => {
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
+const add_new_member_to_group_action = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { receiver_id, group_id, affected_id, affected_role, time_stamp } = body;
+    client.query('insert into group_actions(receiver_id, group_id, affected_id, affcted_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [receiver_id, group_id, affected_id, affected_role, time_stamp, GROUP_ACTION_ENUM.ADD], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve();
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const remove_link = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { link_id } = body;
+    client.query('delete from links where link_id = $1', [link_id], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve({
+        time_stamp: Date.now()
+      });
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
 module.exports = {
   login,
   signup,
   new_group,
-  add_to_participants,
+  add_all_to_participants,
   new_message,
   add_send_message_to_message_action,
   add_remove_user_to_group_action,
   get_group_members,
   remove_from_participants,
   change_role,
-  add_change_role_to_group_action
+  add_change_role_to_group_action,
+  add_one_to_participants,
+  add_new_member_to_group_action,
+  remove_link
 }

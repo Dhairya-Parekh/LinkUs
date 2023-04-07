@@ -54,7 +54,7 @@ app.post('/create_group', (req, res) => {
       for(let i = 0; i < req.body.members.length; i++){
         if(req.body.members[i] != req.body.user_id){
           temp_body = {user_id : req.body.members[i], group_id : response.group_id}
-          query.add_to_participants(temp_body);
+          query.add_all_to_participants(temp_body);
         }
       }
       res.status(200).send(response);
@@ -116,21 +116,40 @@ app.post('/send_message', (req, res) => {
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
-
-app.post('/add_user', (req, res) => {
-  temp_body = {user_id: req.body.new_member_id, group_id: req.body.group_id}
-  query.add_to_existing(temp_body)
+app.post('/delete_message', (req, res) => {
+  temp_body = {link_id: req.body.link_id}
+  query.remove_link(temp_body)
     .then(response => {
       temp_body = {group_id: req.body.group_id}
       query.get_group_members(temp_body)
       .then(response1 => {
         for(let i = 0; i < response1.length; i++){
           if(response1[i].user_id != req.body.user_id){
-            temp_body = {receiver_id : response1[i].user_id, group_id: req.body.group_id, affected_id: req.body.user_id, affected_role: req.body.role, time_stamp: response.time_stamp}
-            query.add_change_role_to_group_action(temp_body);
+            temp_body = {receiver_id : response1[i].user_id, group_id: req.body.group_id, affected_id: req.body.new_member_id, affected_role: req.body.role, time_stamp: response.time_stamp}
+            query.add_new_member_to_group_action(temp_body);
+          }
+        }
+        res.status(200).send(response);
+      })
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+})
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+app.post('/add_user', (req, res) => {
+  temp_body = {user_id: req.body.new_member_id, group_id: req.body.group_id}
+  query.add_one_to_participants(temp_body)
+    .then(response => {
+      temp_body = {group_id: req.body.group_id}
+      query.get_group_members(temp_body)
+      .then(response1 => {
+        for(let i = 0; i < response1.length; i++){
+          if(response1[i].user_id != req.body.user_id){
+            temp_body = {receiver_id : response1[i].user_id, group_id: req.body.group_id, affected_id: req.body.new_member_id, affected_role: req.body.role, time_stamp: response.time_stamp}
+            query.add_new_member_to_group_action(temp_body);
           }
         }
         res.status(200).send(response);
