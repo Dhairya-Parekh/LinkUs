@@ -3,10 +3,11 @@ import 'package:linkus/Common%20Widgets/link_list.dart';
 import 'package:linkus/Common%20Widgets/loading.dart';
 import 'package:linkus/Helper%20Files/db.dart';
 import 'package:linkus/Helper%20Files/api.dart';
+import 'package:linkus/groupinfo.dart';
 
 class GroupPage extends StatefulWidget {
-  final int groupId;
-  const GroupPage({Key? key, required this.groupId}) : super(key: key);
+  final Group group;
+  const GroupPage({super.key, required this.group});
 
   @override
   State<GroupPage> createState() => _GroupPageState();
@@ -74,7 +75,7 @@ class _GroupPageState extends State<GroupPage> {
   bool _areLinksLoading = true;
 
   Future<void> _loadLinks() async {
-    final links = await LocalDatabase.fetchLinks(widget.groupId);
+    final links = await LocalDatabase.fetchLinks(widget.group.id);
     setState(() {
       _links = links;
       _areLinksLoading = false;
@@ -106,11 +107,15 @@ class _GroupPageState extends State<GroupPage> {
         title: const Text('Group Chat'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
+              icon: const Icon(Icons.info),
+              onPressed: () {
+                // navigate to group info page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => GroupInfoPage(group: widget.group)),
+                );
+              }),
         ],
       ),
       body: _areLinksLoading ? const Loading() : LinkList(links: _links),
@@ -196,12 +201,10 @@ class _GroupPageState extends State<GroupPage> {
                       };
 
                       final jsonResponse =
-                          await API.broadcastMessage(0, widget.groupId, link);
+                          await API.broadcastMessage(0, widget.group.id, link);
 
                       // TODO : Update the localstorage
 
-                      
-                      
                       // ignore: use_build_context_synchronously
                       Navigator.pop(context);
                     },

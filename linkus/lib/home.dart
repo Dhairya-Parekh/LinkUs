@@ -5,7 +5,7 @@ import 'package:linkus/group.dart';
 
 class HompePage extends StatefulWidget {
   final String username;
-  const HompePage({Key? key, required this.username}) : super(key: key);
+  const HompePage({super.key, required this.username});
 
   @override
   State<HompePage> createState() => _HompePageState();
@@ -71,7 +71,7 @@ class _HompePageState extends State<HompePage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => GroupPage(groupId: index),
+                                builder: (context) => GroupPage(group: group),
                               ),
                             );
                           },
