@@ -134,7 +134,7 @@ const add_all_to_participants = (body) => {
           if (error) {
             reject(error);
           }
-          client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [results.rows[0], group_id, user_id, role, time_stamp, GROUP_ACTION_ENUM.GET_ADDED], (error, results2) => {
+          client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [results.rows[0], group_id, results.rows[0], role, time_stamp, GROUP_ACTION_ENUM.GET_ADDED], (error, results2) => {
             resolve(
               true
             );
@@ -276,12 +276,13 @@ const add_change_role_to_group_action = (body) => {
 
 const add_one_to_participants = (body) => {
   return new Promise(function (resolve, reject) {
-    const { user_id, user_name, group_id } = body;
+    const { user_id, user_name, group_id, affected_role } = body;
     client.query('select roles from participants where user_id = $1 and group_id = $2)', [user_id, group_id], (error, results) => {
       if(results.rows[0] != ROLE_ENUM.ADMIN){
         resolve({
           success: false,
           message: "You are not an admin",
+          new_member_id: null,
           time_stamp: new Date()
         })
       }
@@ -291,20 +292,29 @@ const add_one_to_participants = (body) => {
             resolve({
               success: false,
               message: "User not found",
+              new_member_id: null,
               time_stamp: new Date()
             })
           }
           else{
-            client.query('insert into participants(user_id, group_id, roles) values ($1, $2, $3)', [user_id, group_id, ROLE_ENUM.MEMBER], (error, results2) => {
+            client.query('insert into participants(user_id, group_id, roles) values ($1, $2, $3)', [user_id, group_id, affected_role], (error, results2) => {
               if (error) {
                 reject(error);
               }
-              resolve({
-                success: true,
-                message: "User added successfully",
-                time_stamp: new Date()
-              });
-            })}
+              time_stamp = new Date();
+              client.query('insert into group_actions(receiver_id, group_id, affected_id, affcted_role, time_stamp, action_type) values ($1, $2, $3)', [results1.rows[0].user_id, group_id, results1.rows[0].user_id, affected_role, time_stamp, GROUP_ACTION_ENUM.GET_ADDED], (error, results3) => {
+                if (error) {
+                  reject(error);
+                }
+                resolve({
+                  success: true,
+                  message: "User added successfully",
+                  new_member_id: results1.rows[0].user_id,
+                  time_stamp: time_stamp
+                });
+              })
+            })
+          }
         })
       }
     })
@@ -485,6 +495,61 @@ const get_removed_members = (body) => {
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
+const get_added_members = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { user_id, time_stamp } = body;
+    client.query('select affected_id, group_id, affected_role from group_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.ADD], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      response = [];
+      for(let i = 0; i < results.rows.length; i++){
+        temp = {};
+        client.query('select user_name from users where user_id = $1', [results.rows[i].affected_id], (error, results1) => {
+          if (error) {
+            reject(error);
+          }
+          temp["user_id"] = results.rows[i].affected_id
+          temp["group_id"] = results.rows[i].group_id
+          temp["user_name"] = results1.rows[0].user_name
+          temp["role"] = results.rows[i].affected_role
+        })
+        response.push(temp)
+      }
+      resolve(response);
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const get_new_groups = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { user_id, time_stamp } = body;
+    client.query('select group_id, affected_role from group_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.GET_ADDED], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      response = [];
+      for(let i = 0; i < results.rows.length; i++){
+        temp = {};
+        client.query('select participants.user_id as user_id, participants.roles as roles, users.user_name as user_name from participants, users where users.user_id = participants.user_id and group_id = $1', [results.rows[i].group_id], (error, results1) => {
+          if (error) {
+            reject(error);
+          }
+          temp["group_id"] = results.rows[i].group_id
+          temp["role"] = results.rows[i].affected_role
+          temp["members"] = results1.rows
+        })
+        response.push(temp)
+      }
+      resolve(response);
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 module.exports = {
   login,
@@ -508,5 +573,7 @@ module.exports = {
   get_del_messages,
   get_reacts,
   get_role_changes,
-  get_removed_members
+  get_removed_members,
+  get_added_members,
+  get_new_groups
 }

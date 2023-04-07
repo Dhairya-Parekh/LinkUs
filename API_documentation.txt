@@ -313,6 +313,7 @@ Fetch Updates:
 		}>>,
 		get_added: <list<{
 			group_id: <uuid type char 16>,
+			role: <string>,
 			members: <list<{
 				user_id: <uuid type char 16>,
 				user_name: <string>,
@@ -375,6 +376,9 @@ Broadcast add:
 		new_member_role : <string>
 	}
 	Return: {
+		success : <bool>,
+		message : <string>,
+		new_member_id : <uuid type char 16>,
 		time_stamp : <time_stamp>
 	}
 
