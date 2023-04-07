@@ -19,11 +19,12 @@ Client Side
 
 Update new message actions:
 	Type : void
-	Name : add_messages
+	Name : updateMessages
 	Params : <list<{
 			sender_id: <uuid type char 16>,
 			group_id: <uuid type char 16>,
 			link: {
+				link_id : <uuid type char 16>,
 				title: <string>,
 				link: <string>,
 				desc: <string>,
@@ -34,14 +35,14 @@ Update new message actions:
 
 Update delete message actions:
 	Type : void
-	Name : delete_messages
+	Name : deleteMessages
 	Params : <list<{
 			link_id: <uuid type char 16>
 		}>>
 
 Update react message actions:
 	Type : void
-	Name : add_reacts
+	Name : updateReactions
 	Params : <list<{
 			user_id: <uuid type char 16>,
 			link_id: <uuid type char 16>,
@@ -50,7 +51,7 @@ Update react message actions:
 
 Update change role actions:
 	Type : void
-	Name : change_role
+	Name : updateRoles
 	Params : {
 		user_id : <uuid type char 16>,
 		group_id : <uuid type char 16>,
@@ -59,7 +60,7 @@ Update change role actions:
 
 Update kick actions:
 	Type : void
-	Name : remove_member
+	Name : removeMembers
 	Params : {
 		user_id : <uuid type char 16>,
 		group_id : <uuid type char 16>
@@ -67,11 +68,28 @@ Update kick actions:
 
 Update add actions:
 	Type : void
-	Name : add_member
+	Name : addUsers
 	Params : {
-		user_id : <uuid type char 16>,
-		group_id : <uuid type char 16>,
-		role : <string>
+		<list<{
+			user_id: <uuid type char 16>,
+			group_id: <uuid type char 16>,
+			user_name: <string>,
+			role: <string>
+		}>>
+	}
+
+Update get Added:
+	Type : void
+	Name : getAdded
+	Params : {
+		<list<{
+			group_id: <uuid type char 16>,
+			members: <list<{
+				user_id: <uuid type char 16>,
+				user_name: <string>,
+				roles: <string>
+			}>>
+		}>>
 	}
 
 Read groups :

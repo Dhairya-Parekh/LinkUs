@@ -4,7 +4,6 @@ import 'package:linkus/Helper%20Files/api.dart';
 import 'package:linkus/Helper%20Files/db.dart';
 import 'package:linkus/group.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
-;
 
 class HompePage extends StatefulWidget {
   final String username;

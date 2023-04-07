@@ -1,4 +1,5 @@
 import 'package:sqflite/sqflite.dart';
+import 'dart:io';
 
 class Group {
   final int id;
@@ -39,23 +40,30 @@ class LocalDatabase {
   factory LocalDatabase() => _instance;
   static Database? _database;
   LocalDatabase._internal();
+  
+  static Future<void> loadSchemaFile(Database db) async {
+  final schemaFile = File('client_schema.sql');
+  final schemaSql = await schemaFile.readAsString();
+  final batch = db.batch();
+  final sqlStatements = schemaSql.split(';');
+  for (final statement in sqlStatements) {
+    batch.execute(statement);
+  }
+  await batch.commit();
+  }
+
   static Future<Database> get database async {
     if (_database != null) {
       return _database!;
     }
     _database = await openDatabase('my_database.db', version: 1,
         onCreate: (Database db, int version) async {
-      // Create the first table
-      await db.execute('''
-        CREATE TABLE users (
-          id INTEGER PRIMARY KEY,
-          name TEXT,
-          age INTEGER
-        )
-      ''');
+          await loadSchemaFile(db);
     });
     return _database!;
   }
+
+
 
   static Future<List<Link>> fetchBookmarks() async {
     // Simulate network delay
@@ -263,6 +271,8 @@ class LocalDatabase {
   static Future<void> updateMessages(List<Map<String, dynamic>> newMessages) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
+    
+    
   }
   
   static Future<void> deleteMessages(List<Map<String, dynamic>> deleteMessages) async {
