@@ -112,7 +112,7 @@ const new_group = (body) => {
       })
       resolve({
         group_id: group_id,
-        time_stamp: Date.now()
+        time_stamp: new Date()
       });
     })
   })
@@ -134,7 +134,7 @@ const add_all_to_participants = (body) => {
           if (error) {
             reject(error);
           }
-          client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [results.rows[0], group_id, user_id, role, time_stamp, GROUP_ACTION_ENUM.GET], (error, results2) => {
+          client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [results.rows[0], group_id, user_id, role, time_stamp, GROUP_ACTION_ENUM.GET_ADDED], (error, results2) => {
             resolve(
               true
             );
@@ -151,7 +151,7 @@ const new_message = (body) => {
   return new Promise(function (resolve, reject) {
     const { sender_id, group_id, link } = body;
     link_id = uuidv4();
-    time_stamp = Date.now();
+    time_stamp = new Date();
     client.query('insert into links (link_id, sender_id, group_id, title, link, info, timestamp) values ($1, $2, $3, $4, $5, $6, $7)', [link_id, sender_id, group_id, link.title, link.link, link.info, time_stamp], (error, results) => {
       if (error) {
         reject(error);
@@ -203,7 +203,7 @@ const remove_from_participants = (body) => {
       if (error) {
         reject(error);
       }
-      if(response.rows[0] != ROLE_ENUM.ADMIN){
+      if(results.rows[0] != ROLE_ENUM.ADMIN){
         resolve(
           false
         )
@@ -213,9 +213,15 @@ const remove_from_participants = (body) => {
           if (error) {
             reject(error);
           }
-          resolve({
-            time_stamp: Date.now()
-          });
+          time_stamp = new Date()
+          client.query('insert into group_actions(receiver_id, group_id, affected_id, time_stamp, action_type) values ($1, $2, $3, $4, $5)', [user_id, group_id, user_id, time_stamp, GROUP_ACTION_ENUM.REMOVE], (error, results) => {
+            if (error) {
+              reject(error);
+            }
+            resolve({
+              time_stamp: time_stamp
+            });
+          })
         })
       }
     })
@@ -246,7 +252,7 @@ const change_role = (body) => {
         reject(error);
       }
       resolve({
-        time_stamp: Date.now()
+        time_stamp: new Date()
       });
     })
   })
@@ -276,16 +282,16 @@ const add_one_to_participants = (body) => {
         resolve({
           success: false,
           message: "You are not an admin",
-          time_stamp: Date.now()
+          time_stamp: new Date()
         })
       }
       else{
         client.query('select user_id from users where user_name = $1)', [user_name], (error, results1) => {
-          if(results.rows.length == 0){
+          if(results1.rows.length == 0){
             resolve({
               success: false,
               message: "User not found",
-              time_stamp: Date.now()
+              time_stamp: new Date()
             })
           }
           else{
@@ -296,7 +302,7 @@ const add_one_to_participants = (body) => {
               resolve({
                 success: true,
                 message: "User added successfully",
-                time_stamp: Date.now()
+                time_stamp: new Date()
               });
             })}
         })
@@ -329,7 +335,7 @@ const remove_link = (body) => {
         reject(error);
       }
       resolve({
-        time_stamp: Date.now()
+        time_stamp: new Date()
       });
     })
   })
@@ -359,7 +365,7 @@ const react_to_link = (body) => {
         reject(error);
       }
       resolve({
-        time_stamp: Date.now()
+        time_stamp: new Date()
       });
     })
   })
@@ -375,6 +381,104 @@ const add_react_to_message_action = (body) => {
         reject(error);
       }
       resolve();
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const get_new_messages = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { user_id, time_stamp } = body;
+    client.query('select link_id, sender_id from message_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, MESSAGE_ACTION_ENUM.RECEIVE], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      response = [];
+      for(let i = 0; i < results.rows.length; i++){
+        client.query('select sender_id, group_id, link_id, title, link, info from links where link_id = $1', [results.rows[i].link_id], (error, results1) => {
+          if (error) {
+            reject(error);
+          }
+          results1.rows[0]["time_stamp"] = time_stamp;
+          client.query('select tags from tags where link_id = $1', [results.rows[i]], (error, results2) => {
+            if (error) {
+              reject(error);
+            }
+            temp = []
+            for(let i = 0; i < results2.rows.length; i++){
+              temp.push(results.rows[i].tags)
+            }
+            results1.rows[0]["tags"] = results2.temp;
+          })
+          result.push(results1);
+        })
+      }
+      resolve(response);
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const get_del_messages = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { user_id, time_stamp } = body;
+    client.query('select link_id from message_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, MESSAGE_ACTION_ENUM.DELETE], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve(results.rows);
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const get_reacts = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { user_id, time_stamp } = body;
+    client.query('select sender_id, link_id from message_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, MESSAGE_ACTION_ENUM.REACT], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      for(let i = 0; i < results.rows.length; i++){
+        client.query('select react from reacts where user_id = $1 and link_id = $2', [results.rows[i].sender_id, results.rows[i].link_id], (error, results1) => {
+          if (error) {
+            reject(error);
+          }
+          results.rows[i]["react"] = results1.rows[0].react
+        })
+      }
+      resolve(results.rows);
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const get_role_changes = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { user_id, time_stamp } = body;
+    client.query('select group_id, affected_id, affected_role from group_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.CHANGE], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve(results.rows);
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const get_removed_members = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { user_id, time_stamp } = body;
+    client.query('select affected_id, group_id from group_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.REMOVE], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve(results.rows);
     })
   })
 }
@@ -399,5 +503,10 @@ module.exports = {
   remove_link,
   add_delete_message_to_message_action,
   react_to_link,
-  add_react_to_message_action
+  add_react_to_message_action,
+  get_new_messages,
+  get_del_messages,
+  get_reacts,
+  get_role_changes,
+  get_removed_members
 }

@@ -277,6 +277,7 @@ Fetch Updates:
 		last_opened: <time_stamp>
 	}
 	Return: {
+		time_stamp: <time_stamp>,
 		new_messages: <list<{
 			sender_id: <uuid type char 16>,
 			group_id: <uuid type char 16>,
@@ -291,17 +292,17 @@ Fetch Updates:
 			link_id: <uuid type char 16>
 		}>>,
 		react: <list<{
-			user_id: <uuid type char 16>,
+			sender_id: <uuid type char 16>,
 			link_id: <uuid type char 16>,
 			react: <string>
 		}>>,
 		change_role: <list<{
-			user_id: <uuid type char 16>,
+			affected_id: <uuid type char 16>,
 			group_id: <uuid type char 16>,
-			role: <string>
+			affected_role: <string>
 		}>>,
 		remove_member: <list<{
-			user_id: <uuid type char 16>,
+			affected_id: <uuid type char 16>,
 			group_id: <uuid type char 16>
 		}>>,
 		add_user: <list<{
@@ -317,8 +318,7 @@ Fetch Updates:
 				user_name: <string>,
 				roles: <string>
 			}>>
-		}>>,
-		time_stamp: <time_stamp>
+		}>>
 	}
 
 Broadcast message:

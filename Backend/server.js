@@ -7,7 +7,6 @@ const app = express();
 // set port, listen for requests
 const PORT = process.env.BACKEND_PORT || 8080;
 
-
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
@@ -75,7 +74,56 @@ app.post('/create_group', (req, res) => {
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
+app.get('/get_updates', (req, res) => {
+  all_updates = {"time_stamp": new Date()}
+  query.get_new_messages(req.query)
+    .then(response => {
+      all_updates["new_messages"] = response;
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+  //----------------------------------
+  query.get_del_messages(req.query)
+    .then(response => {
+      all_updates["delete_messages"] = response;
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+  //----------------------------------
+  query.get_reacts(req.query)
+    .then(response => {
+      all_updates["react"] = response;
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+  //----------------------------------
+  query.get_role_changes(req.query)
+    .then(response => {
+      all_updates["change_role"] = response;
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+  //----------------------------------
+  query.get_removed_members(req.query)
+    .then(response => {
+      all_updates["remove_member"] = response;
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+  //----------------------------------
+  query.get_removed_members(req.query)
+    .then(response => {
+      all_updates["remove_member"] = response;
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })  
+})
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
