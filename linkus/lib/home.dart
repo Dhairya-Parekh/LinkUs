@@ -5,7 +5,7 @@ import 'package:linkus/group.dart';
 
 class HompePage extends StatefulWidget {
   final String username;
-  const HompePage({super.key, required this.username});
+  const HompePage({Key? key, required this.username}) : super(key: key);
 
   @override
   State<HompePage> createState() => _HompePageState();
@@ -54,28 +54,45 @@ class _HompePageState extends State<HompePage> {
           Expanded(
             child: _areGroupsLoading
                 ? const Loading()
-                : ListView.builder(
-                    itemCount: groups.length,
-                    itemBuilder: (context, index) {
-                      final group = groups[index];
-                      return GestureDetector(
-                        onTap: () {
-                          // Replace with navigation to group page
-                          Navigator.push(
+                : Container(
+                    color: Colors.grey[200],
+                    child: GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 4,
+                        childAspectRatio: 1.0,
+                      ),
+                      itemCount: groups.length,
+                      itemBuilder: (context, index) {
+                        final group = groups[index];
+                        return GestureDetector(
+                          onTap: () {
+                            // Replace with navigation to group page
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      GroupPage(group: group)));
-                                      // const GroupChatPage()));
-                        },
-                        child: Card(
+                                builder: (context) => GroupPage(groupId: index),
+                              ),
+                            );
+                          },
                           child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Text(group.name),
+                            padding: const EdgeInsets.all(
+                                4.0), // reduce padding around card
+                            child: Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(
+                                    8), // reduce padding inside card
+                                child: Text(
+                                  group.name,
+                                  style: const TextStyle(
+                                      fontSize: 14), // reduce font size
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
           ),
         ],

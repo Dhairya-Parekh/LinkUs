@@ -1,56 +1,82 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter/material.dart';
+import 'package:linkus/Helper%20Files/api.dart';
+import 'package:linkus/Helper%20Files/local_storage.dart';
 
 class CreateGroupPage extends StatefulWidget {
-  const CreateGroupPage({super.key});
+  final String username;
+  const CreateGroupPage({super.key, required this.username});
 
   @override
   State<CreateGroupPage> createState() => _CreateGroupPageState();
 }
 
 class _CreateGroupPageState extends State<CreateGroupPage> {
+  final TextEditingController _groupNameController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
   List<String> users = [];
+  Map<String, dynamic> userRoles = {};
 
   Future<void> _createGroup() async {
-    final groupName = await showDialog<String>(
-      context: context,
-      builder: (context) {
-        final groupNameController = TextEditingController();
-        return AlertDialog(
-          title: const Text('Create Group'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text('Enter group name:'),
-              const SizedBox(height: 8),
-              TextField(
-                controller: groupNameController,
-                decoration: const InputDecoration(
-                  hintText: 'Group Name',
-                  border: OutlineInputBorder(),
-                ),
+    // Check if group name and at least one user has been entered
+    if (_groupNameController.text.trim().isEmpty || users.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content:
+                const Text('Please enter a group name and at least one user.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
               ),
             ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () =>
-                  Navigator.of(context).pop(groupNameController.text.trim()),
-              child: const Text('Create'),
-            ),
-          ],
-        );
-      },
-    );
-    // TODO: Implement group creation with users and group name
+          );
+        },
+      );
+      return;
+    }
+
+    final groupName = _groupNameController.text.trim();
+    final groupInfo = _descriptionController.text.trim();
+    final members = users.map<Map<String, dynamic>>((user) {
+      final key = userRoles[user].toString();
+      return {key: user};
+    }).toList();
+
+    final jsonResponse =
+        await API.createGroup(widget.username, groupName, groupInfo, members);
+
+    if (jsonResponse['success']) {
+      // Group creation successful, do something here (e.g. navigate to home page)
+      await saveCredentials(widget.username, '').then((res) {
+        Navigator.pushReplacementNamed(context, '/home');
+      });
+    } else {
+      // Group creation failed, display error message
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content: Text(jsonResponse['message']),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -61,6 +87,40 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text('Enter group name:'),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _groupNameController,
+                  decoration: const InputDecoration(
+                    hintText: 'Group Name',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text('Enter group description:'),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _descriptionController,
+                  decoration: const InputDecoration(
+                    hintText: 'Group Description',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -79,7 +139,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                   onPressed: () {
                     setState(() {
                       final username = _usernameController.text.trim();
-                      if (username.isNotEmpty) {
+                      if (username.isNotEmpty && !users.contains(username)) {
                         users.add(username);
                         _usernameController.clear();
                       }
@@ -97,7 +157,21 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                 final user = users[index];
                 return ListTile(
                   title: Text(user),
-                  trailing: const Icon(Icons.add),
+                  trailing: DropdownButton<String>(
+                    value: null,
+                    hint: const Text('Choose Role'),
+                    items: <String>['Admin', 'Member'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (String? selectedRole) {
+                      setState(() {
+                        userRoles[user] = selectedRole;
+                      });
+                    },
+                  ),
                 );
               },
             ),

@@ -27,7 +27,7 @@ class _AppState extends State<App> {
           this.username = username;
           _tabs = [
             HompePage(username: username),
-            const CreateGroupPage(),
+            CreateGroupPage(username: username),
             const ProfilePage(),
           ];
           _isLoading = false;
