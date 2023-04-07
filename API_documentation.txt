@@ -27,9 +27,9 @@ Update new message actions:
 				link_id : <uuid type char 16>,
 				title: <string>,
 				link: <string>,
-				desc: <string>,
+				info: <string>,
 				tags: <list<strings>>,
-				timestamp: <time_stamp>
+				time_stamp: <time_stamp>
 			}
 		}>>
 
@@ -133,7 +133,7 @@ Read links for a particular group:
 				link_id : <uuid type char 16>,
 				title: <string>,
 				link: <string>,
-				desc: <string>,
+				info: <string>,
 				tags: <list<strings>>
 			}>>
 	}
@@ -149,7 +149,7 @@ Search links global
 				group_id : <uuid type char 16>,
 				title: <string>,
 				link: <string>,
-				desc: <string>
+				info: <string>
 			}>>
 	}
 
@@ -164,7 +164,7 @@ Search links for group:
 				link_id : <uuid type char 16>,
 				title: <string>,
 				link: <string>,
-				desc: <string>
+				info: <string>
 			}>>
 	}
 
@@ -180,7 +180,7 @@ Sort the links based on a parameter and a filter:
 				link_id : <uuid type char 16>,
 				title: <string>,
 				link: <string>,
-				desc: <string>
+				info: <string>
 			}>>
 	}
 
@@ -205,7 +205,7 @@ Read bookmarks:
 				link_id : <uuid type char 16>,
 				title: <string>,
 				link: <string>,
-				desc: <string>,
+				info: <string>,
 				tags: <list<strings>>
 			}>>
 	}
@@ -266,28 +266,26 @@ New group:
 		success: <bool>,
 		group_id : <uuid type char 16>,
 		message: <string>,
-		timestamp: <time_stamp>
+		time_stamp: <time_stamp>
 	}
 
 Fetch Updates:
 	Type: get
 	URL: /get_updates
 	Params: {
-		last_opened: <time_stamp>,
-		user_id: <uuid type char 16>
+		user_id: <uuid type char 16>,
+		last_opened: <time_stamp>
 	}
 	Return: {
 		new_messages: <list<{
 			sender_id: <uuid type char 16>,
 			group_id: <uuid type char 16>,
-			link: {
-				link_id : <uuid type char 16>,
-				title: <string>,
-				link: <string>,
-				desc: <string>,
-				tags: <list<strings>>,
-				timestamp: <time_stamp>
-			}
+			link_id : <uuid type char 16>,
+			title: <string>,
+			link: <string>,
+			info: <string>,
+			tags: <list<strings>>,
+			time_stamp: <time_stamp>
 		}>>,
 		delete_messages: <list<{
 			link_id: <uuid type char 16>
@@ -320,7 +318,7 @@ Fetch Updates:
 				roles: <string>
 			}>>
 		}>>,
-		timestamp: <time_stamp>
+		time_stamp: <time_stamp>
 	}
 
 Broadcast message:
@@ -339,7 +337,7 @@ Broadcast message:
 	
 	Return: {
 		link_id: <uuid type char 16>,
-		timestamp: <time_stamp>
+		time_stamp: <time_stamp>
 	}
 
 Broadcast react:
@@ -352,7 +350,7 @@ Broadcast react:
 		react : <string>
 	}
 	Return: {
-		timestamp : <time_stamp>
+		time_stamp : <time_stamp>
 	}
 
 Broadcast delete:
@@ -364,7 +362,7 @@ Broadcast delete:
 		group_id : <uuid type char 16>
 	}
 	Return: {
-		timestamp : <time_stamp>
+		time_stamp : <time_stamp>
 	}
 	
 Broadcast add:
@@ -377,7 +375,7 @@ Broadcast add:
 		new_member_role : <string>
 	}
 	Return: {
-		timestamp : <time_stamp>
+		time_stamp : <time_stamp>
 	}
 
 Broadcast change role:
@@ -389,7 +387,7 @@ Broadcast change role:
 		role : <string>
 	}
 	Return: {
-		timestamp : <time_stamp>
+		time_stamp : <time_stamp>
 	}
 
 Broadcast kick:
@@ -403,5 +401,5 @@ Broadcast kick:
 	Return: {
 		success : <bool>,
 		message : <string>,
-		timestamp : <time_stamp>
+		time_stamp : <time_stamp>
 	}
