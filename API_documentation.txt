@@ -1,6 +1,19 @@
+String size constraints
+	user_id, link_id, group_id = 36
+	user_name, group_name <= 15
+	passcode <= 15
+	email_id <= 40
+	group_info <= 150
+	roles = adm/mem
+	title <= 50
+	link <= 256
+	info <= 100
+	tags <= 15
+	react = l/d
+
 APIs 
 Local storage:
-	last updated timestamp
+	last updated time_stamp
 	userid
 Client Side
 
@@ -227,14 +240,15 @@ New group:
 		group_name : <string>,
 		group_info : <string>,
 		members : <list<{
-				participant_id: <uuid type char 16>,
+				participant_name: <string>,
 				role: <string>
 			}>>
 	}
 	Return: {
 		success: <bool>,
 		group_id : <uuid type char 16>,
-		message: <string>
+		message: <string>,
+		timestamp: <time_stamp>
 	}
 
 Fetch Updates:
@@ -341,7 +355,7 @@ Broadcast add:
 	Body: {
 		user_id : <uuid type char 16>,
 		group_id : <uuid type char 16>,
-		new_member_id : <uuid type char 16>,
+		new_member_name : <string>,
 		new_member_role : <string>
 	}
 	Return: {
@@ -365,8 +379,11 @@ Broadcast kick:
 	URL: /remove_member
 	Body: {
 		user_id : <uuid type char 16>,
+		kicker_id : <uuid type char 16>,
 		group_id : <uuid type char 16>
 	}
 	Return: {
+		success : <bool>,
+		message : <string>,
 		timestamp : <time_stamp>
 	}

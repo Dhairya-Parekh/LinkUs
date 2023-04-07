@@ -111,7 +111,8 @@ const new_group = (body) => {
         }
       })
       resolve({
-        group_id: group_id
+        group_id: group_id,
+        time_stamp: Date.now()
       });
     })
   })
@@ -121,16 +122,25 @@ const new_group = (body) => {
 
 const add_all_to_participants = (body) => {
   return new Promise(function (resolve, reject) {
-    const { user_id, group_id } = body;
-    client.query('insert into participants(user_id, group_id, roles) values ($1, $2, $3)', [user_id, group_id, ROLE_ENUM.MEMBER], (error, results) => {
-      if (error) {
-        reject(error);
-      }
-      client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [user_id, group_id, user_id, ROLE_ENUM.MEMBER, Date.now(), GROUP_ACTION_ENUM.GET], (error, results1) => {
+    const { user_name, group_id, role, time_stamp } = body;
+    client.query('select user_id from users where user_name = $1)', [user_name], (error, results) => {
+      if(results.rows.length == 0){
         resolve(
-          true
-        );
-      })
+          false
+        )
+      }
+      else{
+        client.query('insert into participants(user_id, group_id, roles) values ($1, $2, $3)', [results.rows[0], group_id, role], (error, results1) => {
+          if (error) {
+            reject(error);
+          }
+          client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [results.rows[0], group_id, user_id, role, time_stamp, GROUP_ACTION_ENUM.GET], (error, results2) => {
+            resolve(
+              true
+            );
+          })
+        })
+      }
     })
   })
 }
@@ -188,14 +198,26 @@ const get_group_members = (body) => {
 
 const remove_from_participants = (body) => {
   return new Promise(function (resolve, reject) {
-    const { user_id, group_id } = body;
-    client.query('delete from participants where user_id = $1 and group_id = $2', [user_id, group_id], (error, results) => {
+    const { user_id, kicker_id, group_id } = body;
+    client.query('select roles from participants where user_id = $1 and group_id = $2', [kicker_id, group_id], (error, results) => {
       if (error) {
         reject(error);
       }
-      resolve({
-        time_stamp: Date.now()
-      });
+      if(response.rows[0] != ROLE_ENUM.ADMIN){
+        resolve(
+          false
+        )
+      }
+      else{
+        client.query('delete from participants where user_id = $1 and group_id = $2', [user_id, group_id], (error, results1) => {
+          if (error) {
+            reject(error);
+          }
+          resolve({
+            time_stamp: Date.now()
+          });
+        })
+      }
     })
   })
 }
@@ -248,14 +270,37 @@ const add_change_role_to_group_action = (body) => {
 
 const add_one_to_participants = (body) => {
   return new Promise(function (resolve, reject) {
-    const { user_id, group_id } = body;
-    client.query('insert into participants(user_id, group_id, roles) values ($1, $2, $3)', [user_id, group_id, ROLE_ENUM.MEMBER], (error, results) => {
-      if (error) {
-        reject(error);
+    const { user_id, user_name, group_id } = body;
+    client.query('select roles from participants where user_id = $1 and group_id = $2)', [user_id, group_id], (error, results) => {
+      if(results.rows[0] != ROLE_ENUM.ADMIN){
+        resolve({
+          success: false,
+          message: "You are not an admin",
+          time_stamp: Date.now()
+        })
       }
-      resolve({
-        time_stamp: Date.now()
-      });
+      else{
+        client.query('select user_id from users where user_name = $1)', [user_name], (error, results1) => {
+          if(results.rows.length == 0){
+            resolve({
+              success: false,
+              message: "User not found",
+              time_stamp: Date.now()
+            })
+          }
+          else{
+            client.query('insert into participants(user_id, group_id, roles) values ($1, $2, $3)', [user_id, group_id, ROLE_ENUM.MEMBER], (error, results2) => {
+              if (error) {
+                reject(error);
+              }
+              resolve({
+                success: true,
+                message: "User added successfully",
+                time_stamp: Date.now()
+              });
+            })}
+        })
+      }
     })
   })
 }

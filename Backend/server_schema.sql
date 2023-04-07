@@ -10,7 +10,7 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE users
 (
     user_id varchar(36) not null,
-    user_name varchar(15) not null,
+    user_name varchar(15) not null unique,
     passcode varchar(15) not null,
     email_id varchar(40) not null,
     primary key (user_id)

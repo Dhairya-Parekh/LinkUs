@@ -52,12 +52,20 @@ app.post('/signup', (req, res) => {
 app.post('/create_group', (req, res) => {
   query.new_group(req.body)
     .then(response => {
+      temp = []
+      success = true;
       for(let i = 0; i < req.body.members.length; i++){
-        if(req.body.members[i] != req.body.user_id){
-          temp_body = {user_id : req.body.members[i], group_id : response.group_id}
-          query.add_all_to_participants(temp_body);
-        }
+        temp_body = {user_name : req.body.members[i].participants_name, group_id : response.group_id, role : req.body.members[i].role, time_stamp : response.time_stamp}
+        query.add_all_to_participants(temp_body)
+        .then(response1 => {
+          if(!reponse){
+            success = false;
+           temp.push(temp.req.body.members[i].participants_name)
+          }
+        })
       }
+      response["success"] = success;
+      response["message"] = temp;
       res.status(200).send(response);
     })
     .catch(error => {
@@ -140,20 +148,22 @@ app.post('/delete_message', (req, res) => {
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app.post('/add_user', (req, res) => {
-  temp_body = {user_id: req.body.new_member_id, group_id: req.body.group_id}
+  temp_body = {user_id: req.body.user_id, user_name: req.body.new_member_name, group_id: req.body.group_id}
   query.add_one_to_participants(temp_body)
     .then(response => {
-      temp_body = {group_id: req.body.group_id}
-      query.get_group_members(temp_body)
-      .then(response1 => {
-        for(let i = 0; i < response1.length; i++){
-          if(response1[i].user_id != req.body.user_id){
-            temp_body = {receiver_id : response1[i].user_id, group_id: req.body.group_id, affected_id: req.body.new_member_id, affected_role: req.body.role, time_stamp: response.time_stamp}
-            query.add_new_member_to_group_action(temp_body);
+      if(response.success){
+        temp_body = {group_id: req.body.group_id}
+        query.get_group_members(temp_body)
+        .then(response1 => {
+          for(let i = 0; i < response1.length; i++){
+            if(response1[i].user_id != req.body.user_id){
+              temp_body = {receiver_id : response1[i].user_id, group_id: req.body.group_id, affected_id: req.body.new_member_id, affected_role: req.body.role, time_stamp: response.time_stamp}
+              query.add_new_member_to_group_action(temp_body);
+            }
           }
-        }
-        res.status(200).send(response);
-      })
+        })
+      }
+      res.status(200).send(response);
     })
     .catch(error => {
       res.status(500).send(error);
@@ -187,17 +197,28 @@ app.post('/change_role', (req, res) => {
 app.post('/remove_member', (req, res) => {
   query.remove_from_participants(req.body)
     .then(response => {
-      temp_body = {group_id: req.body.group_id}
-      query.get_group_members(temp_body)
-      .then(response1 => {
-        for(let i = 0; i < response1.length; i++){
-          if(response1[i].user_id != req.body.user_id){
-            temp_body = {receiver_id : response1[i].user_id, group_id: req.body.group_id, affected_id: req.body.user_id, time_stamp: response.time_stamp}
-            query.add_remove_user_to_group_action(temp_body);
+      if(response){
+        temp_body = {group_id: req.body.group_id}
+        query.get_group_members(temp_body)
+        .then(response1 => {
+          for(let i = 0; i < response1.length; i++){
+            if(response1[i].user_id != req.body.kicker_id){
+              temp_body = {receiver_id : response1[i].user_id, group_id: req.body.group_id, affected_id: req.body.user_id, time_stamp: response.time_stamp}
+              query.add_remove_user_to_group_action(temp_body);
+            }
           }
-        }
+          response["success"] = true;
+          response["message"] = "User Removed";
+          res.status(200).send(response);
+        })      
+      }
+      else{
+        response = {}
+        response["success"] = false;
+        response["message"] = "User Not Removed";
+        response["time_stamp"] = Date.now();
         res.status(200).send(response);
-      })
+      }
     })
     .catch(error => {
       res.status(500).send(error);
