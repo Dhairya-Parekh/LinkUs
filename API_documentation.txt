@@ -27,7 +27,7 @@ Update new message actions:
 				link_id : <uuid type char 16>,
 				title: <string>,
 				link: <string>,
-				desc: <string>,
+				info: <string>,
 				tags: <list<strings>>,
 				timestamp: <time_stamp>
 			}
