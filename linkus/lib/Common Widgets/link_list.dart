@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:linkus/Helper%20Files/db.dart';
+import 'package:linkus/link.dart';
 
 class LinkList extends StatefulWidget {
   final List<Link> links;
@@ -16,10 +17,28 @@ class _LinkListState extends State<LinkList> {
       itemCount: widget.links.length,
       itemBuilder: (BuildContext context, int index) {
         Link message = widget.links[index];
-        return ListTile(
-          title: Text(message.sender),
-          subtitle: Text(message.title),
-          trailing: Text(message.time.toString()),
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MessagePage(
+                  title: message.title,
+                  description: message.description,
+                  sender: message.sender,
+                  likes: message.likes,
+                  dislikes: message.dislikes,
+                  link: message.link,
+                  timestamp: message.time,
+                ),
+              ),
+            );
+          },
+          child: ListTile(
+            title: Text(message.sender),
+            subtitle: Text(message.title),
+            trailing: Text(message.time.toString()),
+          ),
         );
       },
     );

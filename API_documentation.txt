@@ -1,6 +1,19 @@
+String size constraints
+	user_id, link_id, group_id = 36
+	user_name, group_name <= 15
+	passcode <= 15
+	email_id <= 40
+	group_info <= 150
+	roles = adm/mem
+	title <= 50
+	link <= 256
+	info <= 100
+	tags <= 15
+	react = l/d
+
 APIs 
 Local storage:
-	last updated timestamp
+	last updated time_stamp
 	userid
 Client Side
 
@@ -8,8 +21,8 @@ Update new message actions:
 	Type : void
 	Name : add_messages
 	Params : <list<{
-			sender_id: <int>,
-			group_id: <int>,
+			sender_id: <uuid type char 16>,
+			group_id: <uuid type char 16>,
 			link: {
 				title: <string>,
 				link: <string>,
@@ -23,15 +36,15 @@ Update delete message actions:
 	Type : void
 	Name : delete_messages
 	Params : <list<{
-			link_id: <int>
+			link_id: <uuid type char 16>
 		}>>
 
 Update react message actions:
 	Type : void
 	Name : add_reacts
 	Params : <list<{
-			user_id: <int>,
-			link_id: <int>,
+			user_id: <uuid type char 16>,
+			link_id: <uuid type char 16>,
 			react: <string>
 		}>>
 
@@ -39,8 +52,8 @@ Update change role actions:
 	Type : void
 	Name : change_role
 	Params : {
-		user_id : <int>,
-		group_id : <int>,
+		user_id : <uuid type char 16>,
+		group_id : <uuid type char 16>,
 		role : <string>
 	}
 
@@ -48,44 +61,58 @@ Update kick actions:
 	Type : void
 	Name : remove_member
 	Params : {
-		user_id : <int>,
-		group_id : <int>
+		user_id : <uuid type char 16>,
+		group_id : <uuid type char 16>
 	}
 
 Update add actions:
 	Type : void
 	Name : add_member
 	Params : {
-		user_id : <int>,
-		group_id : <int>,
+		user_id : <uuid type char 16>,
+		group_id : <uuid type char 16>,
 		role : <string>
 	}
 
 Read groups :
-	Type : void
-	Name : remove_member
+	Type : list<json>
+	Name : read_groups
 	Params : {
-		user_id : <int>,
-		group_id : <int>
+		user_id : <uuid type char 16>,
+		group_id : <uuid type char 16>
+	}
+	Returns : {
+		groups : <list<{
+				group_id : <int>,
+				group_name: <string>,
+				group_info: <string>
+			}>>
 	}
 
 Search groups:
-	Type : void
-	Name : remove_member
+	Type : list<json>
+	Name : search_group
 	Params : {
-		user_id : <int>,
-		group_id : <int>
+		user_id : <uuid type char 16>,
+		group_id : <uuid type char 16>
+	}
+	Returns : {
+		groups : <list<{
+				group_id : <int>,
+				group_name: <string>,
+				group_info: <string>
+			}>>
 	}
 
 Read links for a particular group:
-	Type : json
+	Type : list<json>
 	Name : links_of_group
 	Params : {
-		group_id : <int>
+		group_id : <uuid type char 16>
 	}
 	Returns : {
 		links : <list<{
-				link_id : <int>,
+				link_id : <uuid type char 16>,
 				title: <string>,
 				link: <string>,
 				desc: <string>,
@@ -94,14 +121,14 @@ Read links for a particular group:
 	}
 
 Search links global
-	Type : json
+	Type : list<json>
 	Name : search_all
 	Params : {
 	}
 	Returns : {
 		links : <list<{
-				link_id : <int>,
-				group_id : <int>,
+				link_id : <uuid type char 16>,
+				group_id : <uuid type char 16>,
 				title: <string>,
 				link: <string>,
 				desc: <string>
@@ -109,14 +136,14 @@ Search links global
 	}
 
 Search links for group:
-	Type : json
+	Type : list<json>
 	Name : search_group
 	Params : {
-		group_id : <int>
+		group_id : <uuid type char 16>
 	}
 	Returns : {
 		links : <list<{
-				link_id : <int>,
+				link_id : <uuid type char 16>,
 				title: <string>,
 				link: <string>,
 				desc: <string>
@@ -124,7 +151,7 @@ Search links for group:
 	}
 
 Sort the links based on a parameter and a filter:
-	Type : json
+	Type : list<json>
 	Name : sort_links
 	Params : {
 		sort_by : <string>,
@@ -132,7 +159,7 @@ Sort the links based on a parameter and a filter:
 	}
 	Returns : {
 		links : <list<{
-				link_id : <int>,
+				link_id : <uuid type char 16>,
 				title: <string>,
 				link: <string>,
 				desc: <string>
@@ -140,10 +167,10 @@ Sort the links based on a parameter and a filter:
 	}
 
 Read group members with their roles:
-	Type : json
+	Type : list<json>
 	Name : get_members
 	Params : {
-		group_id : <int>
+		group_id : <uuid type char 16>
 	}
 	Returns : {
 		users : <list<{
@@ -153,11 +180,11 @@ Read group members with their roles:
 	}
 
 Read bookmarks:
-	Type : json
+	Type : list<json>
 	Name : get_bookmarks
 	Returns : {
 		links : <list<{
-				link_id : <int>,
+				link_id : <uuid type char 16>,
 				title: <string>,
 				link: <string>,
 				desc: <string>,
@@ -169,7 +196,7 @@ Update bookmarks:
 	Type : void
 	Name : update_bookmark
 	Params : {
-		link_id : <int>
+		link_id : <uuid type char 16>
 		action : <string>
 	}
 
@@ -187,7 +214,7 @@ Login:
 	}
 	Return: {
 		success: <bool>,
-		userid: <int>,
+		userid: <uuid type char 16>,
         message: <string>
 	}
 
@@ -201,7 +228,7 @@ Sign Up:
 	}
 	Return: {
 		success: <bool>,
-		userid: <int>,
+		userid: <uuid type char 16>,
         message: <string>
 	}
 
@@ -209,13 +236,19 @@ New group:
 	Type: post 
 	URL: /create_group
 	Body: {
-		user_id : <int>,
+		user_id : <uuid type char 16>,
 		group_name : <string>,
 		group_info : <string>,
-		members : <list<int>>
+		members : <list<{
+				participant_name: <string>,
+				role: <string>
+			}>>
 	}
 	Return: {
-		group_id : <int>
+		success: <bool>,
+		group_id : <uuid type char 16>,
+		message: <string>,
+		timestamp: <time_stamp>
 	}
 
 Fetch Updates:
@@ -223,14 +256,14 @@ Fetch Updates:
 	URL: /get_updates
 	Params: {
 		last_opened: <time_stamp>,
-		user_id: <int>
+		user_id: <uuid type char 16>
 	}
 	Return: {
 		new_messages: <list<{
-			sender_id: <int>,
-			group_id: <int>,
+			sender_id: <uuid type char 16>,
+			group_id: <uuid type char 16>,
 			link: {
-				link_id : <int>,
+				link_id : <uuid type char 16>,
 				title: <string>,
 				link: <string>,
 				desc: <string>,
@@ -239,44 +272,45 @@ Fetch Updates:
 			}
 		}>>,
 		delete_messages: <list<{
-			link_id: <int>
+			link_id: <uuid type char 16>
 		}>>,
 		react: <list<{
-			user_id: <int>,
-			link_id: <int>,
+			user_id: <uuid type char 16>,
+			link_id: <uuid type char 16>,
 			react: <string>
 		}>>,
 		change_role: <list<{
-			user_id: <int>,
-			group_id: <int>,
+			user_id: <uuid type char 16>,
+			group_id: <uuid type char 16>,
 			role: <string>
 		}>>,
 		remove_member: <list<{
-			user_id: <int>,
-			group_id: <int>
+			user_id: <uuid type char 16>,
+			group_id: <uuid type char 16>
 		}>>,
 		add_user: <list<{
-			user_id: <int>,
-			group_id: <int>,
+			user_id: <uuid type char 16>,
+			group_id: <uuid type char 16>,
 			user_name: <string>,
 			role: <string>
 		}>>,
 		get_added: <list<{
-			group_id: <int>,
+			group_id: <uuid type char 16>,
 			members: <list<{
-				user_id: <int>,
+				user_id: <uuid type char 16>,
 				user_name: <string>,
 				roles: <string>
 			}>>
 		}>>,
+		timestamp: <time_stamp>
 	}
 
 Broadcast message:
 	Type: post 
 	URL: /send_message
 	Body: {
-		sender_id : <int>,
-		group_id : <int>,
+		sender_id : <uuid type char 16>,
+		group_id : <uuid type char 16>,
 		link: {
 			title: <string>,
 			link: <string>,
@@ -286,7 +320,7 @@ Broadcast message:
 	}
 	
 	Return: {
-		link_id: <int>,
+		link_id: <uuid type char 16>,
 		timestamp: <time_stamp>
 	}
 
@@ -294,9 +328,9 @@ Broadcast react:
 	Type: post 
 	URL: /react
 	Body: {
-		sender_id : <int>,
-		link_id : <int>,
-		group_id : <int>,
+		sender_id : <uuid type char 16>,
+		link_id : <uuid type char 16>,
+		group_id : <uuid type char 16>,
 		react : <string>
 	}
 	Return: {
@@ -307,8 +341,9 @@ Broadcast delete:
 	Type: post 
 	URL: /delete_message
 	Body: {
-		link_id : <int>,
-		group_id : <int>
+		user_id : <uuid type char 16>,
+		link_id : <uuid type char 16>,
+		group_id : <uuid type char 16>
 	}
 	Return: {
 		timestamp : <time_stamp>
@@ -318,9 +353,10 @@ Broadcast add:
 	Type: post 
 	URL: /add_user
 	Body: {
-		user_id : <int>,
-		group_id : <int>,
-		new_member_id : <int>
+		user_id : <uuid type char 16>,
+		group_id : <uuid type char 16>,
+		new_member_name : <string>,
+		new_member_role : <string>
 	}
 	Return: {
 		timestamp : <time_stamp>
@@ -330,8 +366,8 @@ Broadcast change role:
 	Type: post 
 	URL: /change_role
 	Body : {
-		user_id : <int>,
-		group_id : <int>,
+		user_id : <uuid type char 16>,
+		group_id : <uuid type char 16>,
 		role : <string>
 	}
 	Return: {
@@ -342,9 +378,12 @@ Broadcast kick:
 	Type: post 
 	URL: /remove_member
 	Body: {
-		user_id : <int>,
-		group_id : <int>
+		user_id : <uuid type char 16>,
+		kicker_id : <uuid type char 16>,
+		group_id : <uuid type char 16>
 	}
 	Return: {
-		isAuthenticated: <bool>
+		success : <bool>,
+		message : <string>,
+		timestamp : <time_stamp>
 	}

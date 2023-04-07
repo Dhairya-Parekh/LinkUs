@@ -9,8 +9,8 @@ DROP TABLE IF EXISTS users;
 
 CREATE TABLE users
 (
-    user_id numeric(4,0) not null,
-    user_name varchar(15) not null,
+    user_id varchar(36) not null,
+    user_name varchar(15) not null unique,
     passcode varchar(15) not null,
     email_id varchar(40) not null,
     primary key (user_id)
@@ -18,7 +18,7 @@ CREATE TABLE users
 
 CREATE TABLE groups
 (
-    group_id numeric(4,0) not null,
+    group_id varchar(36) not null,
     group_name varchar(15) not null,
     group_info varchar(150) default null,
     primary key (group_id)
@@ -26,8 +26,8 @@ CREATE TABLE groups
 
 CREATE TABLE participants
 (
-    user_id numeric(4,0) not null,
-    group_id numeric(4,0) not null,
+    user_id varchar(36) not null,
+    group_id varchar(36) not null,
     roles varchar(3) not null,
     primary key (group_id, user_id),
     foreign key (group_id) references groups on delete CASCADE,
@@ -36,9 +36,9 @@ CREATE TABLE participants
 
 CREATE TABLE links
 (
-    link_id numeric(4,0) not null,
-    sender_id numeric(4,0) default null,
-    group_id numeric(4,0) not null,
+    link_id varchar(36) not null,
+    sender_id varchar(36) default null,
+    group_id varchar(36) not null,
     title varchar(50) default 'New Book',
     link varchar(256) not null,
     info varchar(100) default null,
@@ -50,7 +50,7 @@ CREATE TABLE links
 
 CREATE TABLE tags
 (
-    link_id numeric(4,0) not null,
+    link_id varchar(36) not null,
     tags varchar(15) not null,
     primary key (link_id, tags),
     foreign key (link_id) references links on delete CASCADE
@@ -58,8 +58,8 @@ CREATE TABLE tags
 
 CREATE TABLE reacts
 (
-    user_id numeric(4,0) not null,
-    link_id numeric(4,0) not null,
+    user_id varchar(36) not null,
+    link_id varchar(36) not null,
     react varchar(1),
     primary key (user_id, link_id),
     foreign key (link_id) references links on delete CASCADE,
@@ -68,9 +68,9 @@ CREATE TABLE reacts
 
 CREATE TABLE message_actions
 (
-    receiver_id numeric(4,0) not null,
-    sender_id numeric(4,0) not null,
-    link_id numeric(4,0) not null,
+    receiver_id varchar(36) not null,
+    sender_id varchar(36) not null,
+    link_id varchar(36) not null,
     time_stamp timestamp not null,
     action_type varchar(3),
     primary key (sender_id, receiver_id, link_id),
@@ -81,9 +81,9 @@ CREATE TABLE message_actions
 
 CREATE TABLE group_actions
 (
-    receiver_id numeric(4,0) not null,
-    group_id numeric(4,0) not null,
-    affected_id numeric(4,0) not null,
+    receiver_id varchar(36) not null,
+    group_id varchar(36) not null,
+    affected_id varchar(36) not null,
     affected_role varchar(3) default null,
     time_stamp timestamp not null,
     action_type varchar(3) not null,
