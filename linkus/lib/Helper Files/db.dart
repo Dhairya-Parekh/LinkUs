@@ -115,12 +115,12 @@ class LocalDatabase {
     return links;
   }
 
-  static Future<Map<String,dynamic>> getGroupInfo(int groupId) async{
+  static Future<Map<String, dynamic>> getGroupInfo(int groupId) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
 
     // Generate dummy data
-    final Map<String,dynamic> groupInfo = {
+    final Map<String, dynamic> groupInfo = {
       "name": "Group $groupId",
       "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
       "members": [
@@ -229,8 +229,34 @@ class LocalDatabase {
           "role": "Member",
         },
       ],
-      "isAdmin" : true,
+      "isAdmin": true,
     };
     return groupInfo;
   }
+
+  static Future<int> getUserId(String username) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 3));
+
+    // Generate dummy data
+    const int userId = 1;
+    return userId;
+  }
+
+  static Future<void> changeRole(int groupId, int userId, String role) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 3));
+
+    // Generate dummy data
+    print("Changed role of user $userId in group $groupId to $role");
+  }
+
+  static Future<void> kickUser(int groupId, int userId) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 3));
+
+    // Generate dummy data
+    print("Kicked user $userId from group $groupId");
+  }
+  
 }

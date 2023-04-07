@@ -55,4 +55,50 @@ class API {
     };
     return jsonResponse;
   }
+
+  static Future<Map<String,dynamic>> changeRole(int groupId, int userId, String role) async {
+    // final url = Uri.parse('$_baseUrl/changeRole');
+    // final response = await _client.post(
+    //   url,
+    //   headers: _defaultHeaders,
+    //   body: jsonEncode({
+    //     'groupId': groupId, 
+    //     'userId': userId, 
+    //     'role': role
+    //   })
+    // );
+    // final jsonResponse = jsonDecode(response.body);
+    final jsonResponse = {
+      'success': true,
+      'message': 'Role changed successfully',
+      'data': {
+        'groupId': groupId,
+        'userId': userId,
+        'role': role
+      }
+    };
+    return jsonResponse;
+  }
+
+  static Future<Map<String,dynamic>> kickUser(int groupId, int userId) async {
+    // final url = Uri.parse('$_baseUrl/kickUser');
+    // final response = await _client.post(
+    //   url,
+    //   headers: _defaultHeaders,
+    //   body: jsonEncode({
+    //     'groupId': groupId, 
+    //     'userId': userId
+    //   })
+    // );
+    // final jsonResponse = jsonDecode(response.body);
+    final jsonResponse = {
+      'success': true,
+      'message': 'User kicked successfully',
+      'data': {
+        'groupId': groupId,
+        'userId': userId
+      }
+    };
+    return jsonResponse;
+  }
 }
