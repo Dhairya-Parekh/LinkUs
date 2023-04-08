@@ -7,7 +7,7 @@ import 'package:linkus/Helper%20Files/db.dart';
 // TODO: Remove Hardcoded response
 
 class API {
-  static const _baseUrl = 'https://example.com/api';
+  static const _baseUrl = 'http://192.168.0.104:8080';
   static final _client = http.Client();
   static final Map<String, String> _defaultHeaders = {
     'content-type': 'application/json'
@@ -24,12 +24,12 @@ class API {
   }
 
   static Future<Map<String, dynamic>> signup(
-      String name, String email, String password) async {
+      String username, String email, String password) async {
     final url = Uri.parse('$_baseUrl/signup');
     final response = await _client.post(url,
         headers: _defaultHeaders,
         body: jsonEncode(
-            {'user_name': name, 'password': password, 'email': email}));
+            {'user_name': username, 'password': password, 'email': email}));
     final jsonResponse = jsonDecode(response.body);
     return jsonResponse;
   }
