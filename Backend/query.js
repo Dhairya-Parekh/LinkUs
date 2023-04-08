@@ -44,34 +44,41 @@ client.connect((err) => {
 
 const login = (body) => {
   return new Promise(function (resolve, reject) {
-    const { user_name, password } = body;
-    bcrypt
-    .genSalt(saltRounds)
-    .then(salt => {
-      return bcrypt.hash(password, salt)
-    })
-    .then(hash =>{
-      client.query('select user_id, email FROM users where user_name = $1 and passcode = $2', [user_name, hash], (error, results) => {
-        if (error) {
-          reject(error);
-        }
-        if (results.rows.length == 0) {
-          resolve({
-            success: false,
-            user_id: null,
-            email: null,
-            message: "Invalid username or password"
-          });
-        }
-        else {
-          resolve({
-            success: true,
-            user_id: results.rows[0].user_id,
-            email: results.rows[0].email,
-            message: "Login successful"
-          });
-        }
-      })
+  const { user_name, password } = body;
+    client.query('select user_id, passcode, email FROM users where user_name = $1', [user_name], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      if (results.rows.length == 0) {
+        resolve({
+          success: false,
+          user_id: null,
+          email: null,
+          message: "Invalid username"
+        });
+      }
+      else {
+        bcrypt
+        .compare(password, results.rows[0].passcode)
+        .then(res => {
+          if(!res){
+            resolve({
+              success: false,
+              user_id: null,
+              email: null,
+              message: "Wrong password"
+            })
+          }
+          else{
+            resolve({
+              success: true,
+              user_id: results.rows[0].user_id,
+              email: results.rows[0].email,
+              message: "Login successful"
+            })
+          }
+        })
+      }
     })
   })
 }

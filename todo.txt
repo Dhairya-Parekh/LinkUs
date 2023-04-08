@@ -1,1 +1,4 @@
 check email sent is valid format
+searching groups
+searching links
+set state called after dispose
