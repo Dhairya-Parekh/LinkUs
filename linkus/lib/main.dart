@@ -4,7 +4,6 @@ import 'package:linkus/authenticator.dart';
 import 'package:linkus/login.dart';
 import 'package:linkus/signup.dart';
 
-
 void main() {
   runApp(const LinkUs());
 }

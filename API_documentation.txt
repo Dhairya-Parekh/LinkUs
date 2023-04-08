@@ -316,8 +316,8 @@ Fetch Updates:
 		last_opened: <time_stamp>
 	}
 	Return: {
-		time_stamp: <time_stamp>,
-		new_messages: <list<{
+		timeStamp: <time_stamp>,
+		newMessages: <list<{
 			sender_id: <uuid type char 16>,
 			group_id: <uuid type char 16>,
 			link_id : <uuid type char 16>,
@@ -327,7 +327,7 @@ Fetch Updates:
 			tags: <list<strings>>,
 			time_stamp: <time_stamp>
 		}>>,
-		delete_messages: <list<{
+		deleteMessages: <list<{
 			link_id: <uuid type char 16>
 		}>>,
 		react: <list<{
@@ -335,22 +335,22 @@ Fetch Updates:
 			link_id: <uuid type char 16>,
 			react: <string>
 		}>>,
-		change_role: <list<{
-			affected_id: <uuid type char 16>,
-			group_id: <uuid type char 16>,
-			affected_role: <string>
+		changeRole: <list<{
+			affectedId: <uuid type char 16>,
+			groupId: <uuid type char 16>,
+			affectedRole: <string adm|mem>
 		}>>,
-		remove_member: <list<{
+		removeMember: <list<{
 			affected_id: <uuid type char 16>,
 			group_id: <uuid type char 16>
 		}>>,
-		add_user: <list<{
+		addUser: <list<{
 			user_id: <uuid type char 16>,
 			group_id: <uuid type char 16>,
 			user_name: <string>,
 			role: <string>
 		}>>,
-		get_added: <list<{
+		getAdded: <list<{
 			group_id: <uuid type char 16>,
 			group_name: <string>,
 			group_info: <string>,

@@ -38,19 +38,34 @@ class _HompePageState extends State<HompePage> {
     // fetch updates from server
     final Map<String, dynamic> updates =
         await API.get_updates(lastFetched, userId);
-    final List<Map<String, dynamic>> newMessages = updates['new_messages'];
+    final List<Map<String, dynamic>> newMessages = updates['newMessages'];
     final List<Map<String, dynamic>> deleteMessages =
-        updates['delete_messages'];
+        updates['deleteMessages'];
     final List<Map<String, dynamic>> react = updates['react'];
-    final List<Map<String, dynamic>> changeRole = updates['change_role'];
-    final List<Map<String, dynamic>> removeMember = updates['remove_member'];
-    final List<Map<String, dynamic>> addUser = updates['add_user'];
-    final List<Map<String, dynamic>> getAdded = updates['get_added'];
+    final List<Map<String, dynamic>> changeRole = updates['changeRole'];
+    final List<Map<String, dynamic>> removeMember = updates['removeMember'];
+    final List<Map<String, dynamic>> addUser = updates['addUser'];
+    final List<Map<String, dynamic>> getAdded = updates['getAdded'];
+    // Modify the Jsons
+    List<Map<String, dynamic>> changeRoleActions = [];
+
+    for (Map<String, dynamic> changeRoleAction in changeRole) {
+      Map<String, dynamic> newChangeRoleAction = {};
+      newChangeRoleAction['userId'] = changeRoleAction['affectedId'];
+      newChangeRoleAction['groupId'] = changeRoleAction['groupId'];
+      newChangeRoleAction['role'] = changeRoleAction['affectedRole'] == 'adm'
+          ? GroupRole.admin
+          : changeRoleAction['affectedRole'] == 'mem'
+              ? GroupRole.member
+              : null;
+      changeRoleActions.add(newChangeRoleAction);
+    }
+    
     // update local database
     await LocalDatabase.updateMessages(newMessages);
     await LocalDatabase.deleteMessages(deleteMessages);
     await LocalDatabase.updateReactions(react);
-    await LocalDatabase.updateRoles(changeRole);
+    await LocalDatabase.updateRoles(changeRoleActions);
     await LocalDatabase.removeMembers(removeMember);
     await LocalDatabase.addUsers(addUser);
     await LocalDatabase.getAdded(getAdded);
