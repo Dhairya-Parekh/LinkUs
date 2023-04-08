@@ -5,17 +5,15 @@ import 'package:linkus/Helper%20Files/local_storage.dart';
 import 'package:linkus/Helper%20Files/db.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final User user;
+  const ProfilePage({super.key, required this.user});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  String username = '';
-  String email = '';
   List<ShortLink> bookmarks = [];
-  bool _isUserInfoLoading = true;
   bool _isBookmarksLoading = true;
 
   // Fetch bookmarks from API
@@ -24,16 +22,6 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() {
       bookmarks = response;
       _isBookmarksLoading = false;
-    });
-  }
-
-  // Get user information from shared preferences
-  Future<void> loadUserInfo() async {
-    final userInfo = await getUserInfo();
-    setState(() {
-      username = userInfo["username"];
-      email = userInfo["email"];
-      _isUserInfoLoading = false;
     });
   }
 
@@ -48,13 +36,12 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     loadBookmarks();
-    loadUserInfo();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _isBookmarksLoading || _isUserInfoLoading
+      body: _isBookmarksLoading
           ? const Loading()
           : Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -67,10 +54,18 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  username,
+                  widget.user.username,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  widget.user.email,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w300,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -78,10 +73,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: LinkList(links: bookmarks),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    // Implement logout functionality
-                    logout();
-                  },
+                  onPressed: logout,
                   child: const Text('Logout'),
                 ),
               ],

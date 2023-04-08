@@ -6,8 +6,8 @@ import 'package:linkus/group.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
 
 class HompePage extends StatefulWidget {
-  final String username;
-  const HompePage({super.key, required this.username});
+  final User user;
+  const HompePage({super.key, required this.user});
 
   @override
   State<HompePage> createState() => _HompePageState();
@@ -38,14 +38,14 @@ class _HompePageState extends State<HompePage> {
     // fetch updates from server
     final Map<String, dynamic> updates =
         await API.getUpdates(lastFetched, userId);
-    final List<Map<String, dynamic>> newMessages = updates['newMessages'];
+    final List<Map<String, dynamic>> newMessages = updates['new_messages'];
     final List<Map<String, dynamic>> deleteMessages =
-        updates['deleteMessages'];
+        updates['delete_messages'];
     final List<Map<String, dynamic>> react = updates['react'];
-    final List<Map<String, dynamic>> changeRole = updates['changeRole'];
-    final List<Map<String, dynamic>> removeMember = updates['removeMember'];
-    final List<Map<String, dynamic>> addUser = updates['addUser'];
-    final List<Map<String, dynamic>> getAdded = updates['getAdded'];
+    final List<Map<String, dynamic>> changeRole = updates['change_role'];
+    final List<Map<String, dynamic>> removeMember = updates['remove_member'];
+    final List<Map<String, dynamic>> addUser = updates['add_user'];
+    final List<Map<String, dynamic>> getAdded = updates['get_added'];
     // Modify the Jsons
     List<Map<String, dynamic>> changeRoleActions = [];
 
@@ -70,6 +70,7 @@ class _HompePageState extends State<HompePage> {
     await LocalDatabase.addUsers(addUser);
     await LocalDatabase.getAdded(getAdded);
     // update last fetched time
+    await setLastFetched(updates['time_stamp']);
   }
 
   @override
@@ -81,10 +82,11 @@ class _HompePageState extends State<HompePage> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              "Hello, ${widget.username}!",
+              "Hello, ${widget.user.username}!",
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ),
+          ElevatedButton(onPressed: _refresh, child: const Text("Refresh")),
           const Padding(
             padding: EdgeInsets.all(16),
             child: TextField(

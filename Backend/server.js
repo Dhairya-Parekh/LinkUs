@@ -23,7 +23,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
-
 app.post('/login', (req, res) => {
   query.login(req.body)
     .then(response => {

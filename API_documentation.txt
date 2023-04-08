@@ -80,7 +80,7 @@ Update get Added:
 
 Read groups :
 	Type : list<json>
-	Name : read_groups
+	Name : readGroups
 	Params : {
 		user_id : <uuid type char 16>,
 		group_id : <uuid type char 16>
@@ -95,7 +95,7 @@ Read groups :
 
 Search groups:
 	Type : list<json>
-	Name : search_group
+	Name : searchGroup
 	Params : {
 		user_id : <uuid type char 16>,
 		group_id : <uuid type char 16>
@@ -110,7 +110,7 @@ Search groups:
 
 Search links global
 	Type : list<json>
-	Name : search_all
+	Name : searchAll
 	Params : {
 	}
 	Returns : {
@@ -125,7 +125,7 @@ Search links global
 
 Search links for group:
 	Type : list<json>
-	Name : search_group
+	Name : searchGroup
 	Params : {
 		group_id : <uuid type char 16>
 	}
@@ -140,7 +140,7 @@ Search links for group:
 
 Sort the links based on a parameter and a filter:
 	Type : list<json>
-	Name : sort_links
+	Name : sortLinks
 	Params : {
 		sort_by : <string>,
 		tags: <list<strings>>
@@ -156,7 +156,7 @@ Sort the links based on a parameter and a filter:
 
 Update bookmarks:
 	Type : void
-	Name : update_bookmark
+	Name : updateBookmark
 	Params : {
 		link_id : <uuid type char 16>
 		action : <string>
@@ -272,7 +272,7 @@ Login:
 	Return: {
 		success: <bool>,
 		user_id: <uuid type char 16>,
-		email : <string>,
+		email: <string>,
         message: <string>
 	}
 
@@ -287,7 +287,7 @@ Sign Up:
 	Return: {
 		success: <bool>,
 		user_id: <uuid type char 16>,
-		email : <string>,
+		email: <string>,
         message: <string>
 	}
 
@@ -318,8 +318,8 @@ Fetch Updates:
 		last_opened: <time_stamp>
 	}
 	Return: {
-		timeStamp: <time_stamp>,
-		newMessages: <list<{
+		time_stamp: <time_stamp>,
+		new_messages: <list<{
 			sender_id: <uuid type char 16>,
 			group_id: <uuid type char 16>,
 			link_id : <uuid type char 16>,
@@ -329,7 +329,7 @@ Fetch Updates:
 			tags: <list<strings>>,
 			time_stamp: <time_stamp>
 		}>>,
-		deleteMessages: <list<{
+		delete_messages: <list<{
 			link_id: <uuid type char 16>
 		}>>,
 		react: <list<{
@@ -337,22 +337,22 @@ Fetch Updates:
 			link_id: <uuid type char 16>,
 			react: <string>
 		}>>,
-		changeRole: <list<{
-			affectedId: <uuid type char 16>,
-			groupId: <uuid type char 16>,
-			affectedRole: <string adm|mem>
+		change_role: <list<{
+			affected_id: <uuid type char 16>,
+			group_id: <uuid type char 16>,
+			affected_role: <string adm|mem>
 		}>>,
-		removeMember: <list<{
+		remove_member: <list<{
 			affected_id: <uuid type char 16>,
 			group_id: <uuid type char 16>
 		}>>,
-		addUser: <list<{
+		add_user: <list<{
 			user_id: <uuid type char 16>,
 			group_id: <uuid type char 16>,
 			user_name: <string>,
 			role: <string>
 		}>>,
-		getAdded: <list<{
+		get_added: <list<{
 			group_id: <uuid type char 16>,
 			group_name: <string>,
 			group_info: <string>,
