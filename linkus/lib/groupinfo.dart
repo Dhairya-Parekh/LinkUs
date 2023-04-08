@@ -65,8 +65,7 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
     });
     String userID = groupInfo["members"][index]["userId"];
     Map<String, dynamic> response = await API.broadcastKick(
-        widget.group.groupId, userID, userInfo["userId"]
-    );
+        widget.group.groupId, userID, userInfo["userId"]);
     if (response["success"] == true) {
       await LocalDatabase.removeMembers([
         {

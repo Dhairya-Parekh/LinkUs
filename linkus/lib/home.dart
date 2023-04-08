@@ -33,11 +33,11 @@ class _HompePageState extends State<HompePage> {
 
   Future<void> _refresh() async {
     // get userid and last updated time
-    final int userId = await getUserId();
-    final int lastFetched = await getLastFetched();
+    final String userId = await getUserId();
+    final DateTime lastFetched = await getLastFetched();
     // fetch updates from server
     final Map<String, dynamic> updates =
-        await API.get_updates(lastFetched, userId);
+        await API.getUpdates(lastFetched, userId);
     final List<Map<String, dynamic>> newMessages = updates['newMessages'];
     final List<Map<String, dynamic>> deleteMessages =
         updates['deleteMessages'];
