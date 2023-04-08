@@ -77,6 +77,9 @@ const signup = (body) => {
       if (results.rows.length == 0) {
         user_id = uuidv4();
         client.query('insert into users (user_id, user_name, passcode, email_id) values ($1, $2, $3, $4)', [user_id, user_name, password, email], (error, results1) => {
+          if (error) {
+            reject(error);
+          }
           resolve({
             success: true,
             user_id: user_id,
@@ -124,6 +127,9 @@ const add_all_to_participants = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_name, group_id, role, time_stamp } = body;
     client.query('select user_id from users where user_name = $1)', [user_name], (error, results) => {
+      if (error) {
+        reject(error);
+      }
       if(results.rows.length == 0){
         resolve(
           false
@@ -135,6 +141,9 @@ const add_all_to_participants = (body) => {
             reject(error);
           }
           client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [results.rows[0], group_id, results.rows[0], role, time_stamp, GROUP_ACTION_ENUM.GET_ADDED], (error, results2) => {
+            if (error) {
+              reject(error);
+            }
             resolve(
               true
             );
@@ -278,6 +287,9 @@ const add_one_to_participants = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, user_name, group_id, affected_role } = body;
     client.query('select roles from participants where user_id = $1 and group_id = $2)', [user_id, group_id], (error, results) => {
+      if (error) {
+        reject(error);
+      }
       if(results.rows[0] != ROLE_ENUM.ADMIN){
         resolve({
           success: false,
@@ -288,6 +300,9 @@ const add_one_to_participants = (body) => {
       }
       else{
         client.query('select user_id from users where user_name = $1)', [user_name], (error, results1) => {
+          if (error) {
+            reject(error);
+          }
           if(results1.rows.length == 0){
             resolve({
               success: false,
@@ -297,7 +312,7 @@ const add_one_to_participants = (body) => {
             })
           }
           else{
-            client.query('insert into participants(user_id, group_id, roles) values ($1, $2, $3)', [user_id, group_id, affected_role], (error, results2) => {
+            client.query('insert into participants(user_id, group_id, roles) values ($1, $2, $3)', [results1.rows[0].user_id, group_id, affected_role], (error, results2) => {
               if (error) {
                 reject(error);
               }
@@ -417,11 +432,11 @@ const get_new_messages = (body) => {
             }
             temp = []
             for(let i = 0; i < results2.rows.length; i++){
-              temp.push(results.rows[i].tags)
+              temp.push(results2.rows[i].tags)
             }
-            results1.rows[0]["tags"] = results2.temp;
+            results1.rows[0]["tags"] = temp;
           })
-          result.push(results1);
+          response.push(results1);
         })
       }
       resolve(response);
@@ -526,7 +541,7 @@ const get_added_members = (body) => {
 const get_new_groups = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, time_stamp } = body;
-    client.query('select group_id, affected_role from group_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.GET_ADDED], (error, results) => {
+    client.query('select group_actions.group_id as, group_actions.affected_role as affected_role, groups.group_name as group_name, groups.group_info as group_info from group_actions, groups where group_actions.group_id = groups.group_id and receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.GET_ADDED], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -538,6 +553,8 @@ const get_new_groups = (body) => {
             reject(error);
           }
           temp["group_id"] = results.rows[i].group_id
+          temp["group_name"] = results.rows[i].group_name
+          temp["group_info"] = results.rows[i].group_info
           temp["role"] = results.rows[i].affected_role
           temp["members"] = results1.rows
         })

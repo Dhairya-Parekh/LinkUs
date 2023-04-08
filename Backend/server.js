@@ -116,14 +116,6 @@ app.get('/get_updates', (req, res) => {
       res.status(500).send(error);
     })
   //----------------------------------
-  query.get_removed_members(req.query)
-    .then(response => {
-      all_updates["remove_member"] = response;
-    })
-    .catch(error => {
-      res.status(500).send(error);
-    })
-  //----------------------------------
   query.get_added_members(req.query)
     .then(response => {
       all_updates["add_user"] = response;
