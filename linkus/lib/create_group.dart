@@ -1,15 +1,10 @@
-// ignore_for_file: use_build_context_synchronously
-
-import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:linkus/Helper%20Files/api.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
 
 class CreateGroupPage extends StatefulWidget {
-  final String username;
-  const CreateGroupPage({super.key, required this.username});
+  final User user;
+  const CreateGroupPage({super.key, required this.user});
 
   @override
   State<CreateGroupPage> createState() => _CreateGroupPageState();
@@ -52,13 +47,11 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
     }).toList();
 
     final jsonResponse =
-        await API.createGroup(widget.username, groupName, groupInfo, members);
+        await API.createGroup(widget.user.username, groupName, groupInfo, members);
 
     if (jsonResponse['success']) {
       // Group creation successful, do something here (e.g. navigate to home page)
-      await saveCredentials(widget.username, '').then((res) {
-        Navigator.pushReplacementNamed(context, '/home');
-      });
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
       // Group creation failed, display error message
       showDialog(

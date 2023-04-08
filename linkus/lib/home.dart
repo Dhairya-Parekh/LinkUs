@@ -6,8 +6,8 @@ import 'package:linkus/group.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
 
 class HompePage extends StatefulWidget {
-  final String username;
-  const HompePage({super.key, required this.username});
+  final User user;
+  const HompePage({super.key, required this.user});
 
   @override
   State<HompePage> createState() => _HompePageState();
@@ -81,7 +81,7 @@ class _HompePageState extends State<HompePage> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              "Hello, ${widget.username}!",
+              "Hello, ${widget.user.username}!",
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ),

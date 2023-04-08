@@ -3,7 +3,7 @@ import 'package:linkus/Common%20Widgets/loading.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
 import 'package:linkus/home.dart';
 import 'package:linkus/profile.dart';
-import 'package:linkus/createGroup.dart';
+import 'package:linkus/create_group.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -14,24 +14,27 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   int _currentIndex = 0;
-  String username = "user";
+  User? user;
   List<Widget> _tabs = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    getUsername().then((username) {
-      if (username != null) {
+    getUser().then((user) {
+      if (user != null) {
         setState(() {
-          this.username = username;
+          this.user = user;
           _tabs = [
-            HompePage(username: username),
-            CreateGroupPage(username: username),
-            const ProfilePage(),
+            HompePage(user: user),
+            CreateGroupPage(user: user),
+            ProfilePage(user: user),
           ];
           _isLoading = false;
         });
+      }
+      else{
+        Navigator.pushReplacementNamed(context, '/login');
       }
     });
   }
@@ -40,7 +43,7 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My App $username'),
+        title: const Text('LinkUs'),
       ),
       body: _isLoading ? const Loading() : _tabs[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(

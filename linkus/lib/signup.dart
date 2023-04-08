@@ -29,13 +29,10 @@ class _SignUpPageState extends State<SignUpPage> {
     final jsonResponse = await API.signup(username,email,password);
 
     if (jsonResponse['success']) {
-      // Login successful, do something here (e.g. navigate to home page)
-      // TODO : save user_id as well
-      await saveCredentials(username, password).then((res) {
+      await saveCredentials(username, password, jsonResponse["user_id"], jsonResponse["email"]).then((res) {
         Navigator.pushReplacementNamed(context, '/home');
       });
     } else {
-      // Login failed, display error message
       setState(() {
         _errorMessage = jsonResponse['message'];
       });
