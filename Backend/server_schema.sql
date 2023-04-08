@@ -73,8 +73,7 @@ CREATE TABLE message_actions
     link_id varchar(36) not null,
     time_stamp timestamp not null,
     action_type varchar(3),
-    primary key (sender_id, receiver_id, link_id),
-    foreign key (link_id) references links on delete CASCADE,
+    primary key (sender_id, receiver_id, link_id, time_stamp),
     foreign key (sender_id) references users on delete CASCADE,
     foreign key (receiver_id) references users on delete CASCADE
 );
@@ -87,7 +86,7 @@ CREATE TABLE group_actions
     affected_role varchar(3) default null,
     time_stamp timestamp not null,
     action_type varchar(3) not null,
-    primary key (receiver_id, affected_id, group_id, time_stamp),
+    primary key (receiver_id, affected_id, group_id, time_stamp, action_type),
     foreign key (group_id) references groups on delete CASCADE,
     foreign key (affected_id) references users on delete CASCADE,
     foreign key (receiver_id) references users on delete CASCADE

@@ -53,12 +53,12 @@ app.post('/create_group', (req, res) => {
       temp = []
       success = true;
       for(let i = 0; i < req.body.members.length; i++){
-        temp_body = {user_name : req.body.members[i].participants_name, group_id : response.group_id, role : req.body.members[i].role, time_stamp : response.time_stamp}
+        temp_body = {user_name : req.body.members[i].participant_name, group_id : response.group_id, role : req.body.members[i].role, time_stamp : response.time_stamp}
         query.add_all_to_participants(temp_body)
         .then(response1 => {
-          if(!reponse){
+          if(!response){
             success = false;
-           temp.push(temp.req.body.members[i].participants_name)
+            temp.push(temp.req.body.members[i].participant_name)
           }
         })
       }
@@ -142,8 +142,8 @@ app.post('/send_message', (req, res) => {
       query.get_group_members(temp_body)
       .then(response1 => {
         for(let i = 0; i < response1.length; i++){
-          if(response1[i].user_id != req.body.user_id){
-            temp_body = {receiver_id : response1[i].user_id, sender_id : req.body.user_id, link_id : response.link_id, time_stamp : response.time_stamp}
+          if(response1[i].user_id != req.body.sender_id){
+            temp_body = {receiver_id : response1[i].user_id, sender_id : req.body.sender_id, link_id : response.link_id, time_stamp : response.time_stamp}
             query.add_send_message_to_message_action(temp_body);
           }
         }
@@ -166,7 +166,7 @@ app.post('/react', (req, res) => {
       .then(response1 => {
         for(let i = 0; i < response1.length; i++){
           if(response1[i].user_id != req.body.sender_id){
-            temp_body = {receiver_id : response1[i].user_id, sender_id: req.body.user_id, link_id: req.body.link_id, time_stamp: response.time_stamp}
+            temp_body = {receiver_id : response1[i].user_id, sender_id: req.body.sender_id, link_id: req.body.link_id, time_stamp: response.time_stamp}
             query.add_react_to_message_action(temp_body);
           }
         }
@@ -204,7 +204,7 @@ app.post('/delete_message', (req, res) => {
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app.post('/add_user', (req, res) => {
-  temp_body = {user_id: req.body.user_id, user_name: req.body.new_member_name, role: req.body.new_member_role, group_id: req.body.group_id}
+  temp_body = {user_id: req.body.user_id, user_name: req.body.new_member_name, affected_role: req.body.new_member_role, group_id: req.body.group_id}
   query.add_one_to_participants(temp_body)
     .then(response => {
       if(response.success){
@@ -213,7 +213,7 @@ app.post('/add_user', (req, res) => {
         .then(response1 => {
           for(let i = 0; i < response1.length; i++){
             if(response1[i].user_id != req.body.user_id && response1[i].user_id != response.new_member_id){
-              temp_body = {receiver_id : response1[i].user_id, group_id: req.body.group_id, affected_id: response.new_member_id, affected_role: req.body.role, time_stamp: response.time_stamp}
+              temp_body = {receiver_id : response1[i].user_id, group_id: req.body.group_id, affected_id: response.new_member_id, affected_role: req.body.new_member_role, time_stamp: response.time_stamp}
               query.add_new_member_to_group_action(temp_body);
             }
           }
