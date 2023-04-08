@@ -11,16 +11,16 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
 
-// app.use((req, res, next) => {
-//   res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-//   res.header("Access-Control-Allow-Credentials", "true");
-//   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//   next();
-// });
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 // parsing the incoming data
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 query.get_group_members({group_id: 123})
