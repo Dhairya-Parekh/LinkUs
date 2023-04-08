@@ -23,7 +23,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
-query.get_group_members({group_id: 123})
 app.post('/login', (req, res) => {
   query.login(req.body)
     .then(response => {

@@ -83,3 +83,9 @@ Future<DateTime> getLastFetched() async {
       : DateTime.fromMillisecondsSinceEpoch(0);
   return lastFetched;
 }
+
+Future<void> setLastFetched(DateTime lastFetched) async {
+  await Future.delayed(const Duration(seconds: 3), () {});
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.setString('last_fetched', lastFetched.toString());
+}

@@ -305,9 +305,9 @@ class LocalDatabase {
     await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
     for (Map<String, dynamic> roleAction in updateRolesActions) {
-      final String userId = roleAction['userId'];
-      final String groupId = roleAction['groupId'];
-      final String role = roleAction['role'] == GroupRole.admin ? 'adm' : 'mem';
+      final String userId = roleAction['user_id'];
+      final String groupId = roleAction['group_id'];
+      final String role = roleAction['role'].value;
       String query =
           "update participants set roles = '$role' where user_id = '$userId' and group_id = '$groupId'";
       await db.rawInsert(query);
