@@ -7,7 +7,6 @@ const app = express();
 // set port, listen for requests
 const PORT = process.env.BACKEND_PORT || 8080;
 
-
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
@@ -75,7 +74,73 @@ app.post('/create_group', (req, res) => {
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
+app.get('/get_updates', (req, res) => {
+  all_updates = {"time_stamp": new Date()}
+  query.get_new_messages(req.query)
+    .then(response => {
+      all_updates["new_messages"] = response;
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+  //----------------------------------
+  query.get_del_messages(req.query)
+    .then(response => {
+      all_updates["delete_messages"] = response;
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+  //----------------------------------
+  query.get_reacts(req.query)
+    .then(response => {
+      all_updates["react"] = response;
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+  //----------------------------------
+  query.get_role_changes(req.query)
+    .then(response => {
+      all_updates["change_role"] = response;
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+  //----------------------------------
+  query.get_removed_members(req.query)
+    .then(response => {
+      all_updates["remove_member"] = response;
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+  //----------------------------------
+  query.get_removed_members(req.query)
+    .then(response => {
+      all_updates["remove_member"] = response;
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+  //----------------------------------
+  query.get_added_members(req.query)
+    .then(response => {
+      all_updates["add_user"] = response;
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+  //----------------------------------
+  query.get_new_groups(req.query)
+    .then(response => {
+      all_updates["get_added"] = response;
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+  res.status(200).send(all_updates);
+})
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -148,7 +213,7 @@ app.post('/delete_message', (req, res) => {
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app.post('/add_user', (req, res) => {
-  temp_body = {user_id: req.body.user_id, user_name: req.body.new_member_name, group_id: req.body.group_id}
+  temp_body = {user_id: req.body.user_id, user_name: req.body.new_member_name, role: req.body.new_member_role, group_id: req.body.group_id}
   query.add_one_to_participants(temp_body)
     .then(response => {
       if(response.success){
@@ -156,13 +221,14 @@ app.post('/add_user', (req, res) => {
         query.get_group_members(temp_body)
         .then(response1 => {
           for(let i = 0; i < response1.length; i++){
-            if(response1[i].user_id != req.body.user_id){
-              temp_body = {receiver_id : response1[i].user_id, group_id: req.body.group_id, affected_id: req.body.new_member_id, affected_role: req.body.role, time_stamp: response.time_stamp}
+            if(response1[i].user_id != req.body.user_id && response1[i].user_id != response.new_member_id){
+              temp_body = {receiver_id : response1[i].user_id, group_id: req.body.group_id, affected_id: response.new_member_id, affected_role: req.body.role, time_stamp: response.time_stamp}
               query.add_new_member_to_group_action(temp_body);
             }
           }
         })
       }
+      
       res.status(200).send(response);
     })
     .catch(error => {
@@ -226,4 +292,3 @@ app.post('/remove_member', (req, res) => {
 })
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
-

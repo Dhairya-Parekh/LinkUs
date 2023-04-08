@@ -69,35 +69,3 @@ class _AppState extends State<App> {
   }
 }
 
-class FirstTab extends StatelessWidget {
-  const FirstTab({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('First Tab'),
-    );
-  }
-}
-
-class SecondTab extends StatelessWidget {
-  const SecondTab({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Second Tab'),
-    );
-  }
-}
-
-class ThirdTab extends StatelessWidget {
-  const ThirdTab({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Third Tab'),
-    );
-  }
-}

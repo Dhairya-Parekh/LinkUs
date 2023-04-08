@@ -30,14 +30,17 @@ class _HompePageState extends State<HompePage> {
       _areGroupsLoading = false;
     });
   }
+
   Future<void> _refresh() async {
     // get userid and last updated time
     final int userId = await getUserId();
     final int lastFetched = await getLastFetched();
     // fetch updates from server
-    final Map<String, dynamic> updates = await API.get_updates(lastFetched, userId);
+    final Map<String, dynamic> updates =
+        await API.get_updates(lastFetched, userId);
     final List<Map<String, dynamic>> newMessages = updates['new_messages'];
-    final List<Map<String, dynamic>> deleteMessages = updates['delete_messages'];
+    final List<Map<String, dynamic>> deleteMessages =
+        updates['delete_messages'];
     final List<Map<String, dynamic>> react = updates['react'];
     final List<Map<String, dynamic>> changeRole = updates['change_role'];
     final List<Map<String, dynamic>> removeMember = updates['remove_member'];
@@ -52,8 +55,8 @@ class _HompePageState extends State<HompePage> {
     await LocalDatabase.addUsers(addUser);
     await LocalDatabase.getAdded(getAdded);
     // update last fetched time
-    
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,7 +111,7 @@ class _HompePageState extends State<HompePage> {
                                 padding: const EdgeInsets.all(
                                     8), // reduce padding inside card
                                 child: Text(
-                                  group.name,
+                                  group.groupName,
                                   style: const TextStyle(
                                       fontSize: 14), // reduce font size
                                 ),

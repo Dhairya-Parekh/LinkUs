@@ -49,23 +49,6 @@ Update react message actions:
 			react: <string>
 		}>>
 
-Update change role actions:
-	Type : void
-	Name : updateRoles
-	Params : {
-		user_id : <uuid type char 16>,
-		group_id : <uuid type char 16>,
-		role : <string>
-	}
-
-Update kick actions:
-	Type : void
-	Name : removeMembers
-	Params : {
-		user_id : <uuid type char 16>,
-		group_id : <uuid type char 16>
-	}
-
 Update add actions:
 	Type : void
 	Name : addUsers
@@ -86,6 +69,7 @@ Update get Added:
 			group_id: <uuid type char 16>,
 			group_name: <string>,
 			group_info: <string>,
+			role: <string>,
 			members: <list<{
 				user_id: <uuid type char 16>,
 				user_name: <string>,
@@ -121,22 +105,6 @@ Search groups:
 				group_id : <int>,
 				group_name: <string>,
 				group_info: <string>
-			}>>
-	}
-
-Read links for a particular group:
-	Type : list<json>
-	Name : links_of_group
-	Params : {
-		group_id : <uuid type char 16>
-	}
-	Returns : {
-		links : <list<{
-				link_id : <uuid type char 16>,
-				title: <string>,
-				link: <string>,
-				info: <string>,
-				tags: <list<strings>>
 			}>>
 	}
 
@@ -186,32 +154,6 @@ Sort the links based on a parameter and a filter:
 			}>>
 	}
 
-Read group members with their roles:
-	Type : list<json>
-	Name : get_members
-	Params : {
-		group_id : <uuid type char 16>
-	}
-	Returns : {
-		users : <list<{
-				user_name: <string>,
-				role: <string>
-			}>>
-	}
-
-Read bookmarks:
-	Type : list<json>
-	Name : get_bookmarks
-	Returns : {
-		links : <list<{
-				link_id : <uuid type char 16>,
-				title: <string>,
-				link: <string>,
-				info: <string>,
-				tags: <list<strings>>
-			}>>
-	}
-
 Update bookmarks:
 	Type : void
 	Name : update_bookmark
@@ -220,6 +162,101 @@ Update bookmarks:
 		action : <string>
 	}
 
+Get all groups:
+	Type : list<json>
+	Name : fetchGroups
+	Returns :
+		<list<{
+			groupId : <uuid type char 16>,
+			groupName: <string>
+		}>>
+
+Get links for a particular group:
+	Type : list<json>
+	Name : fetchLinks
+	Params : {
+		groupId : <uuid type char 16>
+	}
+	Returns : 
+		<list<{
+			linkId : <uuid type char 16>,
+			title: <string>,
+			senderName: <string>,
+			timeStamp: <time_stamp_dart>
+		}>>
+
+Get bookmarks:
+	Type : list<json>
+	Name : fetchBookmarks
+	Returns :  
+		<list<{
+			linkId : <uuid type char 16>,
+			title: <string>,
+			senderName: <string>,
+			timeStamp: <time_stamp_dart>
+		}>>
+
+Get group info along with members and thier roles:
+	Type : list<json>
+	Name : getGroupInfo
+	Params : {
+		group_id : <uuid type char 16>
+	}
+	Returns : {
+		groupName : <string>,
+		groupDesc : <string>,
+		members : <list<{
+			userId: <uuid type char 16>,
+			userName: <string>,
+			role: <Enum in flutter>
+		}>>
+	}
+
+Update change role actions:
+	Type : void
+	Name : updateRoles
+	Params : <list<{
+		groupId: <uuid type char 16>,
+		userId: <uuid type char 16>,
+		role: <Enum in flutter>
+	}>>
+
+Update kick actions:
+	Type : void
+	Name : removeMembers
+	Params : <list<{
+		userId : <uuid type char 16>,
+		groupId : <uuid type char 16>
+	}>>
+
+Get group specific user information:
+	Type : list<json>
+	Name : getGroupSpecificUserInfo
+	Params : {
+		groupId : <uuid type char 16>,
+		userId : <uuid type char 16>
+	}
+	Returns : {
+		userName : <string>,
+		role : <Enum in flutter>
+	}
+
+Get link info:
+	Type : list<json>
+	Name : getLinkInfo
+	Params : {
+		linkId : <uuid type char 16>
+	}
+	Returns : {
+		title : <string>,
+		link : <string>,
+		info : <string>,
+		senderName : <string>,
+		timeStamp : <time_stamp_dart>,
+		likes : <int>,
+		dislikes : <int>,
+		tags: <list<string>>
+	}
 
 Server Side
 
@@ -279,6 +316,7 @@ Fetch Updates:
 		last_opened: <time_stamp>
 	}
 	Return: {
+		time_stamp: <time_stamp>,
 		new_messages: <list<{
 			sender_id: <uuid type char 16>,
 			group_id: <uuid type char 16>,
@@ -293,17 +331,17 @@ Fetch Updates:
 			link_id: <uuid type char 16>
 		}>>,
 		react: <list<{
-			user_id: <uuid type char 16>,
+			sender_id: <uuid type char 16>,
 			link_id: <uuid type char 16>,
 			react: <string>
 		}>>,
 		change_role: <list<{
-			user_id: <uuid type char 16>,
+			affected_id: <uuid type char 16>,
 			group_id: <uuid type char 16>,
-			role: <string>
+			affected_role: <string>
 		}>>,
 		remove_member: <list<{
-			user_id: <uuid type char 16>,
+			affected_id: <uuid type char 16>,
 			group_id: <uuid type char 16>
 		}>>,
 		add_user: <list<{
@@ -316,13 +354,13 @@ Fetch Updates:
 			group_id: <uuid type char 16>,
 			group_name: <string>,
 			group_info: <string>,
+			role: <string>,
 			members: <list<{
 				user_id: <uuid type char 16>,
 				user_name: <string>,
 				roles: <string>
 			}>>
-		}>>,
-		time_stamp: <time_stamp>
+		}>>
 	}
 
 Broadcast message:
@@ -379,6 +417,9 @@ Broadcast add:
 		new_member_role : <string>
 	}
 	Return: {
+		success : <bool>,
+		message : <string>,
+		new_member_id : <uuid type char 16>,
 		time_stamp : <time_stamp>
 	}
 
@@ -386,24 +427,27 @@ Broadcast change role:
 	Type: post 
 	URL: /change_role
 	Body : {
-		user_id : <uuid type char 16>,
-		group_id : <uuid type char 16>,
-		role : <string>
+		userId : <uuid type char 16>,
+		groupId : <uuid type char 16>,
+		changerId : <uuid type char 16>,
+		role : <string adm|mem>
 	}
 	Return: {
-		time_stamp : <time_stamp>
+		success : <bool>,
+		message : <string>
+		timeStamp : <time_stamp>,
 	}
 
 Broadcast kick:
 	Type: post 
 	URL: /remove_member
 	Body: {
-		user_id : <uuid type char 16>,
-		kicker_id : <uuid type char 16>,
-		group_id : <uuid type char 16>
+		userId : <uuid type char 16>,
+		kickerId : <uuid type char 16>,
+		groupId : <uuid type char 16>
 	}
 	Return: {
 		success : <bool>,
 		message : <string>,
-		time_stamp : <time_stamp>
+		timeStamp : <time_stamp>
 	}

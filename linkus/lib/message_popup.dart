@@ -45,9 +45,8 @@ class _TechChipsState extends State<TechChips> {
   }
 }
 
-
 class MessagePopUp extends StatefulWidget {
-  final int groupId;
+  final String groupId;
   const MessagePopUp({super.key, required this.groupId});
 
   @override
@@ -55,7 +54,6 @@ class MessagePopUp extends StatefulWidget {
 }
 
 class _MessagePopUpState extends State<MessagePopUp> {
-
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _linkController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -69,7 +67,6 @@ class _MessagePopUpState extends State<MessagePopUp> {
     Tech("Historical Fiction", Colors.lightGreen, false)
   ];
 
-
   List<Widget> techChips() {
     return [
       const Text('Tags:'),
@@ -82,94 +79,111 @@ class _MessagePopUpState extends State<MessagePopUp> {
     ];
   }
 
+  Future<void> _addLink() async {
+    // Add link to database
+
+    final title = _titleController.text.trim();
+    final description = _descriptionController.text.trim();
+    final linkUrl = _linkController.text.trim();
+    final selectedTags =
+        _tags.where((tag) => tag.isSelected).map((tag) => tag.label).toList();
+
+    final link = {
+      "title": title,
+      "link": linkUrl,
+      "info": description,
+      "tags": selectedTags,
+    };
+
+    print("Sending link");
+    print(link);
+    // final jsonResponse =
+    //     await API.broadcastMessage(0, widget.groupId, link);
+
+    // TODO : Update the localstorage
+
+    // ignore: use_build_context_synchronously
+    Navigator.pop(context);
+    // final title = _titleController.text.trim();
+    // final description = _descriptionController.text.trim();
+    // final link = _linkController.text.trim();
+    // final tags = _tags.where((tech) => tech.isSelected).map((tech) => tech.label);
+    // final linkData = {
+    //   'title': title,
+    //   'description': description,
+    //   'link': link,
+    //   'tags': tags.toList(),
+    // };
+    // await API.addLink(widget.groupId, linkData);
+    // Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
-        return AlertDialog(
-          contentPadding: const EdgeInsets.all(16),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return AlertDialog(
+      contentPadding: const EdgeInsets.all(16),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text('Add Link'),
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Add Link'),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+              TextField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  hintText: 'Title',
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _linkController,
+                decoration: const InputDecoration(
+                  hintText: 'Link',
+                ),
+              ),
+              const SizedBox(height: 16),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      children: techChips(),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(
+                  hintText: 'Description',
+                ),
+                maxLines: null,
               ),
             ],
           ),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: _titleController,
-                    decoration: const InputDecoration(
-                      hintText: 'Title',
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _linkController,
-                    decoration: const InputDecoration(
-                      hintText: 'Link',
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Wrap(
-                        spacing: 8,
-                        children: techChips(),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _descriptionController,
-                    decoration: const InputDecoration(
-                      hintText: 'Description',
-                    ),
-                    maxLines: null,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            FloatingActionButton(
-              onPressed: () async {
-                // Add link to database
-
-                final title = _titleController.text.trim();
-                final description = _descriptionController.text.trim();
-                final linkUrl = _linkController.text.trim();
-                final selectedTags = _tags
-                    .where((tag) => tag.isSelected)
-                    .map((tag) => tag.label)
-                    .toList();
-
-                final link = {
-                  "title": title,
-                  "link": linkUrl,
-                  "info": description,
-                  "tags": selectedTags,
-                };
-
-                final jsonResponse =
-                    await API.broadcastMessage(0, widget.groupId, link);
-
-                // TODO : Update the localstorage
-
-                // ignore: use_build_context_synchronously
-                Navigator.pop(context);
-              },
-              child: const Icon(Icons.send),
-            ),
-          ],
-        );
-      }
+        ),
+      ),
+      actions: [
+        FloatingActionButton(
+          onPressed: _addLink,
+          child: const Icon(Icons.send),
+        ),
+      ],
+    );
+  }
 }
