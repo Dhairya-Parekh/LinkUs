@@ -51,7 +51,7 @@ const login = (body) => {
       return bcrypt.hash(password, salt)
     })
     .then(hash =>{
-      client.query('select user_id FROM users where user_name = $1 and passcode = $2', [user_name, hash], (error, results) => {
+      client.query('select user_id, email FROM users where user_name = $1 and passcode = $2', [user_name, hash], (error, results) => {
         if (error) {
           reject(error);
         }
@@ -59,6 +59,7 @@ const login = (body) => {
           resolve({
             success: false,
             user_id: null,
+            email: null,
             message: "Invalid username or password"
           });
         }
@@ -66,6 +67,7 @@ const login = (body) => {
           resolve({
             success: true,
             user_id: results.rows[0].user_id,
+            email: results.rows[0].email,
             message: "Login successful"
           });
         }
@@ -98,6 +100,7 @@ const signup = (body) => {
             resolve({
               success: true,
               user_id: user_id,
+              email: email,
               message: "Voila! You are now a member of our community."
             });
           })
@@ -107,6 +110,7 @@ const signup = (body) => {
         resolve({
           success: false,
           user_id: null,
+          email: null,
           message: "Username already exists"
         });
       }
