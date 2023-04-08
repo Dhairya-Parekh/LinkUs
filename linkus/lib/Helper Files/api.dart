@@ -14,150 +14,164 @@ class API {
   };
 
   static Future<Map<String, dynamic>> login(
-      String username, String password) async {
-    // final url = Uri.parse('$_baseUrl/login');
-    // final response = await _client.post(
-    //   url,
-    //   headers: _defaultHeaders,
-    //   body: jsonEncode({
-    //     'username': username,
-    //     'password': password
-    //   })
-    // );
-    // final jsonResponse = jsonDecode(response.body);
-    await Future.delayed(const Duration(seconds: 3), () {});
-    final jsonResponse = {
-      'success': true,
-      'message': 'Login successful',
-      'data': {'username': username, 'password': password}
-    };
+  String username, String password) async {
+    final url = Uri.parse('$_baseUrl/login');
+    final response = await _client.post(
+      url,
+      headers: _defaultHeaders,
+      body: jsonEncode({
+        'user_name': username,
+        'password': password
+      })
+    );
+    final jsonResponse = jsonDecode(response.body);
     return jsonResponse;
   }
 
   static Future<Map<String, dynamic>> signup(
-      String name, String email, String password) async {
-    // final url = Uri.parse('$_baseUrl/signup');
-    // final response = await _client.post(
-    //   url,
-    //   headers: _defaultHeaders,
-    //   body: jsonEncode({
-    //     'name': name,
-    //     'email': email,
-    //     'password': password
-    //   })
-    // );
-    // final jsonResponse = jsonDecode(response.body);
-    final jsonResponse = {
-      'success': true,
-      'message': 'Signup successful',
-      'data': {'name': name, 'email': email, 'password': password}
-    };
+  String name, String email, String password) async {
+    final url = Uri.parse('$_baseUrl/signup');
+    final response = await _client.post(
+      url,
+      headers: _defaultHeaders,
+      body: jsonEncode({
+        'user_name': name,
+        'password': password,
+        'email': email
+      })
+    );
+    final jsonResponse = jsonDecode(response.body);
     return jsonResponse;
   }
 
   static Future<Map<String, dynamic>> createGroup(
-      String userName,
-      String groupName,
-      String groupInfo,
-      List<Map<String, dynamic>> members) async {
-    // final url = Uri.parse('$_baseUrl/create_group');
-    // final response = await _client.post(
-    //   url,
-    //   headers: _defaultHeaders,
-    //   body: jsonEncode({
-    //     'user_id': userId,
-    //     'group_name': groupName,
-    //     'group_info': groupInfo,
-    //     'members': members
-    //   })
-    // );
-    // final jsonResponse = jsonDecode(response.body);
-    final jsonResponse = {
-      'success': true,
-      'message': 'Group created successfully',
-      'group_id': 0
-    };
+  String userName, String groupName, String groupInfo, List<Map<String, dynamic>> members) async {
+    final url = Uri.parse('$_baseUrl/create_group');
+    final response = await _client.post(
+      url,
+      headers: _defaultHeaders,
+      body: jsonEncode({
+        'user_id': userID,
+        'group_name': groupName,
+        'group_info': groupInfo,
+        'members': members
+      })
+    );
+    final jsonResponse = jsonDecode(response.body);
+    return jsonResponse;
+  }
+
+  static Future<Map<String, dynamic>> getUpdates(
+  DateTime lastOpened, String userID) async {
+    final url = Uri.parse('$_baseUrl/get_updates');
+    final response = await _client.get(
+      url,
+      headers: _defaultHeaders,
+      body: jsonEncode({
+        'last_opened': lastOpened,
+        'user_id': userID
+        })
+      );
+    final jsonResponse = jsonDecode(response.body);
     return jsonResponse;
   }
 
   static Future<Map<String, dynamic>> broadcastMessage(
-      int senderId, int grouoId, Map<String, dynamic> link) async {
-    // final url = Uri.parse('$_baseUrl/create_group');
-    // final response = await _client.post(
-    //   url,
-    //   headers: _defaultHeaders,
-    //   body: jsonEncode({
-    //     'sender_id': senderId,
-    //     'group_id': groupId,
-    //     'link': link,
-    //   })
-    // );
-    // final jsonResponse = jsonDecode(response.body);
-    final jsonResponse = {
-      'link_id': 0,
-      'timestamp': 10,
-    };
+  String senderID, String groupID, Map<String, dynamic> link) async {
+    final url = Uri.parse('$_baseUrl/send_message');
+    final response = await _client.post(
+      url,
+      headers: _defaultHeaders,
+      body: jsonEncode({
+        'sender_id': senderID,
+        'group_id': groupID,
+        'link': link
+      })
+    );
+    final jsonResponse = jsonDecode(response.body);
+    return jsonResponse;
+  }
+
+  static Future<Map<String, dynamic>> broadcastReact(
+  String senderID, String linkID, String groupID, String react) async {
+    final url = Uri.parse('$_baseUrl/react');
+    final response = await _client.post(
+      url,
+      headers: _defaultHeaders,
+      body: jsonEncode({
+        'sender_id': senderID,
+        'link_id': linkID,
+        'group_id': groupID,
+        'react': react
+      })
+    );
+    final jsonResponse = jsonDecode(response.body);
+    return jsonResponse;
+  }
+
+  static Future<Map<String, dynamic>> broadcastDelete(
+  String userID, String linkID, String groupID) async {
+    final url = Uri.parse('$_baseUrl/delete_message');
+    final response = await _client.post(
+      url,
+      headers: _defaultHeaders,
+      body: jsonEncode({
+        'user_id': userID,
+        'link_id': linkID,
+        'group_id': groupID
+      })
+    );
+    final jsonResponse = jsonDecode(response.body);
+    return jsonResponse;
+  }
+
+  static Future<Map<String, dynamic>> broadcastAdd(
+  String userId, String groupId, String name, GroupRole role) async {
+    final url = Uri.parse('$_baseUrl/add_user');
+    final response = await _client.post(
+      url,
+      headers: _defaultHeaders,
+      body: jsonEncode({
+        'user_id': userId,
+        'group_id': groupId,
+        'new_member_name': name,
+        'new_member_role': role.value
+      })
+    );
+    final jsonResponse = jsonDecode(response.body);
     return jsonResponse;
   }
 
   static Future<Map<String, dynamic>> broadcastChangeRole(
-      String groupId, String userId, String changerId, GroupRole role) async {
-    // final url = Uri.parse('$_baseUrl/change_role');
-    // final response = await _client.post(
-    //   url,
-    //   headers: _defaultHeaders,
-    //   body: jsonEncode({
-    //     'userId': userId,
-    //     'groupId': groupId,
-    //     'changerId': changerId,
-    //     'role': role == GroupRole.admin ? 'adm' : 'mem'
-    //   })
-    // );
-    // final jsonResponse = jsonDecode(response.body);
-    final jsonResponse = {
-      'success': true,
-      'message': 'Role changed successfully',
-      'timeStamp': DateTime.now(),
-    };
+  String userID, String groupID, String changerID, GroupRole role) async {
+    final url = Uri.parse('$_baseUrl/change_role');
+    final response = await _client.post(
+      url,
+      headers: _defaultHeaders,
+      body: jsonEncode({
+        'user_id': userID,
+        'group_id': groupID,
+        'changer_id': changerID,
+        'role': role.value
+      })
+    );
+    final jsonResponse = jsonDecode(response.body);
     return jsonResponse;
   }
 
   static Future<Map<String, dynamic>> broadcastKick(
-      String groupId, String userId, String kickerId) async {
-    // final url = Uri.parse('$_baseUrl/remove_member');
-    // final response = await _client.post(
-    //   url,
-    //   headers: _defaultHeaders,
-    //   body: jsonEncode({
-    //     'groupId': groupId,
-    //     'userId': userId,
-    //     'kickerId': kickerId,
-    //   })
-    // );
-    // final jsonResponse = jsonDecode(response.body);
-    final jsonResponse = {
-      'success': true,
-      'message': 'User kicked successfully',
-      'timeStamp': DateTime.now(),
-    };
-    return jsonResponse;
-  }
-
-  static Future<Map<String, dynamic>> get_updates(
-      int lastOpened, int userId) async {
-    final url = Uri.parse('$_baseUrl/get_updates');
-    final response = await _client.post(url,
-        headers: _defaultHeaders,
-        body: jsonEncode({'last_opened': lastOpened, 'user_id': userId}));
+  String userID, String kickerID, String groupID) async {
+    final url = Uri.parse('$_baseUrl/remove_member');
+    final response = await _client.post(
+      url,
+      headers: _defaultHeaders,
+      body: jsonEncode({
+        'user_id': userID,
+        'kicker_id': kickerID,
+        'group_id': groupID
+      })
+    );
     final jsonResponse = jsonDecode(response.body);
-    // final jsonResponse = {
-    //   'success': true,
-    //   'message': 'Updates fetched',
-    //   'data': {
-    //     'last_opened': last_opened,
-    //     'user_id': user_id
-    //   }
-    // };
     return jsonResponse;
   }
 }

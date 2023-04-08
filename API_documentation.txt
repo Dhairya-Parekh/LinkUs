@@ -14,7 +14,7 @@ String size constraints
 APIs 
 Local storage:
 	last updated time_stamp
-	userid
+	user_id
 Client Side
 
 Update new message actions:
@@ -167,22 +167,22 @@ Get all groups:
 	Name : fetchGroups
 	Returns :
 		<list<{
-			groupId : <uuid type char 16>,
-			groupName: <string>
+			group_id : <uuid type char 16>,
+			group_name: <string>
 		}>>
 
 Get links for a particular group:
 	Type : list<json>
 	Name : fetchLinks
 	Params : {
-		groupId : <uuid type char 16>
+		group_id : <uuid type char 16>
 	}
 	Returns : 
 		<list<{
-			linkId : <uuid type char 16>,
+			link_id : <uuid type char 16>,
 			title: <string>,
-			senderName: <string>,
-			timeStamp: <time_stamp_dart>
+			sender_name: <string>,
+			time_stamp: <time_stamp_dart>
 		}>>
 
 Get bookmarks:
@@ -190,24 +190,24 @@ Get bookmarks:
 	Name : fetchBookmarks
 	Returns :  
 		<list<{
-			linkId : <uuid type char 16>,
+			link_id : <uuid type char 16>,
 			title: <string>,
-			senderName: <string>,
-			timeStamp: <time_stamp_dart>
+			sender_name: <string>,
+			time_stamp: <time_stamp_dart>
 		}>>
 
-Get group info along with members and thier roles:
+Get group info along with members and their roles:
 	Type : list<json>
 	Name : getGroupInfo
 	Params : {
 		group_id : <uuid type char 16>
 	}
 	Returns : {
-		groupName : <string>,
-		groupDesc : <string>,
+		group_name : <string>,
+		group_info : <string>,
 		members : <list<{
-			userId: <uuid type char 16>,
-			userName: <string>,
+			user_id: <uuid type char 16>,
+			user_name: <string>,
 			role: <Enum in flutter>
 		}>>
 	}
@@ -216,8 +216,8 @@ Update change role actions:
 	Type : void
 	Name : updateRoles
 	Params : <list<{
-		groupId: <uuid type char 16>,
-		userId: <uuid type char 16>,
+		group_id: <uuid type char 16>,
+		user_id: <uuid type char 16>,
 		role: <Enum in flutter>
 	}>>
 
@@ -225,19 +225,19 @@ Update kick actions:
 	Type : void
 	Name : removeMembers
 	Params : <list<{
-		userId : <uuid type char 16>,
-		groupId : <uuid type char 16>
+		user_id : <uuid type char 16>,
+		group_id : <uuid type char 16>
 	}>>
 
 Get group specific user information:
 	Type : list<json>
 	Name : getGroupSpecificUserInfo
 	Params : {
-		groupId : <uuid type char 16>,
-		userId : <uuid type char 16>
+		group_id : <uuid type char 16>,
+		user_id : <uuid type char 16>
 	}
 	Returns : {
-		userName : <string>,
+		user_name : <string>,
 		role : <Enum in flutter>
 	}
 
@@ -245,14 +245,14 @@ Get link info:
 	Type : list<json>
 	Name : getLinkInfo
 	Params : {
-		linkId : <uuid type char 16>
+		link_id : <uuid type char 16>
 	}
 	Returns : {
 		title : <string>,
 		link : <string>,
 		info : <string>,
-		senderName : <string>,
-		timeStamp : <time_stamp_dart>,
+		sender_name : <string>,
+		time_stamp : <time_stamp_dart>,
 		likes : <int>,
 		dislikes : <int>,
 		tags: <list<string>>
@@ -271,7 +271,7 @@ Login:
 	}
 	Return: {
 		success: <bool>,
-		userid: <uuid type char 16>,
+		user_id: <uuid type char 16>,
         message: <string>
 	}
 
@@ -285,7 +285,7 @@ Sign Up:
 	}
 	Return: {
 		success: <bool>,
-		userid: <uuid type char 16>,
+		user_id: <uuid type char 16>,
         message: <string>
 	}
 
@@ -427,27 +427,27 @@ Broadcast change role:
 	Type: post 
 	URL: /change_role
 	Body : {
-		userId : <uuid type char 16>,
-		groupId : <uuid type char 16>,
-		changerId : <uuid type char 16>,
+		user_id : <uuid type char 16>,
+		group_id : <uuid type char 16>,
+		changer_id : <uuid type char 16>,
 		role : <string adm|mem>
 	}
 	Return: {
 		success : <bool>,
 		message : <string>
-		timeStamp : <time_stamp>,
+		time_stamp : <time_stamp>,
 	}
 
 Broadcast kick:
 	Type: post 
 	URL: /remove_member
 	Body: {
-		userId : <uuid type char 16>,
-		kickerId : <uuid type char 16>,
-		groupId : <uuid type char 16>
+		user_id : <uuid type char 16>,
+		kicker_id : <uuid type char 16>,
+		group_id : <uuid type char 16>
 	}
 	Return: {
 		success : <bool>,
 		message : <string>,
-		timeStamp : <time_stamp>
+		time_stamp : <time_stamp>
 	}

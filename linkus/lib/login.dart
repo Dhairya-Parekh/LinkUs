@@ -29,6 +29,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (jsonResponse['success']) {
       // Login successful, do something here (e.g. navigate to home page)
+      // TODO : save user_id as well
       await saveCredentials(username, password).then((res) {
         Navigator.pushReplacementNamed(context, '/home');
       });

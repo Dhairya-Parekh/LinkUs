@@ -54,6 +54,19 @@ enum GroupRole {
   member,
 }
 
+extension GroupRoleExtension on GroupRole {
+  String get value {
+    switch (this) {
+      case GroupRole.admin:
+        return "adm";
+      case GroupRole.member:
+        return "mem";
+      default:
+        return "";
+    }
+  }
+}
+
 class LocalDatabase {
   static final LocalDatabase _instance = LocalDatabase._internal();
   factory LocalDatabase() => _instance;
