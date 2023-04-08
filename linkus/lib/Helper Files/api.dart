@@ -39,16 +39,22 @@ class API {
       String groupName,
       String groupInfo,
       List<Map<String, dynamic>> members) async {
-    final url = Uri.parse('$_baseUrl/create_group');
-    final response = await _client.post(url,
-        headers: _defaultHeaders,
-        body: jsonEncode({
-          'user_id': userId,
-          'group_name': groupName,
-          'group_info': groupInfo,
-          'members': members
-        }));
-    final jsonResponse = jsonDecode(response.body);
+    // final url = Uri.parse('$_baseUrl/create_group');
+    // final response = await _client.post(url,
+    //     headers: _defaultHeaders,
+    //     body: jsonEncode({
+    //       'user_id': userId,
+    //       'group_name': groupName,
+    //       'group_info': groupInfo,
+    //       'members': members
+    //     }));
+    // final jsonResponse = jsonDecode(response.body);
+    final jsonResponse = {
+      'success': false,
+      'message': 'Group created successfully',
+      'group_id': '1234567890',
+      'time_stamp': DateTime.now()
+    };
     return jsonResponse;
   }
 

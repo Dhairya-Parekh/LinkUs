@@ -300,7 +300,7 @@ New group:
 		group_info : <string>,
 		members : <list<{
 				participant_name: <string>,
-				role: <string>
+				role: <string adm|mem>
 			}>>
 	}
 	Return: {

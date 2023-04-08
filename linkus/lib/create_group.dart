@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:linkus/Helper%20Files/api.dart';
+import 'package:linkus/Helper%20Files/db.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
 
 class CreateGroupPage extends StatefulWidget {
@@ -14,8 +15,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
   final TextEditingController _groupNameController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  List<String> users = [];
-  Map<String, dynamic> userRoles = {};
+  List<Map<String, dynamic>> users = [];
 
   Future<void> _createGroup() async {
     // Check if group name and at least one user has been entered
@@ -42,34 +42,57 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
     final groupName = _groupNameController.text.trim();
     final groupInfo = _descriptionController.text.trim();
     final members = users.map<Map<String, dynamic>>((user) {
-      final key = userRoles[user].toString();
-      return {key: user};
+      return {
+        'participant_name': user['username'],
+        'role': (user['role'] as GroupRole).value,
+      };
     }).toList();
 
-    final jsonResponse =
-        await API.createGroup(widget.user.username, groupName, groupInfo, members);
+    API.createGroup(widget.user.userId, groupName, groupInfo, members).then((jsonResponse){
+      if (jsonResponse['success']) {
+        // Group creation successful, do something here (e.g. navigate to home page)
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        // Group creation failed, display error message
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Error'),
+              content: Text(jsonResponse['message']),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    });
 
-    if (jsonResponse['success']) {
-      // Group creation successful, do something here (e.g. navigate to home page)
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
-      // Group creation failed, display error message
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Error'),
-            content: Text(jsonResponse['message']),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-    }
+    // if (jsonResponse['success']) {
+    //   // Group creation successful, do something here (e.g. navigate to home page)
+    //   Navigator.pushReplacementNamed(context, '/home');
+    // } else {
+    //   // Group creation failed, display error message
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) {
+    //       return AlertDialog(
+    //         title: const Text('Error'),
+    //         content: Text(jsonResponse['message']),
+    //         actions: [
+    //           TextButton(
+    //             onPressed: () => Navigator.of(context).pop(),
+    //             child: const Text('OK'),
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    // }
   }
 
   @override
@@ -132,8 +155,8 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                   onPressed: () {
                     setState(() {
                       final username = _usernameController.text.trim();
-                      if (username.isNotEmpty && !users.contains(username)) {
-                        users.add(username);
+                      if (username.isNotEmpty && !users.map((user)=>user['username']).contains(username)){
+                        users.add({'username': username, 'role': GroupRole.member});
                         _usernameController.clear();
                       }
                     });
@@ -149,9 +172,11 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
               itemBuilder: (context, index) {
                 final user = users[index];
                 return ListTile(
-                  title: Text(user),
+                  title: Text(user['username']),
                   trailing: DropdownButton<String>(
-                    value: null,
+                    value: user['role'] == GroupRole.admin
+                        ? 'Admin'
+                        : 'Member',
                     hint: const Text('Choose Role'),
                     items: <String>['Admin', 'Member'].map((String value) {
                       return DropdownMenuItem<String>(
@@ -161,7 +186,9 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                     }).toList(),
                     onChanged: (String? selectedRole) {
                       setState(() {
-                        userRoles[user] = selectedRole;
+                        users[index]['role'] =  selectedRole == 'Admin'
+                            ? GroupRole.admin
+                            : GroupRole.member;
                       });
                     },
                   ),
