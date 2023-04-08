@@ -93,7 +93,7 @@ const signup = (body) => {
           return bcrypt.hash(password, salt)
         })
         .then(hash => {
-          client.query('insert into users (user_id, user_name, passcode, email_id) values ($1, $2, $3, $4)', [user_id, user_name, hash, email], (error, results1) => {
+          client.query('insert into users (user_id, user_name, passcode, email) values ($1, $2, $3, $4)', [user_id, user_name, hash, email], (error, results1) => {
             if (error) {
               reject(error);
             }
