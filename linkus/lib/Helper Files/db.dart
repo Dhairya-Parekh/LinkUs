@@ -271,38 +271,124 @@ class LocalDatabase {
   static Future<void> updateMessages(List<Map<String, dynamic>> newMessages) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
-    
-    
+    final Database db = await database;
+    for (Map<String, dynamic> message in newMessages) {
+      final String senderId = message['sender_id'];
+      final String groupId = message['group_id'];
+      final Map<String, dynamic> linkInfo = message['link'];
+      final String linkId = linkInfo['link_id'];
+      final String title = linkInfo['title'];
+      final String link = linkInfo['link'];
+      final String info = linkInfo['info'];
+      final int timeStamp = linkInfo['time_stamp'];
+      final List<String> tags = linkInfo['tags'];
+  
+      String query = "insert into links(link_id,sender_id,group_id,title,link,time_stamp,info) values"
+      "('$linkId','$senderId','$groupId','$title','$link',$timeStamp,'$info')";
+      await db.rawInsert(query);
+      for (String tag in tags) {
+        query = "insert into tags(link_id,tag) values('$linkId','$tag')";
+        await db.rawInsert(query);
+      }
+    }
+    db.close();
   }
   
   static Future<void> deleteMessages(List<Map<String, dynamic>> deleteMessages) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
+    final Database db = await database;
+    for (Map<String, dynamic> message in deleteMessages) {
+      final String linkId = message['link_id'];
+      String query = "delete from links where link_id = '$linkId'";
+      await db.rawDelete(query);
+      query = "delete from tags where link_id = '$linkId'";
+      await db.rawDelete(query);
+    }
   }
 
-  static Future<void> updateReactions(List<Map<String, dynamic>> react) async {
+  static Future<void> updateReactions(List<Map<String, dynamic>> reactions) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
+    final Database db = await database;
+    for (Map<String, dynamic> reaction in reactions) {
+      final String userId = reaction['user_id'];
+      final String linkId = reaction['link_id'];
+      final String react = reaction['react'];
+      final String query = "insert into reacts(user_id,link_id,react) values('$userId','$linkId','$react')";
+      await db.rawInsert(query);
+    }
+    db.close();
   }
 
-  static Future<void> updateRoles(List<Map<String, dynamic>> changeRole) async {
+  static Future<void> updateRoles(List<Map<String, dynamic>> roles) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
+    final Database db = await database;
+    for (Map<String, dynamic> target_role in roles) {
+      final String userId = target_role['user_id'];
+      final String groupId = target_role['group_id'];
+      final String role = target_role['role'];
+      String query = "update participants set role = '$role' where user_id = '$userId' and group_id = '$groupId'";
+      await db.rawInsert(query);
+    }
   }
 
   static Future<void> removeMembers(List<Map<String, dynamic>> removeMember) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
+    final Database db = await database;
+    for (Map<String, dynamic> target in removeMember) {
+      final String userId = target['user_id'];
+      final String groupId = target['group_id'];
+      String query = "delete from participants where user_id = '$userId' and group_id = '$groupId'";
+      await db.rawDelete(query);
+    }
   }
 
   static Future<void> addUsers(List<Map<String, dynamic>> addUser) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
+    final Database db = await database;
+    for (Map<String, dynamic> target in addUser) {
+      final String userId = target['user_id'];
+      final String groupId = target['group_id'];
+      final String userName = target['user_name'];
+      final String role = target['role'];
+      // insert into users
+      String query = "insert into users(user_id,user_name) values('$userId','$userName')";
+      await db.rawInsert(query);
+      // insert into participants
+      query = "insert into participants(user_id,group_id,role) values('$userId','$groupId','$role')";
+      await db.rawInsert(query);
+    }
   }
 
   static Future<void> getAdded(List<Map<String, dynamic>> addGroup) async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
+    final Database db = await database;
+    for (Map<String, dynamic> target in addGroup) {
+      final String groupId = target['group_id'];
+      final String groupName = target['group_name'];
+      final String groupInfo = target['group_info'];
+      // insert into groups
+      String query = "insert into groups(group_id,group_name,group_info) values('$groupId','$groupName','$groupInfo')";
+      await db.rawInsert(query);
+      final List<Map<String,dynamic>> members = target['members'];
+      for(Map<String,dynamic> member in members){
+        final String userId = member['user_id'];
+        final String userName = member['user_name'];
+        final String role = member['role'];
+        // insert into users
+        query = "insert into users(user_id,user_name) values('$userId','$userName')";
+        await db.rawInsert(query);
+        // insert into participants
+        query = "insert into participants(user_id,group_id,role) values('$userId','$groupId','$role')";
+        await db.rawInsert(query);
+      }
+      
+    }
   }
   
 }

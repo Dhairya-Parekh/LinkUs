@@ -84,6 +84,8 @@ Update get Added:
 	Params : {
 		<list<{
 			group_id: <uuid type char 16>,
+			group_name: <string>,
+			group_info: <string>,
 			members: <list<{
 				user_id: <uuid type char 16>,
 				user_name: <string>,
@@ -312,6 +314,8 @@ Fetch Updates:
 		}>>,
 		get_added: <list<{
 			group_id: <uuid type char 16>,
+			group_name: <string>,
+			group_info: <string>,
 			members: <list<{
 				user_id: <uuid type char 16>,
 				user_name: <string>,
