@@ -633,28 +633,11 @@ const get_removed_members = (body) => {
 const get_added_members = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, time_stamp } = body;
-    client.query('select affected_id, group_id, affected_role from group_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.ADD], async(error, results) => {
+    client.query('select users.user_name, group_actions.affected_id as user_id, group_actions.group_id, group_actions.affected_role as role from group_actions, users where users.user_id = group_actions.affected_id, receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.ADD], async(error, results) => {
       if (error) {
         reject(error);
       }
-      const promises = [];
-      for(let i = 0; i < results.rows.length; i++){
-        promises.push(new Promise((resolve, reject) => {
-          temp = {};
-          client.query('select user_name from users where user_id = $1', [results.rows[i].affected_id], (error, results1) => {
-            if (error) {
-              reject(error);
-            }
-            temp["user_id"] = results.rows[i].affected_id
-            temp["group_id"] = results.rows[i].group_id
-            temp["user_name"] = results1.rows[0].user_name
-            temp["role"] = results.rows[i].affected_role
-            resolve(temp);
-          })
-        }))
-      }
-      const response = await Promise.all(promises);
-      resolve(response);
+      resolve(results.rows);
     })
   })
 }
