@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS message_actions;
+DROP TABLE IF EXISTS delete_messages;
 DROP TABLE IF EXISTS group_actions;
 DROP TABLE IF EXISTS reacts;
 DROP TABLE IF EXISTS tags;
@@ -73,6 +74,18 @@ CREATE TABLE message_actions
     link_id varchar(36) not null,
     time_stamp timestamp not null,
     action_type varchar(3),
+    primary key (sender_id, receiver_id, link_id, time_stamp),
+    foreign key (link_id) references links on delete CASCADE,
+    foreign key (sender_id) references users on delete CASCADE,
+    foreign key (receiver_id) references users on delete CASCADE
+);
+
+CREATE TABLE delete_messages
+(
+    receiver_id varchar(36) not null,
+    sender_id varchar(36) not null,
+    link_id varchar(36) not null,
+    time_stamp timestamp not null,
     primary key (sender_id, receiver_id, link_id, time_stamp),
     foreign key (sender_id) references users on delete CASCADE,
     foreign key (receiver_id) references users on delete CASCADE

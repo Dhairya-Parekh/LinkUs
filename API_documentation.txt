@@ -406,6 +406,7 @@ Broadcast delete:
 		group_id : <uuid type char 16>
 	}
 	Return: {
+		success : <bool>,
 		time_stamp : <time_stamp>
 	}
 	

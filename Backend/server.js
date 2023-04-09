@@ -77,6 +77,8 @@ app.get('/get_updates', (req, res) => {
   all_updates = {"time_stamp": new Date()}
   query.get_new_messages(req.query)
     .then(response => {
+      console.log("new messages")
+      console.log(response)
       all_updates["new_messages"] = response;
     })
     .catch(error => {
@@ -85,6 +87,8 @@ app.get('/get_updates', (req, res) => {
   //----------------------------------
   query.get_del_messages(req.query)
     .then(response => {
+      console.log("deleted messages")
+      console.log(response)
       all_updates["delete_messages"] = response;
     })
     .catch(error => {
@@ -93,6 +97,8 @@ app.get('/get_updates', (req, res) => {
   //----------------------------------
   query.get_reacts(req.query)
     .then(response => {
+      console.log("reacts")
+      console.log(response)
       all_updates["react"] = response;
     })
     .catch(error => {
@@ -101,6 +107,8 @@ app.get('/get_updates', (req, res) => {
   //----------------------------------
   query.get_role_changes(req.query)
     .then(response => {
+      console.log("role changes")
+      console.log(response)
       all_updates["change_role"] = response;
     })
     .catch(error => {
@@ -109,6 +117,8 @@ app.get('/get_updates', (req, res) => {
   //----------------------------------
   query.get_removed_members(req.query)
     .then(response => {
+      console.log("removed members")
+      console.log(response)
       all_updates["remove_member"] = response;
     })
     .catch(error => {
@@ -117,6 +127,8 @@ app.get('/get_updates', (req, res) => {
   //----------------------------------
   query.get_added_members(req.query)
     .then(response => {
+      console.log("added members")
+      console.log(response)
       all_updates["add_user"] = response;
     })
     .catch(error => {
@@ -125,6 +137,8 @@ app.get('/get_updates', (req, res) => {
   //----------------------------------
   query.get_new_groups(req.query)
     .then(response => {
+      console.log("new groups")
+      console.log(response);
       all_updates["get_added"] = response;
     })
     .catch(error => {
@@ -181,20 +195,21 @@ app.post('/react', (req, res) => {
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app.post('/delete_message', (req, res) => {
-  temp_body = {link_id: req.body.link_id}
-  query.remove_link(temp_body)
+  query.remove_link(req.body)
     .then(response => {
-      temp_body = {group_id: req.body.group_id}
-      query.get_group_members(temp_body)
-      .then(response1 => {
-        for(let i = 0; i < response1.length; i++){
-          if(response1[i].user_id != req.body.user_id){
-            temp_body = {receiver_id : response1[i].user_id, sender_id: req.body.user_id, link_id: req.body.link_id, time_stamp: response.time_stamp}
-            query.add_delete_message_to_message_action(temp_body);
+      if(response.success){
+        temp_body = {group_id: req.body.group_id}
+        query.get_group_members(temp_body)
+        .then(response1 => {
+          for(let i = 0; i < response1.length; i++){
+            if(response1[i].user_id != req.body.user_id){
+              temp_body = {receiver_id : response1[i].user_id, sender_id: req.body.user_id, link_id: req.body.link_id, time_stamp: response.time_stamp}
+              query.add_delete_message_to_message_action(temp_body);
+            }
           }
-        }
-        res.status(200).send(response);
-      })
+        })
+      }
+      res.status(200).send(response);
     })
     .catch(error => {
       res.status(500).send(error);
@@ -232,17 +247,19 @@ app.post('/add_user', (req, res) => {
 app.post('/change_role', (req, res) => {
   query.change_role(req.body)
     .then(response => {
-      temp_body = {group_id: req.body.group_id}
-      query.get_group_members(temp_body)
-      .then(response1 => {
-        for(let i = 0; i < response1.length; i++){
-          if(response1[i].user_id != req.body.user_id){
-            temp_body = {receiver_id : response1[i].user_id, group_id: req.body.group_id, affected_id: req.body.user_id, affected_role: req.body.role, time_stamp: response.time_stamp}
-            query.add_change_role_to_group_action(temp_body);
+      if(response.success){
+        temp_body = {group_id: req.body.group_id}
+        query.get_group_members(temp_body)
+        .then(response1 => {
+          for(let i = 0; i < response1.length; i++){
+            if(response1[i].user_id != req.body.user_id){
+              temp_body = {receiver_id : response1[i].user_id, group_id: req.body.group_id, affected_id: req.body.user_id, affected_role: req.body.role, time_stamp: response.time_stamp}
+              query.add_change_role_to_group_action(temp_body);
+            }
           }
-        }
-        res.status(200).send(response);
-      })
+        })
+      }
+      res.status(200).send(response);
     })
     .catch(error => {
       res.status(500).send(error);
