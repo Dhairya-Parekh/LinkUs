@@ -76,76 +76,68 @@ app.post('/create_group', (req, res) => {
 app.get('/get_updates', (req, res) => {
   all_updates = {"time_stamp": new Date()}
   query.get_new_messages(req.query)
-    .then(response => {
-      console.log("new messages")
-      console.log(response)
+    .then(async response => {
       all_updates["new_messages"] = response;
-    })
-    .catch(error => {
-      res.status(500).send(error);
-    })
-  //----------------------------------
+      for(let i = 0; i < all_updates["new_messages"].length; i++){
+        temp_body = {"link_id": all_updates["new_messages"][i].link_id}
+        await query.get_tags(temp_body)
+        .then(response8 => {
+          all_updates["new_messages"][i]["tags"] = response8;
+        })
+      }
   query.get_del_messages(req.query)
-    .then(response => {
-      console.log("deleted messages")
-      console.log(response)
-      all_updates["delete_messages"] = response;
-    })
-    .catch(error => {
-      res.status(500).send(error);
-    })
-  //----------------------------------
+    .then(response1 => {
+      all_updates["delete_messages"] = response1;
   query.get_reacts(req.query)
-    .then(response => {
-      console.log("reacts")
-      console.log(response)
-      all_updates["react"] = response;
-    })
-    .catch(error => {
-      res.status(500).send(error);
-    })
-  //----------------------------------
+    .then(response2 => {
+      all_updates["react"] = response2;  
   query.get_role_changes(req.query)
-    .then(response => {
-      console.log("role changes")
-      console.log(response)
-      all_updates["change_role"] = response;
-    })
-    .catch(error => {
-      res.status(500).send(error);
-    })
-  //----------------------------------
+    .then(response3 => {
+      all_updates["change_role"] = response3;
   query.get_removed_members(req.query)
-    .then(response => {
-      console.log("removed members")
-      console.log(response)
-      all_updates["remove_member"] = response;
-    })
-    .catch(error => {
-      res.status(500).send(error);
-    })
-  //----------------------------------
+    .then(response4 => {
+      all_updates["remove_member"] = response4;
   query.get_added_members(req.query)
-    .then(response => {
-      console.log("added members")
-      console.log(response)
-      all_updates["add_user"] = response;
-    })
-    .catch(error => {
-      res.status(500).send(error);
-    })
-  //----------------------------------
+    .then(response5 => {
+      all_updates["add_user"] = response5;
   query.get_new_groups(req.query)
-    .then(response => {
-      console.log("new groups")
-      console.log(response);
-      all_updates["get_added"] = response;
+    .then(async response6 => {
+      all_updates["get_added"] = response6;
+      for(let i = 0; i < all_updates["get_added"].length; i++){
+        temp_body = {"group_id": all_updates["get_added"][i].group_id}
+        await query.get_group_members(temp_body)
+        .then(response7 => {
+          all_updates["get_added"][i]["members"] = response7;
+        })
+      }
+      res.status(200).send(all_updates);
     })
     .catch(error => {
       res.status(500).send(error);
     })
-  res.status(200).send(all_updates);
+  })
+  })
+  .catch(error => {
+    res.status(500).send(error);
+  })
+  })
+  .catch(error => {
+    res.status(500).send(error);
+  })
+  })
+  .catch(error => {
+    res.status(500).send(error);
+  })
+  })
+  .catch(error => {
+    res.status(500).send(error);
+  })
+  })
+  .catch(error => {
+    res.status(500).send(error);
+  })
 })
+
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -300,3 +292,14 @@ app.post('/remove_member', (req, res) => {
 })
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+app.get('/dummy', async (req, res) => {
+  l = [];
+  for(let i = 0; i < 3; i++){
+    response1 = await query.get_group_members({group_id: '4a952228-37cf-4fa7-b3f2-b8d9d5352543'});
+    console.log(response);
+    l.push("response");
+  }
+  console.log(l);
+  res.send(l);
+})

@@ -225,7 +225,7 @@ const add_send_message_to_message_action = (body) => {
 const get_group_members = (body) => {
   return new Promise(function (resolve, reject) {
     const { group_id } = body;
-    client.query('select user_id from participants where group_id = $1', [group_id], (error, results) => {
+    client.query('select users.user_id, users.user_name, participants.roles from participants, users where group_id = $1 and users.user_id = participants.user_id', [group_id], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -494,13 +494,30 @@ const add_delete_message_to_message_action = (body) => {
 const react_to_link = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, link_id, react } = body;
-    client.query('insert into reacts(user_id, link_id, react) values ($1, $2, $3)', [user_id, link_id, react], (error, results) => {
+    client.query('select * from reacts where user_id = $1 and link_id = $2', [user_id, link_id], (error, results) => {
       if (error) {
         reject(error);
       }
-      resolve({
-        time_stamp: new Date()
-      });
+      if(results.rows.length != 0){
+        client.query('update reacts set react = $1 where user_id = $2 and link_id = $3', [react, user_id, link_id], (error, results1) => {
+          if (error) {
+            reject(error);
+          }
+          resolve({
+            time_stamp: new Date()
+          });
+        })
+      }
+      else{
+        client.query('insert into reacts(user_id, link_id, react) values ($1, $2, $3)', [user_id, link_id, react], (error, results2) => {
+          if (error) {
+            reject(error);
+          }
+          resolve({
+            time_stamp: new Date()
+          });
+        })
+      }
     })
   })
 }
@@ -524,39 +541,11 @@ const add_react_to_message_action = (body) => {
 const get_new_messages = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, time_stamp } = body;
-    client.query('select link_id, sender_id from message_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, MESSAGE_ACTION_ENUM.RECEIVE], (error, results) => {
+    client.query('select links.link_id, links.sender_id, links.group_id, links.title, links.link, links.info from message_actions, links where message_actions.link_id = links.link_id and message_actions.receiver_id = $1 and message_actions.time_stamp >= $2 and message_actions.action_type = $3', [user_id, time_stamp, MESSAGE_ACTION_ENUM.RECEIVE], (error, results) => {
       if (error) {
         reject(error);
       }
-      response = [];
-      for(let i = 0; i < results.rows.length; i++){
-        console.log(results.rows[i].link_id)
-        client.query('select sender_id, group_id, title, link, info from links where link_id = $1', [results.rows[i].link_id], (error, results1) => {
-          if (error) {
-            reject(error);
-          }
-          console.log("udhar")
-          console.log(results1.rows)
-          console.log("udharwwwwwwwwwwwwwwwwwwwwwwwwwwwwww")
-          results1.rows[0]["time_stamp"] = time_stamp;
-          client.query('select tags from tags where link_id = $1', [results.rows[i].link_id], (error, results2) => {
-            if (error) {
-              reject(error);
-            }
-            temp = []
-            for(let i = 0; i < results2.rows.length; i++){
-              console.log(results2.rows[i].tags)
-              temp.push(results2.rows[i].tags)
-            }
-            console.log(temp)
-            results1.rows[0]["tags"] = temp;
-          })
-          response.push(results1.rows);
-        })
-      }
-      console.log("idhar")
-      console.log(response)
-      resolve(response);
+      resolve(results.rows);
     })
   })
 }
@@ -578,24 +567,38 @@ const get_del_messages = (body) => {
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 const get_reacts = (body) => {
-  return new Promise(function (resolve, reject) {
+  return new Promise(async (resolve, reject) => {
     const { user_id, time_stamp } = body;
-    client.query('select sender_id, link_id from message_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, MESSAGE_ACTION_ENUM.REACT], (error, results) => {
-      if (error) {
-        reject(error);
+    try {
+      const results = await client.query('select sender_id, link_id from message_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, MESSAGE_ACTION_ENUM.REACT]);
+      const promises = [];
+
+      for (let i = 0; i < results.rows.length; i++) {
+        const promise = new Promise((resolve, reject) => {
+          client.query('select react from reacts where user_id = $1 and link_id = $2', [results.rows[i].sender_id, results.rows[i].link_id], (error, results1) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(results1.rows[0].react);
+            }
+          });
+        });
+
+        promises.push(promise);
       }
-      for(let i = 0; i < results.rows.length; i++){
-        client.query('select react from reacts where user_id = $1 and link_id = $2', [results.rows[i].sender_id, results.rows[i].link_id], (error, results1) => {
-          if (error) {
-            reject(error);
-          }
-          results.rows[i]["react"] = results1.rows[0].react
-        })
+
+      const reactArray = await Promise.all(promises);
+      for (let i = 0; i < results.rows.length; i++) {
+        results.rows[i]['react'] = reactArray[i];
       }
+
       resolve(results.rows);
-    })
-  })
-}
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -630,60 +633,70 @@ const get_removed_members = (body) => {
 const get_added_members = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, time_stamp } = body;
-    client.query('select affected_id, group_id, affected_role from group_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.ADD], (error, results) => {
+    client.query('select affected_id, group_id, affected_role from group_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.ADD], async(error, results) => {
       if (error) {
         reject(error);
       }
-      response = [];
+      const promises = [];
       for(let i = 0; i < results.rows.length; i++){
-        temp = {};
-        client.query('select user_name from users where user_id = $1', [results.rows[i].affected_id], (error, results1) => {
-          if (error) {
-            reject(error);
-          }
-          temp["user_id"] = results.rows[i].affected_id
-          temp["group_id"] = results.rows[i].group_id
-          temp["user_name"] = results1.rows[0].user_name
-          temp["role"] = results.rows[i].affected_role
-        })
-        response.push(temp)
+        promises.push(new Promise((resolve, reject) => {
+          temp = {};
+          client.query('select user_name from users where user_id = $1', [results.rows[i].affected_id], (error, results1) => {
+            if (error) {
+              reject(error);
+            }
+            temp["user_id"] = results.rows[i].affected_id
+            temp["group_id"] = results.rows[i].group_id
+            temp["user_name"] = results1.rows[0].user_name
+            temp["role"] = results.rows[i].affected_role
+            resolve(temp);
+          })
+        }))
       }
+      const response = await Promise.all(promises);
       resolve(response);
     })
   })
 }
+
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 const get_new_groups = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, time_stamp } = body;
-    client.query('select group_actions.group_id as group_id, group_actions.affected_role as affected_role, groups.group_name as group_name, groups.group_info as group_info from group_actions, groups where group_actions.group_id = groups.group_id and receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.GET_ADDED], (error, results) => {
+    client.query('select group_actions.group_id, group_actions.affected_role, groups.group_name, groups.group_info from group_actions, groups where group_actions.group_id = groups.group_id and receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.GET_ADDED], (error, results) => {
       if (error) {
         reject(error);
       }
-      response = [];
-      for(let i = 0; i < results.rows.length; i++){
-        temp = {};
-        client.query('select participants.user_id as user_id, participants.roles as roles, users.user_name as user_name from participants, users where users.user_id = participants.user_id and group_id = $1', [results.rows[i].group_id], (error, results1) => {
-          if (error) {
-            reject(error);
-          }
-          temp["group_id"] = results.rows[i].group_id
-          temp["group_name"] = results.rows[i].group_name
-          temp["group_info"] = results.rows[i].group_info
-          temp["role"] = results.rows[i].affected_role
-          temp["members"] = results1.rows
-        })
-      }
-      console.log(response)
-      resolve(response);
+      resolve(results.rows);
     })
   })
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
+const get_tags = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { link_id } = body;
+    client.query('select tags from tags where link_id = $1', [link_id], async(error, results) => {
+      if (error) {
+        reject(error);
+      }
+      const promises = [];
+      for (let i = 0; i < results.rows.length; i++) {
+        promises.push(new Promise((resolve, reject) => {
+          const tags = results.rows[i].tags;
+          resolve(tags);
+        }));
+      }
+      const response = await Promise.all(promises);
+      resolve(response);
+    });
+  });
+};
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 module.exports = {
   login,
@@ -709,5 +722,6 @@ module.exports = {
   get_role_changes,
   get_removed_members,
   get_added_members,
-  get_new_groups
+  get_new_groups,
+  get_tags
 }
