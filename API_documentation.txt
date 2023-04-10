@@ -69,7 +69,6 @@ Update get Added:
 			group_id: <uuid type char 16>,
 			group_name: <string>,
 			group_info: <string>,
-			role: <string>,
 			members: <list<{
 				user_id: <uuid type char 16>,
 				user_name: <string>,
@@ -307,7 +306,12 @@ New group:
 		success: <bool>,
 		group_id : <uuid type char 16>,
 		message: <string>,
-		time_stamp: <time_stamp>
+		time_stamp: <time_stamp>,
+		members : <list<{
+				user_id: <uuid type char 16>
+				user_name: <string>,
+				roles: <string adm|mem>,
+			}>>
 	}
 
 Fetch Updates:
@@ -315,7 +319,7 @@ Fetch Updates:
 	URL: /get_updates
 	Params: {
 		user_id: <uuid type char 16>,
-		last_opened: <time_stamp>
+		time_stamp: <time_stamp>
 	}
 	Return: {
 		time_stamp: <time_stamp>,

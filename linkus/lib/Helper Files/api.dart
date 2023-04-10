@@ -39,37 +39,39 @@ class API {
       String groupName,
       String groupInfo,
       List<Map<String, dynamic>> members) async {
-    // final url = Uri.parse('$_baseUrl/create_group');
-    // final response = await _client.post(url,
-    //     headers: _defaultHeaders,
-    //     body: jsonEncode({
-    //       'user_id': userId,
-    //       'group_name': groupName,
-    //       'group_info': groupInfo,
-    //       'members': members
-    //     }));
-    // final jsonResponse = jsonDecode(response.body);
-    final jsonResponse = {
-      'success': false,
-      'message': 'Group created successfully',
-      'group_id': '1234567890',
-      'time_stamp': DateTime.now()
-    };
+    final url = Uri.parse('$_baseUrl/create_group');
+    final response = await _client.post(url,
+        headers: _defaultHeaders,
+        body: jsonEncode({
+          'user_id': userId,
+          'group_name': groupName,
+          'group_info': groupInfo,
+          'members': members
+        }));
+    final jsonResponse = jsonDecode(response.body);
+    // final jsonResponse = {
+    //   'success': false,
+    //   'message': 'Group created successfully',
+    //   'group_id': '1234567890',
+    //   'time_stamp': DateTime.now()
+    // };
     return jsonResponse;
   }
 
   static Future<Map<String, dynamic>> getUpdates(
       DateTime lastOpened, String userId) async {
-    final url = Uri.https('$_baseUrl/get_updates', '', {
-      'last_opened': lastOpened,
-      'user_id': userId,
-    });
-    final response = await _client.get(
-      url,
-      headers: _defaultHeaders,
-    );
-    final jsonResponse = jsonDecode(response.body);
-    return jsonResponse;
+    try {
+      final url = Uri.parse(
+          '$_baseUrl/get_updates?time_stamp=${lastOpened.toIso8601String()}&user_id=$userId');
+      final response = await _client.get(
+        url,
+        headers: _defaultHeaders,
+      );
+      final jsonResponse = jsonDecode(response.body);
+      return jsonResponse;
+    } catch (e) {
+      return {};
+    }
   }
 
   static Future<Map<String, dynamic>> broadcastMessage(

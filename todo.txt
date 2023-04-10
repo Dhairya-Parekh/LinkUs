@@ -11,3 +11,5 @@ error handling on
     3. API data not found
 Local API data connections  
 React on messages 
+SQFLite not for browser windows and linux
+Option to remove member in create group page

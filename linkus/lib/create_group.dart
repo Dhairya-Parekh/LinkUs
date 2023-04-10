@@ -47,30 +47,48 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
         'role': (user['role'] as GroupRole).value,
       };
     }).toList();
-
-    API.createGroup(widget.user.userId, groupName, groupInfo, members).then((jsonResponse){
-      if (jsonResponse['success']) {
-        // Group creation successful, do something here (e.g. navigate to home page)
-        Navigator.pushReplacementNamed(context, '/home');
-      } else {
-        // Group creation failed, display error message
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text('Error'),
-              content: Text(jsonResponse['message']),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-      }
-    });
+    try {
+      await API
+          .createGroup(widget.user.userId, groupName, groupInfo, members)
+          .then((jsonResponse) async {
+        if (jsonResponse['success']) {
+          // Save the group to local database
+          // print(jsonResponse);
+          LocalDatabase.getAdded([
+            {
+              'group_id': jsonResponse['group_id'],
+              'group_name': groupName,
+              'group_info': groupInfo,
+              'members': jsonResponse['members']
+                  .map<Map<String, dynamic>>(
+                      (message) => message as Map<String, dynamic>)
+                  .toList(),
+            }
+          ]).then((value) {
+            Navigator.pushReplacementNamed(context, '/home');
+          });
+        } else {
+          // Group creation failed, display error message
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('Error'),
+                content: Text(jsonResponse['message']),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      });
+    } catch (e) {
+      print(e);
+    }
 
     // if (jsonResponse['success']) {
     //   // Group creation successful, do something here (e.g. navigate to home page)
@@ -155,8 +173,12 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                   onPressed: () {
                     setState(() {
                       final username = _usernameController.text.trim();
-                      if (username.isNotEmpty && !users.map((user)=>user['username']).contains(username)){
-                        users.add({'username': username, 'role': GroupRole.member});
+                      if (username.isNotEmpty &&
+                          !users
+                              .map((user) => user['username'])
+                              .contains(username)) {
+                        users.add(
+                            {'username': username, 'role': GroupRole.member});
                         _usernameController.clear();
                       }
                     });
@@ -174,9 +196,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                 return ListTile(
                   title: Text(user['username']),
                   trailing: DropdownButton<String>(
-                    value: user['role'] == GroupRole.admin
-                        ? 'Admin'
-                        : 'Member',
+                    value: user['role'] == GroupRole.admin ? 'Admin' : 'Member',
                     hint: const Text('Choose Role'),
                     items: <String>['Admin', 'Member'].map((String value) {
                       return DropdownMenuItem<String>(
@@ -186,7 +206,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
                     }).toList(),
                     onChanged: (String? selectedRole) {
                       setState(() {
-                        users[index]['role'] =  selectedRole == 'Admin'
+                        users[index]['role'] = selectedRole == 'Admin'
                             ? GroupRole.admin
                             : GroupRole.member;
                       });

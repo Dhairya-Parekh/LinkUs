@@ -4,6 +4,7 @@ import 'package:linkus/Helper%20Files/api.dart';
 import 'package:linkus/Helper%20Files/db.dart';
 import 'package:linkus/group.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
+import 'dart:convert';
 
 class HompePage extends StatefulWidget {
   final User user;
@@ -33,44 +34,71 @@ class _HompePageState extends State<HompePage> {
 
   Future<void> _refresh() async {
     // get userid and last updated time
-    final String userId = await getUserId();
+    final String userId = widget.user.userId;
     final DateTime lastFetched = await getLastFetched();
     // fetch updates from server
     final Map<String, dynamic> updates =
         await API.getUpdates(lastFetched, userId);
-    final List<Map<String, dynamic>> newMessages = updates['new_messages'];
-    final List<Map<String, dynamic>> deleteMessages =
-        updates['delete_messages'];
-    final List<Map<String, dynamic>> react = updates['react'];
-    final List<Map<String, dynamic>> changeRole = updates['change_role'];
-    final List<Map<String, dynamic>> removeMember = updates['remove_member'];
-    final List<Map<String, dynamic>> addUser = updates['add_user'];
-    final List<Map<String, dynamic>> getAdded = updates['get_added'];
-    // Modify the Jsons
-    List<Map<String, dynamic>> changeRoleActions = [];
+    print(updates);
+    try {
+      // Cast List<dynamic> to List<Map<String, dynamic>>
+      final List<Map<String, dynamic>> newMessages = updates['new_messages']
+          .map<Map<String, dynamic>>(
+              (message) => message as Map<String, dynamic>)
+          .toList();
+      final List<Map<String, dynamic>> deleteMessages =
+          updates['delete_messages']
+              .map<Map<String, dynamic>>(
+                  (message) => message as Map<String, dynamic>)
+              .toList();
+      final List<Map<String, dynamic>> react = updates['react']
+          .map<Map<String, dynamic>>(
+              (message) => message as Map<String, dynamic>)
+          .toList();
+      final List<Map<String, dynamic>> changeRole = updates['change_role']
+          .map<Map<String, dynamic>>(
+              (message) => message as Map<String, dynamic>)
+          .toList();
+      final List<Map<String, dynamic>> removeMember = updates['remove_member']
+          .map<Map<String, dynamic>>(
+              (message) => message as Map<String, dynamic>)
+          .toList();
+      final List<Map<String, dynamic>> addUser = updates['add_user']
+          .map<Map<String, dynamic>>(
+              (message) => message as Map<String, dynamic>)
+          .toList();
+      final List<Map<String, dynamic>> getAdded = updates['get_added']
+          .map<Map<String, dynamic>>(
+              (message) => message as Map<String, dynamic>)
+          .toList();
+      // // // Modify the Jsons
+      // List<Map<String, dynamic>> changeRoleActions = [];
 
-    for (Map<String, dynamic> changeRoleAction in changeRole) {
-      Map<String, dynamic> newChangeRoleAction = {};
-      newChangeRoleAction['userId'] = changeRoleAction['affectedId'];
-      newChangeRoleAction['groupId'] = changeRoleAction['groupId'];
-      newChangeRoleAction['role'] = changeRoleAction['affectedRole'] == 'adm'
-          ? GroupRole.admin
-          : changeRoleAction['affectedRole'] == 'mem'
-              ? GroupRole.member
-              : null;
-      changeRoleActions.add(newChangeRoleAction);
+      // for (Map<String, dynamic> changeRoleAction in changeRole) {
+      //   Map<String, dynamic> newChangeRoleAction = {};
+      //   newChangeRoleAction['userId'] = changeRoleAction['affectedId'];
+      //   newChangeRoleAction['groupId'] = changeRoleAction['groupId'];
+      //   newChangeRoleAction['role'] = changeRoleAction['affectedRole'] == 'adm'
+      //       ? GroupRole.admin
+      //       : changeRoleAction['affectedRole'] == 'mem'
+      //           ? GroupRole.member
+      //           : null;
+      //   changeRoleActions.add(newChangeRoleAction);
+      // }
+
+      // // update local database
+      // await LocalDatabase.updateMessages(newMessages);
+      // await LocalDatabase.deleteMessages(deleteMessages);
+      // await LocalDatabase.updateReactions(react);
+      // await LocalDatabase.updateRoles(changeRoleActions);
+      // await LocalDatabase.removeMembers(removeMember);
+      // await LocalDatabase.addUsers(addUser);
+      // await LocalDatabase.getAdded(getAdded);
+      // // update last fetched time
+      await setLastFetched(DateTime.parse(updates['time_stamp']));
+    } catch (e) {
+      print(e);
     }
-    
-    // update local database
-    await LocalDatabase.updateMessages(newMessages);
-    await LocalDatabase.deleteMessages(deleteMessages);
-    await LocalDatabase.updateReactions(react);
-    await LocalDatabase.updateRoles(changeRoleActions);
-    await LocalDatabase.removeMembers(removeMember);
-    await LocalDatabase.addUsers(addUser);
-    await LocalDatabase.getAdded(getAdded);
-    // update last fetched time
-    await setLastFetched(updates['time_stamp']);
   }
 
   @override
