@@ -49,24 +49,29 @@ app.post('/signup', (req, res) => {
 
 app.post('/create_group', (req, res) => {
   query.new_group(req.body)
-    .then(response => {
+    .then(async response => {
       temp = []
       success = true;
       for(let i = 0; i < req.body.members.length; i++){
         temp_body = {user_name : req.body.members[i].participant_name, group_id : response.group_id, role : req.body.members[i].role, time_stamp : response.time_stamp}
-        query.add_all_to_participants(temp_body)
+        await query.add_all_to_participants(temp_body)
         .then(response1 => {
-          if(!response){
+          if(!response1){
             success = false;
-            temp.push(temp.req.body.members[i].participant_name)
+            temp.push(req.body.members[i].participant_name)
           }
         })
       }
-      response["success"] = success;
-      response["message"] = temp;
-      res.status(200).send(response);
+      await query.get_group_members({group_id : response.group_id})
+      .then(response2 => {
+        response["members"] = response2;
+        response["success"] = success;
+        response["message"] = temp;
+        res.status(200).send(response);
+      })
     })
     .catch(error => {
+      console.log(error)
       res.status(500).send(error);
     })
 })
