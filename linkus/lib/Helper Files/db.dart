@@ -72,6 +72,7 @@ class LocalDatabase {
   factory LocalDatabase() => _instance;
   static Database? _database;
   LocalDatabase._internal();
+  static String? _uid;
 
   static Future<void> loadSchemaFile(Database db) async {
     final schemaSql = await rootBundle.loadString('assets/client_schema.sql');
@@ -88,9 +89,9 @@ class LocalDatabase {
     if (_database != null) {
       return _database!;
     }
-    print("Opening database");
+    print("Opening database $_uid");
     _database = await openDatabase(
-      'linkus_local.db',
+      'linkus_local_$_uid.db',
       version: 1,
       onCreate: (Database db, int version) async {
         await loadSchemaFile(db);
@@ -102,19 +103,24 @@ class LocalDatabase {
     return _database!;
   }
 
+  static void setupLocalDatabase(String uid){
+    _uid = uid;
+  }
+  static void closeLocalDatabase(){
+    _database?.close();
+    _database = null;
+  }
+
   static Future<List<Group>> fetchGroups() async {
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 3));
-
-    // Generate dummy data
-    final List<Group> groups = List.generate(
-      15,
-      (index) => Group(
-        groupId: "${index + 1}",
-        groupName: "Group ${index + 1}",
-      ),
-    );
-
+    final Database db = await database;
+    final List<Map<String, dynamic>> grps =
+        await db.rawQuery('SELECT group_id, group_name FROM groups');
+    final List<Group> groups = grps.map(
+      (grp) => Group(
+        groupId: grp["group_id"],
+        groupName: grp["group_name"],
+      )
+    ).toList();
     return groups;
   }
 
@@ -268,7 +274,6 @@ class LocalDatabase {
           await db.rawInsert(query);
         }
       }
-      db.close();
     } catch (e) {
       print(e);
     }
@@ -301,7 +306,6 @@ class LocalDatabase {
           "insert into reacts(user_id,link_id,react) values('$userId','$linkId','$react')";
       await db.rawInsert(query);
     }
-    db.close();
   }
 
   static Future<void> updateRoles(
@@ -371,7 +375,9 @@ class LocalDatabase {
         String query =
             "insert into groups(group_id,group_name,group_info) values('$groupId','$groupName','$groupInfo')";
         await db.rawInsert(query);
-        final List<Map<String, dynamic>> members = target['members'];
+        final List<Map<String, dynamic>> members = target['members'].map<Map<String, dynamic>>(
+              (message) => message as Map<String, dynamic>)
+          .toList();
         for (Map<String, dynamic> member in members) {
           final String userId = member['user_id'];
           final String userName = member['user_name'];

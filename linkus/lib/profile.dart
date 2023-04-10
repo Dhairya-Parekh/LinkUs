@@ -28,6 +28,7 @@ class _ProfilePageState extends State<ProfilePage> {
   //Logout
   Future<void> logout() async {
     await removeCredentials().then((value) {
+      LocalDatabase.closeLocalDatabase();
       Navigator.pushReplacementNamed(context, '/login');
     });
   }

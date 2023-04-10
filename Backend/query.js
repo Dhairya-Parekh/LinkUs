@@ -183,7 +183,7 @@ const add_all_to_participants = (body) => {
           if (error) {
             reject(error);
           }
-          client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [results.rows[0].user_id, group_id, results.rows[0].user_id, role, time_stamp, GROUP_ACTION_ENUM.GET_ADDED], (error, results2) => {
+          client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [results.rows[0].user_id, group_id, results.rows[0].user_id, role, time_stamp.toISOString(), GROUP_ACTION_ENUM.GET_ADDED], (error, results2) => {
             if (error) {
               reject(error);
             }

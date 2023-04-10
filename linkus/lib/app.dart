@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:linkus/Common%20Widgets/loading.dart';
+import 'package:linkus/Helper%20Files/db.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
 import 'package:linkus/home.dart';
 import 'package:linkus/profile.dart';
@@ -23,6 +24,7 @@ class _AppState extends State<App> {
     super.initState();
     getUser().then((user) {
       if (user != null) {
+        LocalDatabase.setupLocalDatabase(user.userId);
         setState(() {
           this.user = user;
           _tabs = [
@@ -32,8 +34,7 @@ class _AppState extends State<App> {
           ];
           _isLoading = false;
         });
-      }
-      else{
+      } else {
         Navigator.pushReplacementNamed(context, '/login');
       }
     });

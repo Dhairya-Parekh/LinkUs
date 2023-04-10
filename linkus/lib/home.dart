@@ -4,7 +4,6 @@ import 'package:linkus/Helper%20Files/api.dart';
 import 'package:linkus/Helper%20Files/db.dart';
 import 'package:linkus/group.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
-import 'dart:convert';
 
 class HompePage extends StatefulWidget {
   final User user;
@@ -33,6 +32,9 @@ class _HompePageState extends State<HompePage> {
   }
 
   Future<void> _refresh() async {
+    setState(() {
+      _areGroupsLoading = true;
+    });
     // get userid and last updated time
     final String userId = widget.user.userId;
     final DateTime lastFetched = await getLastFetched();
@@ -93,9 +95,11 @@ class _HompePageState extends State<HompePage> {
       // await LocalDatabase.updateRoles(changeRoleActions);
       // await LocalDatabase.removeMembers(removeMember);
       // await LocalDatabase.addUsers(addUser);
-      // await LocalDatabase.getAdded(getAdded);
+      await LocalDatabase.getAdded(getAdded);
       // // update last fetched time
       await setLastFetched(DateTime.parse(updates['time_stamp']));
+      // // reload groups
+      await _loadGroups();
     } catch (e) {
       print(e);
     }

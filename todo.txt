@@ -13,3 +13,5 @@ Local API data connections
 React on messages 
 SQFLite not for browser windows and linux
 Option to remove member in create group page
+Add user ID to local_storage
+Correct Timezone on server
