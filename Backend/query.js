@@ -633,7 +633,7 @@ const get_removed_members = (body) => {
 const get_added_members = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, time_stamp } = body;
-    client.query('select users.user_name, group_actions.affected_id as user_id, group_actions.group_id, group_actions.affected_role as role from group_actions, users where users.user_id = group_actions.affected_id, receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.ADD], async(error, results) => {
+    client.query('select users.user_name, group_actions.affected_id as user_id, group_actions.group_id, group_actions.affected_role as role from group_actions, users where users.user_id = group_actions.affected_id and receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.ADD], async(error, results) => {
       if (error) {
         reject(error);
       }
