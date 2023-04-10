@@ -1,7 +1,6 @@
 const express = require("express");
 const query = require('./query');
 
-
 const app = express();
 
 // set port, listen for requests
@@ -22,7 +21,6 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
 app.post('/login', (req, res) => {
   query.login(req.body)
     .then(response => {
@@ -31,6 +29,18 @@ app.post('/login', (req, res) => {
     .catch(error => {
       res.status(500).send(error);
     })
+})
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+app.post('/reset', (req, res) => {
+  query.reset()
+  .then(response => {
+    res.status(200).send(response);
+  })
+  .catch(error => {
+    res.status(500).send(error);
+  })
 })
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -50,18 +60,24 @@ app.post('/signup', (req, res) => {
 app.post('/create_group', (req, res) => {
   query.new_group(req.body)
     .then(async response => {
-      temp = []
+      temp = "These users"
       success = true;
       for(let i = 0; i < req.body.members.length; i++){
         temp_body = {user_name : req.body.members[i].participant_name, group_id : response.group_id, role : req.body.members[i].role, time_stamp : response.time_stamp}
         await query.add_all_to_participants(temp_body)
         .then(response1 => {
           if(!response1){
+            if(success){
+              temp += (req.body.members[i].participant_name)
+            }
+            else{
+              temp += (", " + req.body.members[i].participant_name)
+            }
             success = false;
-            temp.push(req.body.members[i].participant_name)
           }
         })
       }
+      temp += " are not a member of our community."
       await query.get_group_members({group_id : response.group_id})
       .then(response2 => {
         response["members"] = response2;

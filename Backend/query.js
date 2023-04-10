@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
 require('dotenv').config({ path: './config.env' });
 const { Client } = require('pg');
 const bcrypt = require('bcrypt');
@@ -38,6 +39,22 @@ client.connect((err) => {
     console.log('connected to database')
   }
 })
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+const reset = () => {
+  return new Promise(function (resolve, reject) {
+  const sql = fs.readFileSync('./server_schema.sql').toString();
+    client.query(sql, function (error, results, fields) {
+        if (error) {
+          reject(error);
+        }
+      else{
+        resolve(
+          true
+        )
+      }
+    })
+  })
+}
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -682,6 +699,7 @@ const get_tags = (body) => {
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 module.exports = {
+  reset,
   login,
   signup,
   new_group,
