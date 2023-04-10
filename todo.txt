@@ -3,3 +3,11 @@ searching groups
 searching links
 set state called after dispose
 server side reset
+server side delete data from tables
+check if the user is authenticated before processing requests
+error handling on
+    1. API data format Wrong
+    2. API data wrong information
+    3. API data not found
+Local API data connections  
+React on messages 
