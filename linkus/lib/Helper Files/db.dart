@@ -340,7 +340,13 @@ class LocalDatabase {
       // insert into users
       String query =
           "insert into users(user_id,user_name) values('$userId','$userName')";
-      await db.rawInsert(query);
+      
+      try {
+        await db.rawInsert(query);
+      }
+      catch (e) {
+        // ignore
+      }
       // insert into participants
       query =
           "insert into participants(user_id,group_id,role) values('$userId','$groupId','$role')";
@@ -368,7 +374,12 @@ class LocalDatabase {
         // insert into users
         query =
             "insert into users(user_id,user_name) values('$userId','$userName')";
-        await db.rawInsert(query);
+        try {
+          await db.rawInsert(query);
+        }
+        catch (e) {
+          // ignore
+        }
         // insert into participants
         query =
             "insert into participants(user_id,group_id,role) values('$userId','$groupId','$role')";
