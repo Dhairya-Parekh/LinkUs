@@ -329,26 +329,33 @@ const remove_from_participants = (body) => {
       if (error) {
         reject(error);
       }
-      if(results.rows[0].roles != ROLE_ENUM.ADMIN){
+      if(results.rows.length == 0){
         resolve(
           false
         )
       }
       else{
-        client.query('delete from participants where user_id = $1 and group_id = $2', [user_id, group_id], (error, results1) => {
-          if (error) {
-            reject(error);
-          }
-          time_stamp = new Date()
-          client.query('insert into group_actions(receiver_id, group_id, affected_id, time_stamp, action_type) values ($1, $2, $3, $4, $5)', [user_id, group_id, user_id, time_stamp.toISOString(), GROUP_ACTION_ENUM.REMOVE], (error, results) => {
+        if(results.rows[0].roles != ROLE_ENUM.ADMIN){
+          resolve(
+            false
+          )
+        }
+        else{
+          client.query('delete from participants where user_id = $1 and group_id = $2', [user_id, group_id], (error, results1) => {
             if (error) {
               reject(error);
             }
-            resolve({
-              time_stamp: time_stamp
-            });
+            time_stamp = new Date()
+            client.query('insert into group_actions(receiver_id, group_id, affected_id, time_stamp, action_type) values ($1, $2, $3, $4, $5)', [user_id, group_id, user_id, time_stamp.toISOString(), GROUP_ACTION_ENUM.REMOVE], (error, results) => {
+              if (error) {
+                reject(error);
+              }
+              resolve({
+                time_stamp: time_stamp
+              });
+            })
           })
-        })
+        }
       }
     })
   })
@@ -428,24 +435,24 @@ const add_change_role_to_group_action = (body) => {
 const add_one_to_participants = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, user_name, group_id, affected_role } = body;
-    client.query('select * from groups where group_id = $1', [group_id], (error, results4) => {
+    client.query('select roles from participants where user_id = $1 and group_id = $2', [user_id, group_id], (error, results) => {
       if (error) {
         reject(error);
       }
-      if(results4.rows.length == 0){
+      if(results.rows[0].roles != ROLE_ENUM.ADMIN){
         resolve({
           success: false,
-          message: "Group not found",
+          message: "You are not an admin",
           new_member_id: null,
           time_stamp: new Date()
         })
       }
       else{
-        client.query('select * from users where user_id = $1', [user_id], (error, results3) => {
+        client.query('select user_id from users where user_name = $1', [user_name], (error, results1) => {
           if (error) {
             reject(error);
           }
-          if(results3.rows.length == 0){
+          if(results1.rows.length == 0){
             resolve({
               success: false,
               message: "User not found",
@@ -454,52 +461,22 @@ const add_one_to_participants = (body) => {
             })
           }
           else{
-            client.query('select roles from participants where user_id = $1 and group_id = $2', [user_id, group_id], (error, results) => {
+            client.query('insert into participants(user_id, group_id, roles) values ($1, $2, $3)', [results1.rows[0].user_id, group_id, affected_role], (error, results2) => {
               if (error) {
                 reject(error);
               }
-              if(results.rows[0].roles != ROLE_ENUM.ADMIN){
+              time_stamp = new Date();
+              client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [results1.rows[0].user_id, group_id, results1.rows[0].user_id, affected_role, time_stamp.toISOString(), GROUP_ACTION_ENUM.GET_ADDED], (error, results3) => {
+                if (error) {
+                  reject(error);
+                }
                 resolve({
-                  success: false,
-                  message: "You are not an admin",
-                  new_member_id: null,
-                  time_stamp: new Date()
-                })
-              }
-              else{
-                client.query('select user_id from users where user_name = $1', [user_name], (error, results1) => {
-                  if (error) {
-                    reject(error);
-                  }
-                  if(results1.rows.length == 0){
-                    resolve({
-                      success: false,
-                      message: "User not found",
-                      new_member_id: null,
-                      time_stamp: new Date()
-                    })
-                  }
-                  else{
-                    client.query('insert into participants(user_id, group_id, roles) values ($1, $2, $3)', [results1.rows[0].user_id, group_id, affected_role], (error, results2) => {
-                      if (error) {
-                        reject(error);
-                      }
-                      time_stamp = new Date();
-                      client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [results1.rows[0].user_id, group_id, results1.rows[0].user_id, affected_role, time_stamp.toISOString(), GROUP_ACTION_ENUM.GET_ADDED], (error, results3) => {
-                        if (error) {
-                          reject(error);
-                        }
-                        resolve({
-                          success: true,
-                          message: "User added successfully",
-                          new_member_id: results1.rows[0].user_id,
-                          time_stamp: time_stamp
-                        });
-                      })
-                    })
-                  }
-                })
-              }
+                  success: true,
+                  message: "User added successfully",
+                  new_member_id: results1.rows[0].user_id,
+                  time_stamp: time_stamp
+                });
+              })
             })
           }
         })
@@ -531,40 +508,48 @@ const remove_link = (body) => {
       if (error) {
         reject(error);
       }
-      if(results.rows[0].roles != ROLE_ENUM.ADMIN){
-        client.query('select sender_id from links where link_id = $1 and sender_id = $2', [link_id, user_id], (error, results1) => {
-          if (error) {
-            reject(error);
-          }
-          if(results1.rows.length == 0){
-            resolve({
-              success: false,
-              time_stamp: new Date()
-            })
-          }
-          else{
-            client.query('delete from links where link_id = $1', [link_id], (error, results2) => {
-              if (error) {
-                reject(error);
-              }
-              resolve({
-                success: true,
-                time_stamp: new Date()
-              });
-            })
-          }
+      if(results.rows.length == 0){
+        resolve({
+          success: false,
+          time_stamp: new Date()
         })
       }
       else{
-        client.query('delete from links where link_id = $1', [link_id], (error, results3) => {
-          if (error) {
-            reject(error);
-          }
-          resolve({
-            success: true,
-            time_stamp: new Date()
-          });
-        })
+        if(results.rows[0].roles != ROLE_ENUM.ADMIN){
+          client.query('select sender_id from links where link_id = $1 and sender_id = $2', [link_id, user_id], (error, results1) => {
+            if (error) {
+              reject(error);
+            }
+            if(results1.rows.length == 0){
+              resolve({
+                success: false,
+                time_stamp: new Date()
+              })
+            }
+            else{
+              client.query('delete from links where link_id = $1', [link_id], (error, results2) => {
+                if (error) {
+                  reject(error);
+                }
+                resolve({
+                  success: true,
+                  time_stamp: new Date()
+                });
+              })
+            }
+          })
+        }
+        else{
+          client.query('delete from links where link_id = $1', [link_id], (error, results3) => {
+            if (error) {
+              reject(error);
+            }
+            resolve({
+              success: true,
+              time_stamp: new Date()
+            });
+          })
+        }
       }
     })
   })

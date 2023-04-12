@@ -5,8 +5,6 @@ error handling on
     1. API data format Wrong
     2. API data wrong information
     3. API data not found
-Correct Timezone on server
-change roles not working on server
 
 todo naman:
 Add user ID to local_storage
