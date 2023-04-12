@@ -103,10 +103,11 @@ class LocalDatabase {
     return _database!;
   }
 
-  static void setupLocalDatabase(String uid){
+  static void setupLocalDatabase(String uid) {
     _uid = uid;
   }
-  static void closeLocalDatabase(){
+
+  static void closeLocalDatabase() {
     _database?.close();
     _database = null;
   }
@@ -115,12 +116,12 @@ class LocalDatabase {
     final Database db = await database;
     final List<Map<String, dynamic>> grps =
         await db.rawQuery('SELECT group_id, group_name FROM groups');
-    final List<Group> groups = grps.map(
-      (grp) => Group(
-        groupId: grp["group_id"],
-        groupName: grp["group_name"],
-      )
-    ).toList();
+    final List<Group> groups = grps
+        .map((grp) => Group(
+              groupId: grp["group_id"],
+              groupName: grp["group_name"],
+            ))
+        .toList();
     return groups;
   }
 
@@ -139,16 +140,18 @@ class LocalDatabase {
     //   ),
     // );
     final Database db = await database;
-    String query = 'SELECT link_id,title,sender_name,time_stamp FROM links WHERE group_id = ?';
-    final List<Map<String, dynamic>> rawLinks = await db.rawQuery(query, [groupId]);
-    final List<ShortLink> links = rawLinks.map(
-      (link) => ShortLink(
-        linkId: link["link_id"],
-        title: link["title"],
-        senderName: link["sender_name"],
-        timeStamp: DateTime.parse(link["time_stamp"]),
-      )
-    ).toList();
+    String query =
+        'SELECT link_id,user_name,title,time_stamp FROM links join users on links.sender_id = users.user_id WHERE group_id = ?';
+    final List<Map<String, dynamic>> rawLinks =
+        await db.rawQuery(query, [groupId]);
+    final List<ShortLink> links = rawLinks
+        .map((link) => ShortLink(
+              linkId: link["link_id"],
+              title: link["title"],
+              senderName: link["user_name"],
+              timeStamp: DateTime.parse(link["time_stamp"]),
+            ))
+        .toList();
     return links;
   }
 
@@ -175,73 +178,36 @@ class LocalDatabase {
 
   static Future<Map<String, dynamic>> getGroupInfo(String groupId) async {
     // Simulate network delay
-    await Future.delayed(const Duration(seconds: 3));
+    try {
+      await Future.delayed(const Duration(seconds: 3));
+      final Database db = await database;
+      String query =
+          'SELECT group_name, group_info FROM groups WHERE group_id = ?';
+      final List<Map<String, dynamic>> rawGroupInfo =
+          await db.rawQuery(query, [groupId]);
 
-    // Generate dummy data
-    // final Map<String, dynamic> groupInfo = {
-    //   "groupName": "Group $groupId",
-    //   "groupDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    //   "members": [
-    //     {
-    //       "userId": "10",
-    //       "userName": "John Doe",
-    //       "role": GroupRole.admin,
-    //     },
-    //     {
-    //       "userId": "20",
-    //       "userName": "Jane Doe S",
-    //       "role": GroupRole.admin,
-    //     },
-    //     {
-    //       "userId": "30",
-    //       "userName": "John Smith",
-    //       "role": GroupRole.member,
-    //     },
-    //     {
-    //       "userId": "40",
-    //       "userName": "Jane Smith S",
-    //       "role": GroupRole.member,
-    //     },
-    //     {
-    //       "userId": "50",
-    //       "userName": "John Doe B",
-    //       "role": GroupRole.member,
-    //     },
-    //     {
-    //       "userId": "60",
-    //       "userName": "Jane Doe A",
-    //       "role": GroupRole.member,
-    //     },
-    //     {
-    //       "userId": "70",
-    //       "userName": "John Smith C",
-    //       "role": GroupRole.member,
-    //     },
-    //     {
-    //       "userId": "80",
-    //       "userName": "Jane Smith T",
-    //       "role": GroupRole.member,
-    //     },
-    //   ],
-    // };
-    final Database db = await database;
-    String query = 'SELECT group_name, group_info FROM groups WHERE group_id = ?';
-    final List<Map<String, dynamic>> rawGroupInfo = await db.rawQuery(query, [groupId]);
-
-    query = 'SELECT user_id,user_name,roles FROM participants join users on participants.user_id = users.user_id WHERE group_id = ?';
-    final List<Map<String, dynamic>> rawMembers = await db.rawQuery(query, [groupId]);
-    final Map<String, dynamic> groupInfo = {
-      "groupName": rawGroupInfo[0]["group_name"],
-      "groupDesc": rawGroupInfo[0]["group_info"],
-      "members": rawMembers.map(
-        (member) => {
-          "userId": member["user_id"],
-          "userName": member["user_name"],
-          "role": member["roles"],
-        }
-      ).toList(),
-    };
-    return groupInfo;
+      query =
+          'SELECT users.user_id,user_name,roles FROM participants join users on participants.user_id = users.user_id WHERE group_id = ?';
+      final List<Map<String, dynamic>> rawMembers =
+          await db.rawQuery(query, [groupId]);
+      final Map<String, dynamic> groupInfo = {
+        "groupName": rawGroupInfo[0]["group_name"],
+        "groupDesc": rawGroupInfo[0]["group_info"],
+        "members": rawMembers
+            .map((member) => {
+                  "userId": member["user_id"],
+                  "userName": member["user_name"],
+                  "role": member["roles"] == "adm"
+                      ? GroupRole.admin
+                      : GroupRole.member,
+                })
+            .toList(),
+      };
+      return groupInfo;
+    } catch (e) {
+      print(e);
+      return {};
+    }
   }
 
   static Future<Map<String, dynamic>> getLinkInfo(String linkId) async {
@@ -402,9 +368,10 @@ class LocalDatabase {
         String query =
             "insert into groups(group_id,group_name,group_info) values('$groupId','$groupName','$groupInfo')";
         await db.rawInsert(query);
-        final List<Map<String, dynamic>> members = target['members'].map<Map<String, dynamic>>(
-              (message) => message as Map<String, dynamic>)
-          .toList();
+        final List<Map<String, dynamic>> members = target['members']
+            .map<Map<String, dynamic>>(
+                (message) => message as Map<String, dynamic>)
+            .toList();
         for (Map<String, dynamic> member in members) {
           final String userId = member['user_id'];
           final String userName = member['user_name'];

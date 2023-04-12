@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:linkus/Common%20Widgets/link_list.dart';
 import 'package:linkus/Common%20Widgets/loading.dart';
 import 'package:linkus/Helper%20Files/db.dart';
+import 'package:linkus/Helper%20Files/local_storage.dart';
 import 'package:linkus/groupinfo.dart';
 import 'package:linkus/message_popup.dart';
 
 class GroupPage extends StatefulWidget {
   final Group group;
-  const GroupPage({super.key, required this.group});
+  final User user;
+  const GroupPage({super.key, required this.group, required this.user});
 
   @override
   State<GroupPage> createState() => _GroupPageState();
@@ -53,7 +55,7 @@ class _GroupPageState extends State<GroupPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => GroupInfoPage(group: widget.group),
+                  builder: (context) => GroupInfoPage(group: widget.group, user: widget.user,),
                 ),
               );
             },

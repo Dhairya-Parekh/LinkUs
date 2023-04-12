@@ -148,7 +148,7 @@ class _HompePageState extends State<HompePage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => GroupPage(group: group),
+                                builder: (context) => GroupPage(group: group, user: widget.user,),
                               ),
                             );
                           },

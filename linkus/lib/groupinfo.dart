@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:linkus/Common%20Widgets/loading.dart';
 import 'package:linkus/Helper%20Files/api.dart';
 import 'package:linkus/Helper%20Files/db.dart';
+import 'package:linkus/Helper%20Files/local_storage.dart';
 
 // TODO: Handle admin leaving group and deleting group
 
 class GroupInfoPage extends StatefulWidget {
   final Group group;
-  const GroupInfoPage({super.key, required this.group});
+  final User user;
+  const GroupInfoPage({super.key, required this.group, required this.user});
 
   @override
   State<GroupInfoPage> createState() => _GroupInfoPageState();
@@ -24,7 +26,7 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
     final ginfo = await LocalDatabase.getGroupInfo(widget.group.groupId);
     // TODO: Change user id to actual user id
     final uinfo = await LocalDatabase.getGroupSpecificUserInfo(
-        "userId", widget.group.groupId);
+        widget.user.userId, widget.group.groupId);
     setState(() {
       groupInfo = ginfo;
       userInfo = uinfo;
