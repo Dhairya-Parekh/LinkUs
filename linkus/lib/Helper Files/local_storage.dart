@@ -74,18 +74,18 @@ Future<String> getUserId() async {
   return userid;
 }
 
-Future<DateTime> getLastFetched() async {
+Future<DateTime> getLastFetched(String userId) async {
   // await Future.delayed(const Duration(seconds: 3), () {});
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  final String? lastFetchedString = prefs.getString('last_fetched');
+  final String? lastFetchedString = prefs.getString('last_fetched_$userId');
   final DateTime lastFetched = lastFetchedString != null
       ? DateTime.parse(lastFetchedString)
       : DateTime.fromMillisecondsSinceEpoch(0);
   return lastFetched;
 }
 
-Future<void> setLastFetched(DateTime lastFetched) async {
+Future<void> setLastFetched(String userId,DateTime lastFetched) async {
   // await Future.delayed(const Duration(seconds: 3), () {});
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  prefs.setString('last_fetched', lastFetched.toIso8601String());
+  prefs.setString('last_fetched_$userId', lastFetched.toIso8601String());
 }

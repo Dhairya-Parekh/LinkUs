@@ -37,7 +37,7 @@ class _HompePageState extends State<HompePage> {
     });
     // get userid and last updated time
     final String userId = widget.user.userId;
-    final DateTime lastFetched = await getLastFetched();
+    final DateTime lastFetched = await getLastFetched(userId);
     // fetch updates from server
     final Map<String, dynamic> updates =
         await API.getUpdates(lastFetched, userId);
@@ -97,7 +97,7 @@ class _HompePageState extends State<HompePage> {
       // await LocalDatabase.addUsers(addUser);
       await LocalDatabase.getAdded(getAdded);
       // // update last fetched time
-      await setLastFetched(DateTime.parse(updates['time_stamp']));
+      await setLastFetched(userId,DateTime.parse(updates['time_stamp']));
       // // reload groups
       await _loadGroups();
     } catch (e) {

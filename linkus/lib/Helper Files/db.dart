@@ -129,16 +129,26 @@ class LocalDatabase {
     await Future.delayed(const Duration(seconds: 3));
 
     // Generate dummy data
-    final List<ShortLink> links = List.generate(
-      10,
-      (index) => ShortLink(
-        linkId: "${index + 1}",
-        title: 'Link ${index + 1}',
-        senderName: 'John Doe S $groupId',
-        timeStamp: DateTime.now(),
-      ),
-    );
-
+    // final List<ShortLink> links = List.generate(
+    //   10,
+    //   (index) => ShortLink(
+    //     linkId: "${index + 1}",
+    //     title: 'Link ${index + 1}',
+    //     senderName: 'John Doe S $groupId',
+    //     timeStamp: DateTime.now(),
+    //   ),
+    // );
+    final Database db = await database;
+    String query = 'SELECT link_id,title,sender_name,time_stamp FROM links WHERE group_id = ?';
+    final List<Map<String, dynamic>> rawLinks = await db.rawQuery(query, [groupId]);
+    final List<ShortLink> links = rawLinks.map(
+      (link) => ShortLink(
+        linkId: link["link_id"],
+        title: link["title"],
+        senderName: link["sender_name"],
+        timeStamp: DateTime.parse(link["time_stamp"]),
+      )
+    ).toList();
     return links;
   }
 
@@ -168,51 +178,68 @@ class LocalDatabase {
     await Future.delayed(const Duration(seconds: 3));
 
     // Generate dummy data
+    // final Map<String, dynamic> groupInfo = {
+    //   "groupName": "Group $groupId",
+    //   "groupDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    //   "members": [
+    //     {
+    //       "userId": "10",
+    //       "userName": "John Doe",
+    //       "role": GroupRole.admin,
+    //     },
+    //     {
+    //       "userId": "20",
+    //       "userName": "Jane Doe S",
+    //       "role": GroupRole.admin,
+    //     },
+    //     {
+    //       "userId": "30",
+    //       "userName": "John Smith",
+    //       "role": GroupRole.member,
+    //     },
+    //     {
+    //       "userId": "40",
+    //       "userName": "Jane Smith S",
+    //       "role": GroupRole.member,
+    //     },
+    //     {
+    //       "userId": "50",
+    //       "userName": "John Doe B",
+    //       "role": GroupRole.member,
+    //     },
+    //     {
+    //       "userId": "60",
+    //       "userName": "Jane Doe A",
+    //       "role": GroupRole.member,
+    //     },
+    //     {
+    //       "userId": "70",
+    //       "userName": "John Smith C",
+    //       "role": GroupRole.member,
+    //     },
+    //     {
+    //       "userId": "80",
+    //       "userName": "Jane Smith T",
+    //       "role": GroupRole.member,
+    //     },
+    //   ],
+    // };
+    final Database db = await database;
+    String query = 'SELECT group_name, group_info FROM groups WHERE group_id = ?';
+    final List<Map<String, dynamic>> rawGroupInfo = await db.rawQuery(query, [groupId]);
+
+    query = 'SELECT user_id,user_name,roles FROM participants join users on participants.user_id = users.user_id WHERE group_id = ?';
+    final List<Map<String, dynamic>> rawMembers = await db.rawQuery(query, [groupId]);
     final Map<String, dynamic> groupInfo = {
-      "groupName": "Group $groupId",
-      "groupDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      "members": [
-        {
-          "userId": "10",
-          "userName": "John Doe",
-          "role": GroupRole.admin,
-        },
-        {
-          "userId": "20",
-          "userName": "Jane Doe S",
-          "role": GroupRole.admin,
-        },
-        {
-          "userId": "30",
-          "userName": "John Smith",
-          "role": GroupRole.member,
-        },
-        {
-          "userId": "40",
-          "userName": "Jane Smith S",
-          "role": GroupRole.member,
-        },
-        {
-          "userId": "50",
-          "userName": "John Doe B",
-          "role": GroupRole.member,
-        },
-        {
-          "userId": "60",
-          "userName": "Jane Doe A",
-          "role": GroupRole.member,
-        },
-        {
-          "userId": "70",
-          "userName": "John Smith C",
-          "role": GroupRole.member,
-        },
-        {
-          "userId": "80",
-          "userName": "Jane Smith T",
-          "role": GroupRole.member,
-        },
-      ],
+      "groupName": rawGroupInfo[0]["group_name"],
+      "groupDesc": rawGroupInfo[0]["group_info"],
+      "members": rawMembers.map(
+        (member) => {
+          "userId": member["user_id"],
+          "userName": member["user_name"],
+          "role": member["roles"],
+        }
+      ).toList(),
     };
     return groupInfo;
   }
