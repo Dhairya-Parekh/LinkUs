@@ -1,17 +1,25 @@
-check email sent is valid format
-searching groups
-searching links
-set state called after dispose
-server side reset
+todo shikhar:
 server side delete data from tables
 check if the user is authenticated before processing requests
 error handling on
     1. API data format Wrong
     2. API data wrong information
     3. API data not found
-Local API data connections  
-React on messages 
-SQFLite not for browser windows and linux
-Option to remove member in create group page
-Add user ID to local_storage
 Correct Timezone on server
+change roles not working on server
+
+todo naman:
+Add user ID to local_storage
+Local API data connections  
+    fetchLinks
+    getGroupInfo
+    searching links => based on tags
+check email sent is valid format
+SQFLite not for browser windows and linux
+
+
+todo ranjan:
+React on messages 
+Option to remove member in create group page
+searching groups
+set state called after dispose
