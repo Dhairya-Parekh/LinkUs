@@ -441,8 +441,8 @@ Broadcast change role:
 	}
 	Return: {
 		success : <bool>,
-		message : <string>
-		time_stamp : <time_stamp>,
+		message : <string>,
+		time_stamp : <time_stamp>
 	}
 
 Broadcast kick:

@@ -60,7 +60,7 @@ app.post('/signup', (req, res) => {
 app.post('/create_group', (req, res) => {
   query.new_group(req.body)
     .then(async response => {
-      temp = "These users"
+      temp = "These users "
       success = true;
       for(let i = 0; i < req.body.members.length; i++){
         temp_body = {user_name : req.body.members[i].participant_name, group_id : response.group_id, role : req.body.members[i].role, time_stamp : response.time_stamp}
@@ -165,16 +165,27 @@ app.get('/get_updates', (req, res) => {
 app.post('/send_message', (req, res) => {
   query.new_message(req.body)
     .then(response => {
+      tag_list = []
       temp_body = {group_id: req.body.group_id}
-      query.get_group_members(temp_body)
-      .then(response1 => {
-        for(let i = 0; i < response1.length; i++){
-          if(response1[i].user_id != req.body.sender_id){
-            temp_body = {receiver_id : response1[i].user_id, sender_id : req.body.sender_id, link_id : response.link_id, time_stamp : response.time_stamp}
-            query.add_send_message_to_message_action(temp_body);
+      for(let i = 0; i < req.body.link.tags.length; i++){
+        temp_tag = []
+        temp_tag.push(response.link_id)
+        temp_tag.push(req.body.link.tags[i])
+        tag_list.push(temp_tag)
+      }
+      temp_tag_list = {tag_list: tag_list}
+      query.add_tags(temp_tag_list)
+      .then(response2 => {
+        query.get_group_members(temp_body)
+        .then(async response1 => {
+          for(let i = 0; i < response1.length; i++){
+            if(response1[i].user_id != req.body.sender_id){
+              temp_body = {receiver_id : response1[i].user_id, sender_id : req.body.sender_id, link_id : response.link_id, time_stamp : response.time_stamp}
+              await query.add_send_message_to_message_action(temp_body);
+            }
           }
-        }
-        res.status(200).send(response);
+          res.status(200).send(response);
+        })
       })
     })
     .catch(error => {
