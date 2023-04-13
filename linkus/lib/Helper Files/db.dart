@@ -255,12 +255,12 @@ class LocalDatabase {
         final String title = linkInfo['title'];
         final String link = linkInfo['link'];
         final String info = linkInfo['info'];
-        final int timeStamp = linkInfo['time_stamp'];
+        final DateTime timeStamp = linkInfo['time_stamp'];
         final List<String> tags = linkInfo['tags'];
 
         String query =
             "insert into links(link_id,sender_id,group_id,title,link,time_stamp,info) values"
-            "('$linkId','$senderId','$groupId','$title','$link',$timeStamp,'$info')";
+            "('$linkId','$senderId','$groupId','$title','$link','$timeStamp','$info')";
         await db.rawInsert(query);
         for (String tag in tags) {
           query = "insert into tags(link_id,tags) values('$linkId','$tag')";
