@@ -19,7 +19,7 @@ class _AuthenticatorState extends State<Authenticator> {
         Navigator.pushReplacementNamed(context, '/home');
       } else {
         // Navigate to login screen if user is not authenticated
-        Navigator.pushReplacementNamed(context, '/login');
+        Navigator.pushReplacementNamed(context, '/welcome');
       }
     });
   }
