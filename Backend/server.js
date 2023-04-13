@@ -21,20 +21,42 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const ROLE_ENUM = {
+  ADMIN: 'adm',
+  MEMBER: 'mem'
+}
+
+const GROUP_ACTION_ENUM = {
+  REMOVE: 'rem',
+  CHANGE: 'chg',
+  ADD: 'add',
+  GET_ADDED: 'get'
+}
+
+const MESSAGE_ACTION_ENUM = {
+  REACT: 'rea',
+  RECEIVE: 'rec',
+  DELETE: 'del'
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
 app.post('/login', (req, res) => {
-  query.login(req.body)
-    .then(response => {
-      res.status(200).send(response);
-    })
-    .catch(error => {
-      res.status(500).send(error);
-    })
+query.login(req.body)
+  .then(response => {
+    res.status(200).send(response);
+  })
+  .catch(error => {
+    res.status(500).send(error);
+  })
 })
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app.post('/reset', (req, res) => {
-  query.reset()
+query.reset()
   .then(response => {
     res.status(200).send(response);
   })
@@ -46,50 +68,50 @@ app.post('/reset', (req, res) => {
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app.post('/signup', (req, res) => {
-  query.signup(req.body)
-    .then(response => {
-      res.status(200).send(response);
-    })
-    .catch(error => {
-      res.status(500).send(error);
-    })
+query.signup(req.body)
+  .then(response => {
+    res.status(200).send(response);
+  })
+  .catch(error => {
+    res.status(500).send(error);
+  })
 })
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app.post('/create_group', (req, res) => {
-  query.new_group(req.body)
-    .then(async response => {
-      temp = "These users "
-      success = true;
-      for(let i = 0; i < req.body.members.length; i++){
-        temp_body = {user_name : req.body.members[i].participant_name, group_id : response.group_id, role : req.body.members[i].role, time_stamp : response.time_stamp}
-        await query.add_all_to_participants(temp_body)
-        .then(response1 => {
-          if(!response1){
-            if(success){
-              temp += (req.body.members[i].participant_name)
-            }
-            else{
-              temp += (", " + req.body.members[i].participant_name)
-            }
-            success = false;
+query.new_group(req.body)
+  .then(async response => {
+    temp = "These users "
+    success = true;
+    for(let i = 0; i < req.body.members.length; i++){
+      temp_body = {user_name : req.body.members[i].participant_name, group_id : response.group_id, role : req.body.members[i].role, time_stamp : response.time_stamp}
+      await query.add_all_to_participants(temp_body)
+      .then(response1 => {
+        if(!response1){
+          if(success){
+            temp += (req.body.members[i].participant_name)
           }
-        })
-      }
-      temp += " are not a member of our community."
-      await query.get_group_members({group_id : response.group_id})
-      .then(response2 => {
-        response["members"] = response2;
-        response["success"] = success;
-        response["message"] = temp;
-        res.status(200).send(response);
+          else{
+            temp += (", " + req.body.members[i].participant_name)
+          }
+          success = false;
+        }
       })
+    }
+    temp += " are not a member of our community."
+    await query.get_group_members({group_id : response.group_id})
+    .then(response2 => {
+      response["members"] = response2;
+      response["success"] = success;
+      response["message"] = temp;
+      res.status(200).send(response);
     })
-    .catch(error => {
-      console.log(error)
-      res.status(500).send(error);
-    })
+  })
+  .catch(error => {
+    console.log(error)
+    res.status(500).send(error);
+  })
 })
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -163,107 +185,139 @@ app.get('/get_updates', (req, res) => {
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app.post('/send_message', (req, res) => {
-  query.new_message(req.body)
-    .then(response => {
-      tag_list = []
-      temp_body = {group_id: req.body.group_id}
-      for(let i = 0; i < req.body.link.tags.length; i++){
-        temp_tag = []
-        temp_tag.push(response.link_id)
-        temp_tag.push(req.body.link.tags[i])
-        tag_list.push(temp_tag)
-      }
-      temp_tag_list = {tag_list: tag_list}
-      query.add_tags(temp_tag_list)
-      .then(response2 => {
-        query.get_group_members(temp_body)
-        .then(async response1 => {
-          for(let i = 0; i < response1.length; i++){
-            if(response1[i].user_id != req.body.sender_id){
-              temp_body = {receiver_id : response1[i].user_id, sender_id : req.body.sender_id, link_id : response.link_id, time_stamp : response.time_stamp}
-              await query.add_send_message_to_message_action(temp_body);
-            }
+query.new_message(req.body)
+  .then(response => {
+    tag_list = []
+    temp_body = {group_id: req.body.group_id}
+    for(let i = 0; i < req.body.link.tags.length; i++){
+      temp_tag = []
+      temp_tag.push(response.link_id)
+      temp_tag.push(req.body.link.tags[i])
+      tag_list.push(temp_tag)
+    }
+    temp_tag_list = {tag_list: tag_list}
+    query.add_tags(temp_tag_list)
+    .then(response2 => {
+      query.get_group_members(temp_body)
+      .then(response1 => {
+        temp_list = []
+        for(let i = 0; i < response1.length; i++){
+          if(response1[i].user_id != req.body.sender_id){
+            temp_user_list = []
+            temp_user_list.push(response1[i].user_id)
+            temp_user_list.push(req.body.sender_id)
+            temp_user_list.push(response.link_id)
+            temp_user_list.push(response.time_stamp.toISOString())
+            temp_user_list.push(MESSAGE_ACTION_ENUM.RECEIVE)
+            temp_list.push(temp_user_list)
           }
-          res.status(200).send(response);
-        })
+        }
+        add_message_list = {add_message_list: temp_list}
+        query.add_send_message_to_message_action(add_message_list)
       })
     })
-    .catch(error => {
-      res.status(500).send(error);
-    })
+    res.status(200).send(response);
+  })
+  .catch(error => {
+    res.status(500).send(error);
+  })
 })
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app.post('/react', (req, res) => {
-  temp_body = {user_id: req.body.sender_id, link_id: req.body.link_id, react: req.body.react}
-  query.react_to_link(temp_body)
-    .then(response => {
-      temp_body = {group_id: req.body.group_id}
-      query.get_group_members(temp_body)
-      .then(response1 => {
-        for(let i = 0; i < response1.length; i++){
-          if(response1[i].user_id != req.body.sender_id){
-            temp_body = {receiver_id : response1[i].user_id, sender_id: req.body.sender_id, link_id: req.body.link_id, time_stamp: response.time_stamp}
-            query.add_react_to_message_action(temp_body);
-          }
+temp_body = {user_id: req.body.sender_id, link_id: req.body.link_id, react: req.body.react}
+query.react_to_link(temp_body)
+  .then(response => {
+    temp_body = {group_id: req.body.group_id}
+    query.get_group_members(temp_body)
+    .then(response1 => {
+      temp_list = []
+      for(let i = 0; i < response1.length; i++){
+        if(response1[i].user_id != req.body.sender_id){
+          temp_user_list = []
+          temp_user_list.push(response1[i].user_id)
+          temp_user_list.push(req.body.sender_id)
+          temp_user_list.push(req.body.link_id)
+          temp_user_list.push(response.time_stamp.toISOString())
+          temp_user_list.push(MESSAGE_ACTION_ENUM.REACT)
+          temp_list.push(temp_user_list)
         }
-        res.status(200).send(response);
-      })
+      }
+      react_list = {react_list: temp_list}
+      query.add_react_to_message_action(react_list)
     })
-    .catch(error => {
-      res.status(500).send(error);
-    })
+    res.status(200).send(response);
+  })
+  .catch(error => {
+    res.status(500).send(error);
+  })
 })
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app.post('/delete_message', (req, res) => {
-  query.remove_link(req.body)
-    .then(response => {
-      if(response.success){
-        temp_body = {group_id: req.body.group_id}
-        query.get_group_members(temp_body)
-        .then(response1 => {
-          for(let i = 0; i < response1.length; i++){
-            if(response1[i].user_id != req.body.user_id){
-              temp_body = {receiver_id : response1[i].user_id, sender_id: req.body.user_id, link_id: req.body.link_id, time_stamp: response.time_stamp}
-              query.add_delete_message_to_message_action(temp_body);
-            }
+query.remove_link(req.body)
+  .then(response => {
+    if(response.success){
+      temp_body = {group_id: req.body.group_id}
+      query.get_group_members(temp_body)
+      .then(response1 => {
+        temp_list = []
+        for(let i = 0; i < response1.length; i++){
+          if(response1[i].user_id != req.body.user_id){
+            temp_user_list = []
+            temp_user_list.push(response1[i].user_id)
+            temp_user_list.push(req.body.user_id)
+            temp_user_list.push(req.body.link_id)
+            temp_user_list.push(response.time_stamp.toISOString())
+            temp_user_list.push(MESSAGE_ACTION_ENUM.DELETE)
+            temp_list.push(temp_user_list)
           }
-        })
-      }
-      res.status(200).send(response);
-    })
-    .catch(error => {
-      res.status(500).send(error);
-    })
+        }
+        delete_list = {delete_list: temp_list}
+        query.add_delete_message_to_message_action(delete_list)
+      })
+    }
+    res.status(200).send(response);
+  })
+  .catch(error => {
+    res.status(500).send(error);
+  })
 })
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app.post('/add_user', (req, res) => {
-  temp_body = {user_id: req.body.user_id, user_name: req.body.new_member_name, affected_role: req.body.new_member_role, group_id: req.body.group_id}
-  query.add_one_to_participants(temp_body)
-    .then(response => {
-      if(response.success){
-        temp_body = {group_id: req.body.group_id}
-        query.get_group_members(temp_body)
-        .then(response1 => {
-          for(let i = 0; i < response1.length; i++){
-            if(response1[i].user_id != req.body.user_id && response1[i].user_id != response.new_member_id){
-              temp_body = {receiver_id : response1[i].user_id, group_id: req.body.group_id, affected_id: response.new_member_id, affected_role: req.body.new_member_role, time_stamp: response.time_stamp}
-              query.add_new_member_to_group_action(temp_body);
-            }
+temp_body = {user_id: req.body.user_id, user_name: req.body.new_member_name, affected_role: req.body.new_member_role, group_id: req.body.group_id}
+query.add_one_to_participants(temp_body)
+  .then(response => {
+    if(response.success){
+      temp_body = {group_id: req.body.group_id}
+      query.get_group_members(temp_body)
+      .then(response1 => {
+        temp_list = []
+        for(let i = 0; i < response1.length; i++){
+          if(response1[i].user_id != req.body.user_id && response1[i].user_id != response.new_member_id){
+            temp_user_list = []
+            temp_user_list.push(response1[i].user_id)
+            temp_user_list.push(req.body.group_id)
+            temp_user_list.push(response.new_member_id)
+            temp_user_list.push(req.body.new_member_role)
+            temp_user_list.push(response.time_stamp.toISOString())
+            temp_user_list.push(MESSAGE_ACTION_ENUM.ADD)
+            temp_list.push(temp_user_list)
           }
-        })
-      }
-      
-      res.status(200).send(response);
-    })
-    .catch(error => {
-      res.status(500).send(error);
-    })
+        }
+        add_user_list = {add_user_list: temp_list}
+        query.add_new_member_to_group_action(add_user_list);
+      })
+    }
+    res.status(200).send(response);
+  })
+  .catch(error => {
+    res.status(500).send(error);
+  })
 })
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -275,12 +329,21 @@ app.post('/change_role', (req, res) => {
         temp_body = {group_id: req.body.group_id}
         query.get_group_members(temp_body)
         .then(response1 => {
+          temp_list = []
           for(let i = 0; i < response1.length; i++){
-            if(response1[i].user_id != req.body.user_id){
-              temp_body = {receiver_id : response1[i].user_id, group_id: req.body.group_id, affected_id: req.body.user_id, affected_role: req.body.role, time_stamp: response.time_stamp}
-              query.add_change_role_to_group_action(temp_body);
+            if(response1[i].user_id != req.body.changer_id){
+              temp_user_list = []
+              temp_user_list.push(response1[i].user_id)
+              temp_user_list.push(req.body.group_id)
+              temp_user_list.push(req.body.user_id)
+              temp_user_list.push(req.body.role)
+              temp_user_list.push(response.time_stamp.toISOString())
+              temp_user_list.push(GROUP_ACTION_ENUM.CHANGE)
+              temp_list.push(temp_user_list)
             }
           }
+          change_role_list = {change_role_list: temp_list}
+          query.add_change_role_to_group_action(change_role_list);
         })
       }
       res.status(200).send(response);
@@ -299,16 +362,24 @@ app.post('/remove_member', (req, res) => {
         temp_body = {group_id: req.body.group_id}
         query.get_group_members(temp_body)
         .then(response1 => {
+          temp_list = []
           for(let i = 0; i < response1.length; i++){
             if(response1[i].user_id != req.body.kicker_id){
-              temp_body = {receiver_id : response1[i].user_id, group_id: req.body.group_id, affected_id: req.body.user_id, time_stamp: response.time_stamp}
-              query.add_remove_user_to_group_action(temp_body);
+              temp_user_list = []
+              temp_user_list.push(response1[i].user_id)
+              temp_user_list.push(req.body.group_id)
+              temp_user_list.push(req.body.user_id)
+              temp_user_list.push(response.time_stamp.toISOString())
+              temp_user_list.push(GROUP_ACTION_ENUM.REMOVE)
+              temp_list.push(temp_user_list)
             }
           }
-          response["success"] = true;
-          response["message"] = "User Removed";
-          res.status(200).send(response);
-        })      
+          remove_member_list = {remove_member_list: temp_list}
+          query.add_remove_user_to_group_action(remove_member_list);
+        })
+        response["success"] = true;
+        response["message"] = "User Removed";
+        res.status(200).send(response);
       }
       else{
         response = {}
@@ -321,17 +392,4 @@ app.post('/remove_member', (req, res) => {
     .catch(error => {
       res.status(500).send(error);
     })
-})
-
-//-------------------------------------------------------------------------------------------------------------------------------------------------------
-
-app.get('/dummy', async (req, res) => {
-  l = [];
-  for(let i = 0; i < 3; i++){
-    response1 = await query.get_group_members({group_id: '4a952228-37cf-4fa7-b3f2-b8d9d5352543'});
-    console.log(response);
-    l.push("response");
-  }
-  console.log(l);
-  res.send(l);
 })

@@ -17,19 +17,20 @@ const client = new Client({
 
 const ROLE_ENUM = {
   ADMIN: 'adm',
-  MEMBER: 'mem',
+  MEMBER: 'mem'
 }
 
 const GROUP_ACTION_ENUM = {
   REMOVE: 'rem',
   CHANGE: 'chg',
   ADD: 'add',
-  GET_ADDED: 'get',
+  GET_ADDED: 'get'
 }
 
 const MESSAGE_ACTION_ENUM = {
   REACT: 'rea',
   RECEIVE: 'rec',
+  DELETE: 'del'
 }
 
 client.connect((err) => {
@@ -294,8 +295,9 @@ const add_tags = (body) => {
 
 const add_send_message_to_message_action = (body) => {
   return new Promise(function (resolve, reject) {
-    const { receiver_id, sender_id, link_id, time_stamp } = body;
-    client.query('insert into message_actions (receiver_id, sender_id, link_id, time_stamp, action_type) values ($1, $2, $3, $4, $5)', [receiver_id, sender_id, link_id, time_stamp.toISOString(), MESSAGE_ACTION_ENUM.RECEIVE], (error, results) => {
+    const { add_message_list } = body;
+    var values = add_message_list;
+    client.query(format('insert into message_actions (receiver_id, sender_id, link_id, time_stamp, action_type) values %L', values), [], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -365,8 +367,9 @@ const remove_from_participants = (body) => {
 
 const add_remove_user_to_group_action = (body) => {
   return new Promise(function (resolve, reject) {
-    const { receiver_id, group_id, affected_id, time_stamp } = body;
-    client.query('insert into group_actions(receiver_id, group_id, affected_id, time_stamp, action_type) values ($1, $2, $3, $4, $5)', [receiver_id, group_id, affected_id, time_stamp.toISOString(), GROUP_ACTION_ENUM.REMOVE], (error, results) => {
+    const { remove_member_list } = body;
+    var values = remove_member_list;
+    client.query(format('insert into group_actions(receiver_id, group_id, affected_id, time_stamp, action_type) values %L', values), [], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -420,8 +423,9 @@ const change_role = (body) => {
 
 const add_change_role_to_group_action = (body) => {
   return new Promise(function (resolve, reject) {
-    const { receiver_id, group_id, affected_id, affected_role, time_stamp } = body;
-    client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [receiver_id, group_id, affected_id, affected_role, time_stamp.toISOString(), GROUP_ACTION_ENUM.CHANGE], (error, results) => {
+    const { change_role_list } = body;
+    var values = change_role_list;
+    client.query(format('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values %L', values), [], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -489,8 +493,9 @@ const add_one_to_participants = (body) => {
 
 const add_new_member_to_group_action = (body) => {
   return new Promise(function (resolve, reject) {
-    const { receiver_id, group_id, affected_id, affected_role, time_stamp } = body;
-    client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [receiver_id, group_id, affected_id, affected_role, time_stamp.toISOString(), GROUP_ACTION_ENUM.ADD], (error, results) => {
+    const { add_user_list } = body;
+    var values = add_user_list;
+    client.query(format('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values %L', values), [], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -527,28 +532,18 @@ const remove_link = (body) => {
               })
             }
             else{
-              client.query('delete from links where link_id = $1', [link_id], (error, results2) => {
-                if (error) {
-                  reject(error);
-                }
-                resolve({
-                  success: true,
-                  time_stamp: new Date()
-                });
-              })
+              resolve({
+                success: true,
+                time_stamp: new Date()
+              });
             }
           })
         }
         else{
-          client.query('delete from links where link_id = $1', [link_id], (error, results3) => {
-            if (error) {
-              reject(error);
-            }
-            resolve({
-              success: true,
-              time_stamp: new Date()
-            });
-          })
+          resolve({
+            success: true,
+            time_stamp: new Date()
+          });
         }
       }
     })
@@ -559,8 +554,9 @@ const remove_link = (body) => {
 
 const add_delete_message_to_message_action = (body) => {
   return new Promise(function (resolve, reject) {
-    const { receiver_id, sender_id, link_id, time_stamp } = body;
-    client.query('insert into delete_messages(receiver_id, sender_id, link_id, time_stamp) values ($1, $2, $3, $4)', [receiver_id, sender_id, link_id, time_stamp.toISOString()], (error, results) => {
+    const { delete_list } = body;
+    var values = delete_list;
+    client.query(format('insert into message_actions(receiver_id, sender_id, link_id, time_stamp, action_type) values %L', values), [], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -606,8 +602,9 @@ const react_to_link = (body) => {
 
 const add_react_to_message_action = (body) => {
   return new Promise(function (resolve, reject) {
-    const { receiver_id, sender_id, link_id, time_stamp } = body;
-    client.query('insert into message_actions(receiver_id, sender_id, link_id, time_stamp, action_type) values ($1, $2, $3, $4, $5)', [receiver_id, sender_id, link_id, time_stamp.toISOString(), MESSAGE_ACTION_ENUM.REACT], (error, results) => {
+    const { react_list } = body;
+    var values = react_list
+    client.query(format('insert into message_actions(receiver_id, sender_id, link_id, time_stamp, action_type) values %L', values), [], (error, results) => {
       if (error) {
         reject(error);
       }
