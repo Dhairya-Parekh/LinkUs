@@ -215,17 +215,54 @@ class LocalDatabase {
     await Future.delayed(const Duration(seconds: 3));
 
     // Generate dummy data
-    final linkInfo = {
-      "title": "Link $linkId",
-      "link": "https://www.google.com",
-      "info": "Lorem ipsum dolor sit amet, consectetur adipiscing",
-      "senderName": "John Doe",
-      "timeStamp": DateTime.now(),
-      "likes": 10,
-      "dislikes": 2,
-      "tags": ["tag1", "tag2", "tag3"],
-    };
-    return linkInfo;
+    // final linkInfo = {
+    //   "title": "Link $linkId",
+    //   "link": "https://www.google.com",
+    //   "info": "Lorem ipsum dolor sit amet, consectetur adipiscing",
+    //   "senderName": "John Doe",
+    //   "timeStamp": DateTime.now(),
+    //   "likes": 10,
+    //   "dislikes": 2,
+    //   "tags": ["tag1", "tag2", "tag3"],
+    // };
+
+    final Database db = await database;
+    String query =
+        'SELECT user_name, title, link, info, time_stamp FROM links join users on links.sender_id = users.user_id WHERE link_id = ?';
+    final List<Map<String, dynamic>> rawLinks =
+        await db.rawQuery(query, [linkId]);
+
+    final List<Map<String, dynamic>> likesResult = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM reacts WHERE link_id = ? AND react = "like"',
+      [linkId],
+    );
+    final List<Map<String, dynamic>> dislikesResult = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM reacts WHERE link_id = ? AND react = "dislike"',
+      [linkId],
+    );
+
+    final List<Map<String, dynamic>> tagResults = await db.rawQuery(
+      'SELECT tags FROM tags WHERE link_id = ?',
+      [linkId],
+    );
+    final tags = tagResults.map((result) => result['tags']).toList();
+
+    if (rawLinks.isNotEmpty) {
+      final Map<String, dynamic> linkInfo = {
+        "title": rawLinks[0]["title"],
+        "link": rawLinks[0]["link"],
+        "info": rawLinks[0]["info"],
+        "senderName": rawLinks[0]["user_name"],
+        "timeStamp": DateTime.parse(rawLinks[0]["time_stamp"]),
+        "likes": likesResult.first["count"],
+        "dislikes": dislikesResult.first["count"],
+        "tags": tags,
+      };
+
+      return linkInfo;
+    }
+
+    return {};
   }
 
   static Future<Map<String, dynamic>> getGroupSpecificUserInfo(
