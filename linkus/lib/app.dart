@@ -60,8 +60,8 @@ class _AppState extends State<App> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
+            icon: Icon(Icons.group),
+            label: 'Create Group',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
