@@ -24,7 +24,6 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
 
   Future<void> _loadGroupInfo() async {
     final ginfo = await LocalDatabase.getGroupInfo(widget.group.groupId);
-    // TODO: Change user id to actual user id
     final uinfo = await LocalDatabase.getGroupSpecificUserInfo(
         widget.user.userId, widget.group.groupId);
     setState(() {
@@ -44,21 +43,45 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
       _isMemberInfoLoading = index;
     });
     String userID = groupInfo["members"][index]["userId"];
-    Map<String, dynamic> response = await API.broadcastChangeRole(
-        widget.group.groupId, userID, userInfo["userId"], role);
-    if (response["success"] == true) {
-      await LocalDatabase.updateRoles([
-        {
-          "groupId": widget.group.groupId,
-          "userId": userID,
-          "role": role,
-        }
-      ]);
-      setState(() {
-        groupInfo["members"][index]["role"] = role;
-        _isMemberInfoLoading = -1;
-      });
-    }
+    // Map<String, dynamic> response = await API.broadcastChangeRole(
+    //   widget.user.userId, widget.group.groupId, userID, role);
+    API
+        .broadcastChangeRole(
+            userID, widget.group.groupId, widget.user.userId, role)
+        .then((Map<String, dynamic> response) async {
+      if (response["success"] == true) {
+        await LocalDatabase.updateRoles([
+          {
+            "group_id": widget.group.groupId,
+            "user_id": userID,
+            "role": role,
+          }
+        ]);
+        setState(() {
+          groupInfo["members"][index]["role"] = role;
+          _isMemberInfoLoading = -1;
+        });
+      } else {
+        setState(() {
+          _isMemberInfoLoading = -1;
+        });
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Error"),
+            content: Text(response["message"]),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+      }
+    });
   }
 
   Future<void> _kickMember(int index) async {
@@ -66,20 +89,41 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
       _isMemberInfoLoading = index;
     });
     String userID = groupInfo["members"][index]["userId"];
-    Map<String, dynamic> response = await API.broadcastKick(
-        widget.group.groupId, userID, userInfo["userId"]);
-    if (response["success"] == true) {
-      await LocalDatabase.removeMembers([
-        {
-          "groupId": widget.group.groupId,
-          "userId": userID,
-        }
-      ]);
-      setState(() {
-        groupInfo["members"].removeAt(index);
-        _isMemberInfoLoading = -1;
-      });
-    }
+    API
+        .broadcastKick(userID, widget.user.userId, widget.group.groupId)
+        .then((Map<String, dynamic> response) async {
+      if (response["success"] == true) {
+        await LocalDatabase.removeMembers([
+          {
+            "group_id": widget.group.groupId,
+            "user_id": userID,
+          }
+        ]);
+        setState(() {
+          groupInfo["members"].removeAt(index);
+          _isMemberInfoLoading = -1;
+        });
+      } else {
+        setState(() {
+          _isMemberInfoLoading = -1;
+        });
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Error"),
+            content: Text(response["message"]),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+      }
+    });
   }
 
   @override

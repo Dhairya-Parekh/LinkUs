@@ -272,7 +272,7 @@ class LocalDatabase {
       String userId, String groupId) async {
     // Simulate network delay
     // await Future.delayed(const Duration(seconds: 3));
-
+    // TODO: Implement this method with actual database
     // Generate dummy data
     final jsonResponse = {
       "userId": userId,
@@ -371,7 +371,7 @@ class LocalDatabase {
     for (Map<String, dynamic> roleAction in updateRolesActions) {
       final String userId = roleAction['user_id'];
       final String groupId = roleAction['group_id'];
-      final String role = roleAction['role'].value;
+      final String role = (roleAction['role'] as GroupRole).value;
       String query =
           "update participants set roles = '$role' where user_id = '$userId' and group_id = '$groupId'";
       await db.rawInsert(query);
