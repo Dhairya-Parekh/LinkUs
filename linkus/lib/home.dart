@@ -16,6 +16,8 @@ class HompePage extends StatefulWidget {
 class _HompePageState extends State<HompePage> {
   List<Group> groups = [];
   bool _areGroupsLoading = true;
+  List<Group> _searchedGroups = [];
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -28,6 +30,19 @@ class _HompePageState extends State<HompePage> {
     setState(() {
       groups = fetchedGroups;
       _areGroupsLoading = false;
+    });
+  }
+
+  void _searchGroups(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _searchedGroups = [];
+      } else {
+        _searchedGroups = groups
+            .where((group) =>
+                group.groupName.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
     });
   }
 
@@ -119,13 +134,36 @@ class _HompePageState extends State<HompePage> {
             ),
           ),
           ElevatedButton(onPressed: _refresh, child: const Text("Refresh")),
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: "Search for groups...",
-                border: OutlineInputBorder(),
-              ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                // Add a search icon or button outside the border of the search bar
+                IconButton(
+                  icon: Icon(Icons.search),
+                  onPressed: () {
+                    // Perform the search here
+                  },
+                ),
+                Expanded(
+                  // Use a Material design search bar
+                  child: TextField(
+                    onChanged: _searchGroups,
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search...',
+                      // Add a clear button to the search bar
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.clear),
+                        onPressed: () => _searchController.clear(),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(
@@ -139,16 +177,19 @@ class _HompePageState extends State<HompePage> {
                         crossAxisCount: 4,
                         childAspectRatio: 1.0,
                       ),
-                      itemCount: groups.length,
+                      itemCount: _searchedGroups.isEmpty ? groups.length : _searchedGroups.length,
                       itemBuilder: (context, index) {
-                        final group = groups[index];
+                        final group = _searchedGroups.isEmpty ? groups[index] : _searchedGroups[index];
                         return GestureDetector(
                           onTap: () {
                             // Replace with navigation to group page
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => GroupPage(group: group, user: widget.user,),
+                                builder: (context) => GroupPage(
+                                  group: group,
+                                  user: widget.user,
+                                ),
                               ),
                             );
                           },
