@@ -193,24 +193,49 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
               itemCount: users.length,
               itemBuilder: (context, index) {
                 final user = users[index];
-                return ListTile(
-                  title: Text(user['username']),
-                  trailing: DropdownButton<String>(
-                    value: user['role'] == GroupRole.admin ? 'Admin' : 'Member',
-                    hint: const Text('Choose Role'),
-                    items: <String>['Admin', 'Member'].map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (String? selectedRole) {
-                      setState(() {
-                        users[index]['role'] = selectedRole == 'Admin'
-                            ? GroupRole.admin
-                            : GroupRole.member;
-                      });
-                    },
+                return Dismissible(
+                  key: Key(user['username']),
+                  onDismissed: (direction) {
+                    setState(() {
+                      users.removeAt(index);
+                    });
+                  },
+                  background: Container(color: Colors.red),
+                  child: ListTile(
+                    title: Text(user['username']),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        DropdownButton<String>(
+                          value: user['role'] == GroupRole.admin
+                              ? 'Admin'
+                              : 'Member',
+                          hint: const Text('Choose Role'),
+                          items:
+                              <String>['Admin', 'Member'].map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (String? selectedRole) {
+                            setState(() {
+                              users[index]['role'] = selectedRole == 'Admin'
+                                  ? GroupRole.admin
+                                  : GroupRole.member;
+                            });
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () {
+                            setState(() {
+                              users.removeAt(index);
+                            });
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
