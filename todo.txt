@@ -7,7 +7,7 @@ error handling on
     3. API data not found
 
 todo naman:
-Add user ID to local_storage
+Refresh button on home page should work
 Local API data connections  
     fetchLinks
     getGroupInfo
@@ -17,7 +17,17 @@ SQFLite not for browser windows and linux
 
 
 todo ranjan:
-React on messages 
-Option to remove member in create group page
+Double tap on react should remove it
 searching groups
 set state called after dispose
+
+todo misc:
+cookies on frontend
+reading group specific user info db.dart
+leave Group
+add member to group
+option to bookmark a link
+option to delete a Link
+option to delete a group
+should be able to change role of self??
+display tags on link page
