@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:linkus/Helper%20Files/api.dart';
+import 'package:linkus/Helper%20Files/db.dart';
+import 'package:linkus/Helper%20Files/local_storage.dart';
 
 class Tech {
   String label;
@@ -47,7 +49,8 @@ class _TechChipsState extends State<TechChips> {
 
 class MessagePopUp extends StatefulWidget {
   final String groupId;
-  const MessagePopUp({super.key, required this.groupId});
+  final User user;
+  const MessagePopUp({super.key, required this.groupId, required this.user});
 
   @override
   State<MessagePopUp> createState() => _MessagePopUpState();
@@ -95,15 +98,29 @@ class _MessagePopUpState extends State<MessagePopUp> {
       "tags": selectedTags,
     };
 
-    print("Sending link");
-    print(link);
-    // final jsonResponse =
-    //     await API.broadcastMessage(0, widget.groupId, link);
+    final jsonResponse =
+        await API.broadcastMessage(widget.user.userId, widget.groupId, link);
 
-    // TODO : Update the localstorage
+    Map<String, dynamic> message = {
+      'sender_id': widget.user.userId,
+      'group_id': widget.groupId,
+      'link': {
+        'link_id': jsonResponse['link_id'],
+        'title': title,
+        'link': linkUrl,
+        'info': description,
+        'time_stamp':
+            DateTime.parse(jsonResponse['time_stamp']),
+        'tags': selectedTags,
+      },
+    };
+
+    List<Map<String, dynamic>> newMessages = [message];
+    LocalDatabase.updateMessages(newMessages);
 
     // ignore: use_build_context_synchronously
-    Navigator.pop(context);
+    Navigator.pop(context, true);
+
     // final title = _titleController.text.trim();
     // final description = _descriptionController.text.trim();
     // final link = _linkController.text.trim();

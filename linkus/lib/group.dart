@@ -34,12 +34,20 @@ class _GroupPageState extends State<GroupPage> {
   }
 
   Future<void> showNewMessagePopUp() async {
-    return showDialog(
+    final result = await showDialog(
       context: context,
       builder: (context) {
-        return MessagePopUp(groupId: widget.group.groupId);
+        return MessagePopUp(groupId: widget.group.groupId, user: widget.user);
       },
     );
+
+    if (result == true) {
+      // Reload the data
+      setState(() {
+        _areLinksLoading = true;
+      });
+      await _loadLinks();
+    }
   }
 
   @override
@@ -55,7 +63,10 @@ class _GroupPageState extends State<GroupPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => GroupInfoPage(group: widget.group, user: widget.user,),
+                  builder: (context) => GroupInfoPage(
+                    group: widget.group,
+                    user: widget.user,
+                  ),
                 ),
               );
             },
