@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:linkus/Common%20Widgets/loading.dart';
+import 'package:linkus/Helper%20Files/api.dart';
 import 'package:linkus/Helper%20Files/db.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:linkus/Helper%20Files/local_storage.dart';
+
+enum React { like, dislike }
 
 class LinkPage extends StatefulWidget {
   final String linkId;
-  const LinkPage({super.key, required this.linkId});
+  final User user;
+  const LinkPage({super.key, required this.linkId, required this.user});
 
   @override
   State<LinkPage> createState() => _LinkPageState();
@@ -20,6 +25,9 @@ class _LinkPageState extends State<LinkPage> {
   String link = "";
   DateTime timestamp = DateTime.now();
   bool isLoading = true;
+  bool hasLiked = false;
+  bool hasDisliked = false;
+
 
   Future<void> _loadLinkInfo() async {
     final linkInfo = await LocalDatabase.getLinkInfo(widget.linkId);
@@ -47,6 +55,36 @@ class _LinkPageState extends State<LinkPage> {
     } else {
       throw 'Could not launch $link';
     }
+  }
+
+  void _pressReactButton(React react) async {
+    
+    final react_char = (react == React.like) ? (hasLiked ? 'n' : 'l'): (hasDisliked ? 'n' : 'd');
+
+    final linkInfo = await LocalDatabase.getLinkInfo(widget.linkId);
+    final jsonResponse = await API.broadcastReact(
+        linkInfo["senderId"], widget.linkId, linkInfo["groupId"], react_char);
+
+    Map<String, dynamic> reaction = {
+      'user_id': widget.user.userId,
+      'link_id': widget.linkId,
+      'react': react_char
+    };
+
+    List<Map<String, dynamic>> newReactions = [reaction];
+    LocalDatabase.updateReactions(newReactions);
+
+    setState(() {
+        if (react == React.like) {
+          hasLiked = react_char == 'l';
+          hasDisliked = (react_char == 'n')? hasDisliked: false;
+        } else {
+          hasDisliked = react_char == 'd';
+          hasLiked = (react_char == 'n')? hasLiked: false;
+        }
+    });
+
+    await _loadLinkInfo();
   }
 
   @override
@@ -93,13 +131,17 @@ class _LinkPageState extends State<LinkPage> {
                   child: Row(
                     children: [
                       TextButton.icon(
-                        onPressed: () {},
+                        onPressed: () async {
+                          _pressReactButton(React.like);
+                        },
                         icon: const Icon(Icons.thumb_up),
                         label: Text(likes.toString()),
                       ),
                       const SizedBox(width: 8.0),
                       TextButton.icon(
-                        onPressed: () {},
+                        onPressed: () async {
+                          _pressReactButton(React.dislike);
+                        },
                         icon: const Icon(Icons.thumb_down),
                         label: Text(dislikes.toString()),
                       ),

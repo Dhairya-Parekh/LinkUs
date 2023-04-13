@@ -228,16 +228,17 @@ class LocalDatabase {
 
     final Database db = await database;
     String query =
-        'SELECT user_name, title, link, info, time_stamp FROM links join users on links.sender_id = users.user_id WHERE link_id = ?';
+        'SELECT user_name, group_id , sender_id, title, link, info, time_stamp FROM links join users on links.sender_id = users.user_id WHERE link_id = ?';
     final List<Map<String, dynamic>> rawLinks =
         await db.rawQuery(query, [linkId]);
 
     final List<Map<String, dynamic>> likesResult = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM reacts WHERE link_id = ? AND react = "like"',
+      'SELECT COUNT(*) as count FROM reacts WHERE link_id = ? AND react = \'l\'',
       [linkId],
     );
+
     final List<Map<String, dynamic>> dislikesResult = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM reacts WHERE link_id = ? AND react = "dislike"',
+      'SELECT COUNT(*) as count FROM reacts WHERE link_id = ? AND react = \'d\'',
       [linkId],
     );
 
@@ -252,6 +253,8 @@ class LocalDatabase {
         "title": rawLinks[0]["title"],
         "link": rawLinks[0]["link"],
         "info": rawLinks[0]["info"],
+        "senderId": rawLinks[0]["sender_id"],
+        "groupId": rawLinks[0]["group_id"],
         "senderName": rawLinks[0]["user_name"],
         "timeStamp": DateTime.parse(rawLinks[0]["time_stamp"]),
         "likes": likesResult.first["count"],
@@ -332,9 +335,31 @@ class LocalDatabase {
       final String userId = reaction['user_id'];
       final String linkId = reaction['link_id'];
       final String react = reaction['react'];
-      final String query =
-          "insert into reacts(user_id,link_id,react) values('$userId','$linkId','$react')";
-      await db.rawInsert(query);
+      
+      final String querySelect =
+          "SELECT react FROM reacts WHERE user_id = '$userId' AND link_id = '$linkId'";
+
+      final List<Map<String, dynamic>> result = await db.rawQuery(querySelect);
+
+      if (result.isNotEmpty) {
+        if (react == 'n') {
+          // If the existing reaction is 'n', delete the row
+          final String queryDelete =
+              "DELETE FROM reacts WHERE user_id = '$userId' AND link_id = '$linkId'";
+          await db.rawDelete(queryDelete);
+        } else {
+          // Otherwise, update the existing row with the new reaction
+          final String queryUpdate =
+              "UPDATE reacts SET react = '$react' WHERE user_id = '$userId' AND link_id = '$linkId'";
+          await db.rawUpdate(queryUpdate);
+        }
+      } else {
+        // If there is no existing row, insert a new row with the given user_id, link_id, and react
+        final String queryInsert =
+            "INSERT INTO reacts(user_id, link_id, react) VALUES ('$userId', '$linkId', '$react')";
+        await db.rawInsert(queryInsert);
+      }
+
     }
   }
 

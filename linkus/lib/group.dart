@@ -73,7 +73,7 @@ class _GroupPageState extends State<GroupPage> {
           ),
         ],
       ),
-      body: _areLinksLoading ? const Loading() : LinkList(links: _links),
+      body: _areLinksLoading ? const Loading() : LinkList(links: _links, user: widget.user),
       floatingActionButton: FloatingActionButton(
         onPressed: showNewMessagePopUp,
         child: const Icon(Icons.add),

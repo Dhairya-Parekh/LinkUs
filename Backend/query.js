@@ -570,19 +570,32 @@ const add_delete_message_to_message_action = (body) => {
 const react_to_link = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, link_id, react } = body;
+
     client.query('select * from reacts where user_id = $1 and link_id = $2', [user_id, link_id], (error, results) => {
       if (error) {
         reject(error);
       }
       if(results.rows.length != 0){
-        client.query('update reacts set react = $1 where user_id = $2 and link_id = $3', [react, user_id, link_id], (error, results1) => {
-          if (error) {
-            reject(error);
-          }
-          resolve({
-            time_stamp: new Date()
-          });
-        })
+        
+        if(react == 'n'){
+          client.query('delete from reacts where user_id = $1 and link_id = $2', [user_id, link_id], (error, results1) => {
+            if (error) {
+              reject(error);
+            }
+          })
+          return;
+        }else{
+          client.query('update reacts set react = $1 where user_id = $2 and link_id = $3', [react, user_id, link_id], (error, results1) => {
+            if (error) {
+              reject(error);
+            }
+            resolve({
+              time_stamp: new Date()
+            });
+          })
+          
+        }
+        
       }
       else{
         client.query('insert into reacts(user_id, link_id, react) values ($1, $2, $3)', [user_id, link_id, react], (error, results2) => {
