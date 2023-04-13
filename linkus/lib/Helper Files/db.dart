@@ -127,7 +127,7 @@ class LocalDatabase {
 
   static Future<List<ShortLink>> fetchLinks(String groupId) async {
     // Simulate network delay
-    await Future.delayed(const Duration(seconds: 3));
+    // await Future.delayed(const Duration(seconds: 3));
 
     // Generate dummy data
     // final List<ShortLink> links = List.generate(
@@ -157,7 +157,7 @@ class LocalDatabase {
 
   static Future<List<ShortLink>> fetchBookmarks() async {
     // Simulate network delay
-    await Future.delayed(const Duration(seconds: 3));
+    // await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
     final List<Map<String, dynamic>> bookmars =
         await db.rawQuery('SELECT * FROM bookmarks natural join links');
@@ -179,7 +179,7 @@ class LocalDatabase {
   static Future<Map<String, dynamic>> getGroupInfo(String groupId) async {
     // Simulate network delay
     try {
-      await Future.delayed(const Duration(seconds: 3));
+      // await Future.delayed(const Duration(seconds: 3));
       final Database db = await database;
       String query =
           'SELECT group_name, group_info FROM groups WHERE group_id = ?';
@@ -212,7 +212,7 @@ class LocalDatabase {
 
   static Future<Map<String, dynamic>> getLinkInfo(String linkId) async {
     // Simulate network delay
-    await Future.delayed(const Duration(seconds: 3));
+    // await Future.delayed(const Duration(seconds: 3));
 
     // Generate dummy data
     // final linkInfo = {
@@ -271,7 +271,7 @@ class LocalDatabase {
   static Future<Map<String, dynamic>> getGroupSpecificUserInfo(
       String userId, String groupId) async {
     // Simulate network delay
-    await Future.delayed(const Duration(seconds: 3));
+    // await Future.delayed(const Duration(seconds: 3));
 
     // Generate dummy data
     final jsonResponse = {
@@ -284,7 +284,7 @@ class LocalDatabase {
   static Future<void> updateMessages(
       List<Map<String, dynamic>> newMessages) async {
     // Simulate network delay
-    await Future.delayed(const Duration(seconds: 3));
+    // await Future.delayed(const Duration(seconds: 3));
     try {
       final Database db = await database;
       for (Map<String, dynamic> message in newMessages) {
@@ -315,7 +315,7 @@ class LocalDatabase {
   static Future<void> deleteMessages(
       List<Map<String, dynamic>> deleteMessages) async {
     // Simulate network delay
-    await Future.delayed(const Duration(seconds: 3));
+    // await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
     for (Map<String, dynamic> message in deleteMessages) {
       final String linkId = message['link_id'];
@@ -329,7 +329,7 @@ class LocalDatabase {
   static Future<void> updateReactions(
       List<Map<String, dynamic>> reactions) async {
     // Simulate network delay
-    await Future.delayed(const Duration(seconds: 3));
+    // await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
     for (Map<String, dynamic> reaction in reactions) {
       final String userId = reaction['user_id'];
@@ -366,7 +366,7 @@ class LocalDatabase {
   static Future<void> updateRoles(
       List<Map<String, dynamic>> updateRolesActions) async {
     // Simulate network delay
-    await Future.delayed(const Duration(seconds: 3));
+    // await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
     for (Map<String, dynamic> roleAction in updateRolesActions) {
       final String userId = roleAction['user_id'];
@@ -381,7 +381,7 @@ class LocalDatabase {
   static Future<void> removeMembers(
       List<Map<String, dynamic>> removeMember) async {
     // Simulate network delay
-    await Future.delayed(const Duration(seconds: 3));
+    // await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
     for (Map<String, dynamic> target in removeMember) {
       final String userId = target['user_id'];
@@ -394,7 +394,7 @@ class LocalDatabase {
 
   static Future<void> addUsers(List<Map<String, dynamic>> addUser) async {
     // Simulate network delay
-    await Future.delayed(const Duration(seconds: 3));
+    // await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
     for (Map<String, dynamic> target in addUser) {
       final String userId = target['user_id'];
