@@ -263,7 +263,7 @@ class LocalDatabase {
             "('$linkId','$senderId','$groupId','$title','$link',$timeStamp,'$info')";
         await db.rawInsert(query);
         for (String tag in tags) {
-          query = "insert into tags(link_id,tag) values('$linkId','$tag')";
+          query = "insert into tags(link_id,tags) values('$linkId','$tag')";
           await db.rawInsert(query);
         }
       }
