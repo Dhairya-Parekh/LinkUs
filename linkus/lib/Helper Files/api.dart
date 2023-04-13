@@ -19,8 +19,12 @@ class API {
     final response = await _client.post(url,
         headers: _defaultHeaders,
         body: jsonEncode({'user_name': username, 'password': password}));
-    final jsonResponse = jsonDecode(response.body);
-    return jsonResponse;
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      return jsonResponse;
+    } else {
+      throw Exception('Failed to login. Error code ${response.statusCode}');
+    }
   }
 
   static Future<Map<String, dynamic>> signup(
@@ -30,8 +34,12 @@ class API {
         headers: _defaultHeaders,
         body: jsonEncode(
             {'user_name': username, 'password': password, 'email': email}));
-    final jsonResponse = jsonDecode(response.body);
-    return jsonResponse;
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      return jsonResponse;
+    } else {
+      throw Exception('Failed to signup. Error code ${response.statusCode}');
+    }
   }
 
   static Future<Map<String, dynamic>> createGroup(
@@ -48,14 +56,13 @@ class API {
           'group_info': groupInfo,
           'members': members
         }));
-    final jsonResponse = jsonDecode(response.body);
-    // final jsonResponse = {
-    //   'success': false,
-    //   'message': 'Group created successfully',
-    //   'group_id': '1234567890',
-    //   'time_stamp': DateTime.now()
-    // };
-    return jsonResponse;
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      return jsonResponse;
+    } else {
+      throw Exception(
+          'Failed to create group. Error code ${response.statusCode}');
+    }
   }
 
   static Future<Map<String, dynamic>> getUpdates(
@@ -81,8 +88,13 @@ class API {
         headers: _defaultHeaders,
         body: jsonEncode(
             {'sender_id': senderID, 'group_id': groupID, 'link': link}));
-    final jsonResponse = jsonDecode(response.body);
-    return jsonResponse;
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      return jsonResponse;
+    } else {
+      throw Exception(
+          'Failed to send message. Error code ${response.statusCode}');
+    }
   }
 
   static Future<Map<String, dynamic>> broadcastReact(
@@ -96,8 +108,12 @@ class API {
           'group_id': groupID,
           'react': react
         }));
-    final jsonResponse = jsonDecode(response.body);
-    return jsonResponse;
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      return jsonResponse;
+    } else {
+      throw Exception('Failed to react. Error code ${response.statusCode}');
+    }
   }
 
   static Future<Map<String, dynamic>> broadcastDelete(
@@ -107,8 +123,13 @@ class API {
         headers: _defaultHeaders,
         body: jsonEncode(
             {'user_id': userID, 'link_id': linkID, 'group_id': groupID}));
-    final jsonResponse = jsonDecode(response.body);
-    return jsonResponse;
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      return jsonResponse;
+    } else {
+      throw Exception(
+          'Failed to delete message. Error code ${response.statusCode}');
+    }
   }
 
   static Future<Map<String, dynamic>> broadcastAdd(
@@ -122,8 +143,12 @@ class API {
           'new_member_name': name,
           'new_member_role': role.value
         }));
-    final jsonResponse = jsonDecode(response.body);
-    return jsonResponse;
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      return jsonResponse;
+    } else {
+      throw Exception('Failed to add user. Error code ${response.statusCode}');
+    }
   }
 
   static Future<Map<String, dynamic>> broadcastChangeRole(
@@ -137,8 +162,13 @@ class API {
           'changer_id': changerID,
           'role': role.value
         }));
-    final jsonResponse = jsonDecode(response.body);
-    return jsonResponse;
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      return jsonResponse;
+    } else {
+      throw Exception(
+          'Failed to change role. Error code ${response.statusCode}');
+    }
   }
 
   static Future<Map<String, dynamic>> broadcastKick(
@@ -148,7 +178,12 @@ class API {
         headers: _defaultHeaders,
         body: jsonEncode(
             {'user_id': userID, 'kicker_id': kickerID, 'group_id': groupID}));
-    final jsonResponse = jsonDecode(response.body);
-    return jsonResponse;
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      return jsonResponse;
+    } else {
+      throw Exception(
+          'Failed to remove member. Error code ${response.statusCode}');
+    }
   }
 }
