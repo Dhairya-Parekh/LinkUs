@@ -28,7 +28,7 @@ class _AppState extends State<App> {
         setState(() {
           this.user = user;
           _tabs = [
-            HompePage(user: user),
+            HomePage(user: user),
             CreateGroupPage(user: user),
             ProfilePage(user: user),
           ];

@@ -5,15 +5,15 @@ import 'package:linkus/Helper%20Files/db.dart';
 import 'package:linkus/group.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
 
-class HompePage extends StatefulWidget {
+class HomePage extends StatefulWidget {
   final User user;
-  const HompePage({super.key, required this.user});
+  const HomePage({super.key, required this.user});
 
   @override
-  State<HompePage> createState() => _HompePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _HompePageState extends State<HompePage> {
+class _HomePageState extends State<HomePage> {
   List<Group> groups = [];
   bool _areGroupsLoading = true;
   List<Group> _searchedGroups = [];
