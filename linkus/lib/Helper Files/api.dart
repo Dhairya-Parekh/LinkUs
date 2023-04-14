@@ -43,7 +43,7 @@ class API {
   }
 
   static Future<Map<String, dynamic>> createGroup(
-      String userId,
+      String? userId,
       String groupName,
       String groupInfo,
       List<Map<String, dynamic>> members) async {
