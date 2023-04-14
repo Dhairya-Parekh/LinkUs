@@ -112,7 +112,7 @@ class _HompePageState extends State<HompePage> {
       // await LocalDatabase.addUsers(addUser);
       await LocalDatabase.getAdded(getAdded);
       // // update last fetched time
-      await setLastFetched(userId,DateTime.parse(updates['time_stamp']));
+      await setLastFetched(userId, DateTime.parse(updates['time_stamp']));
       // // reload groups
       await _loadGroups();
     } catch (e) {
@@ -123,45 +123,53 @@ class _HompePageState extends State<HompePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SizedBox(height: 32),
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text(
-              "Hello, ${widget.user.username}!",
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-          ),
-          ElevatedButton(onPressed: _refresh, child: const Text("Refresh")),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Add a search icon or button outside the border of the search bar
-                IconButton(
-                  icon: Icon(Icons.search),
-                  onPressed: () {
-                    // Perform the search here
-                  },
+                Text(
+                  "Hello, \n@${widget.user.username}",
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                Expanded(
-                  // Use a Material design search bar
-                  child: TextField(
-                    onChanged: _searchGroups,
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search...',
-                      // Add a clear button to the search bar
-                      suffixIcon: IconButton(
-                        icon: Icon(Icons.clear),
-                        onPressed: () => _searchController.clear(),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20.0),
+                SizedBox(height: 32),
+                Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                    child: TextField(
+                      onChanged: _searchGroups,
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search topics',
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.clear),
+                          onPressed: () => _searchController.clear(),
+                        ),
+                        border: InputBorder.none,
                       ),
                     ),
                   ),
+                ),
+                SizedBox(height: 16),
+                const Text(
+                  "My Reading Groups",
+                  style: TextStyle(fontSize: 18),
                 ),
               ],
             ),
@@ -170,16 +178,23 @@ class _HompePageState extends State<HompePage> {
             child: _areGroupsLoading
                 ? const Loading()
                 : Container(
+                    padding: EdgeInsets.all(16),
                     color: Colors.grey[200],
                     child: GridView.builder(
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 4,
-                        childAspectRatio: 1.0,
+                        crossAxisCount: 2,
+                        childAspectRatio: 1,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 8,
                       ),
-                      itemCount: _searchedGroups.isEmpty ? groups.length : _searchedGroups.length,
+                      itemCount: _searchedGroups.isEmpty
+                          ? groups.length
+                          : _searchedGroups.length,
                       itemBuilder: (context, index) {
-                        final group = _searchedGroups.isEmpty ? groups[index] : _searchedGroups[index];
+                        final group = _searchedGroups.isEmpty
+                            ? groups[index]
+                            : _searchedGroups[index];
                         return GestureDetector(
                           onTap: () {
                             // Replace with navigation to group page
@@ -193,18 +208,21 @@ class _HompePageState extends State<HompePage> {
                               ),
                             );
                           },
-                          child: Padding(
-                            padding: const EdgeInsets.all(
-                                4.0), // reduce padding around card
-                            child: Card(
-                              child: Padding(
-                                padding: const EdgeInsets.all(
-                                    8), // reduce padding inside card
-                                child: Text(
-                                  group.groupName,
-                                  style: const TextStyle(
-                                      fontSize: 14), // reduce font size
-                                ),
+                          child: Card(
+                            elevation: 8,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20.0)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    group.groupName,
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
+                                  const SizedBox(height: 8),
+                                ],
                               ),
                             ),
                           ),
@@ -215,6 +233,19 @@ class _HompePageState extends State<HompePage> {
           ),
         ],
       ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(top: 16.0, right: 16.0),
+        child: FloatingActionButton(
+          onPressed: _refresh,
+          backgroundColor: Colors.white,
+          child: const Icon(
+            Icons.refresh,
+            color: Colors.black,
+            size: 25,
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 }
