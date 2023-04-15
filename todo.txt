@@ -14,20 +14,22 @@ Local API data connections
     searching links => based on tags
 check email sent is valid format
 SQFLite not for browser windows and linux
+option to delete a Link
 
 
 todo ranjan:
 Double tap on react should remove it
-searching groups
-set state called after dispose
-
-todo misc:
-cookies on frontend
-reading group specific user info db.dart
-leave Group
+searching groups (invalid search should show no results)
+Resolve exception caught by widgets library
+    1. setState called after dispose
+    2. incorect use of parent data widget
 add member to group
 option to bookmark a link
-option to delete a Link
-option to delete a group
-should be able to change role of self??
 display tags on link page
+
+todo dhairya:
+cookies on frontend
+leave group for members
+leave group, for admins??
+option to delete a group??
+should be able to change role of self??
