@@ -274,11 +274,21 @@ class LocalDatabase {
     // await Future.delayed(const Duration(seconds: 3));
     // TODO: Implement this method with actual database
     // Generate dummy data
-    final jsonResponse = {
-      "userId": userId,
-      "isAdmin": true,
-    };
-    return jsonResponse;
+    try {
+      final Database db = await database;
+      String query =
+          'SELECT roles FROM participants WHERE group_id = ? AND user_id = ?';
+      final List<Map<String, dynamic>> role =
+          await db.rawQuery(query, [groupId, userId]);
+      final jsonResponse = {
+        "userId": userId,
+        "isAdmin": role.first["roles"] == "adm" ? true : false,
+      };
+      return jsonResponse;
+    } catch (e) {
+      print(e);
+      return {};
+    }
   }
 
   static Future<void> updateMessages(
@@ -335,7 +345,7 @@ class LocalDatabase {
       final String userId = reaction['user_id'];
       final String linkId = reaction['link_id'];
       final String react = reaction['react'];
-      
+
       final String querySelect =
           "SELECT react FROM reacts WHERE user_id = '$userId' AND link_id = '$linkId'";
 
@@ -359,7 +369,6 @@ class LocalDatabase {
             "INSERT INTO reacts(user_id, link_id, react) VALUES ('$userId', '$linkId', '$react')";
         await db.rawInsert(queryInsert);
       }
-
     }
   }
 
