@@ -275,6 +275,20 @@ Login:
         message: <string>
 	}
 
+Authenticate:
+	Type: post 
+	URL: /authenticate
+	Body: {
+		user_name : <string>,
+		password : <string>
+	}
+	Return: {
+		success: <bool>,
+		user_id: <uuid type char 16>,
+		email: <string>,
+        message: <string>
+	}
+
 Sign Up:
 	Type: post 
 	URL: /signup

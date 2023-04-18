@@ -673,17 +673,15 @@ const get_reacts = (body) => {
             }
           });
         });
-
         promises.push(promise);
       }
-
       const reactArray = await Promise.all(promises);
       for (let i = 0; i < results.rows.length; i++) {
         results.rows[i]['react'] = reactArray[i];
       }
-
       resolve(results.rows);
-    } catch (error) {
+    } 
+    catch (error) {
       reject(error);
     }
   });
@@ -770,6 +768,21 @@ const get_tags = (body) => {
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
+const delete_old_links = () => {
+  return new Promise(function (resolve, reject) {
+    const currentDate = new Date();
+    const weekBeforeDate = new Date(currentDate.getTime() - (process.env.WINDOW_LENGTH * 24 * 60 * 60 * 1000));
+    client.query('delete from links where time_stamp < $1', [weekBeforeDate.toISOString()], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve(results);
+    });
+  });
+};
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
 module.exports = {
   reset,
   login,
@@ -799,5 +812,6 @@ module.exports = {
   get_removed_members,
   get_added_members,
   get_new_groups,
-  get_tags
+  get_tags,
+  delete_old_links
 }

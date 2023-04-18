@@ -33,3 +33,4 @@ leave group for members
 leave group, for admins??
 option to delete a group??
 should be able to change role of self??
+offline login
