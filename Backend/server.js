@@ -1,7 +1,18 @@
 const express = require("express");
 const query = require('./query');
+const sessions = require('express-session');
 
 const app = express();
+
+const sessionLength = Number(process.env.SESSION_LENGTH); // In mseconds //1 hr
+
+//session middleware
+app.use(sessions({
+    secret: process.env.SECRET_KEY,
+    saveUninitialized:true,
+    cookie: { maxAge: sessionLength },
+    resave: true
+}));
 
 // set port, listen for requests
 const PORT = process.env.BACKEND_PORT || 8080;
@@ -56,9 +67,11 @@ query.login(req.body)
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app.post('/authenticate', (req, res) => {
+  console.log(req.body)
   query.login(req.body)
     .then(response => {
       if(response.success){
+        console.log(req.body)
         req.session.isAuthenticated = true;
         req.session.user_id = response.user_id;
       }
