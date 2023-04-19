@@ -27,7 +27,9 @@ class _LinkPageState extends State<LinkPage> {
   bool isLoading = true;
   bool hasLiked = false;
   bool hasDisliked = false;
-
+  // ignore: prefer_typing_uninitialized_variables
+  late final tags;
+  // ignore: prefer_typing_uninitialized_variables
 
   Future<void> _loadLinkInfo() async {
     final linkInfo = await LocalDatabase.getLinkInfo(widget.linkId);
@@ -40,6 +42,7 @@ class _LinkPageState extends State<LinkPage> {
       link = linkInfo["link"];
       timestamp = linkInfo["timeStamp"];
       isLoading = false;
+      tags = linkInfo["tags"];
     });
   }
 
@@ -58,8 +61,9 @@ class _LinkPageState extends State<LinkPage> {
   }
 
   void _pressReactButton(React react) async {
-    
-    final react_char = (react == React.like) ? (hasLiked ? 'n' : 'l'): (hasDisliked ? 'n' : 'd');
+    final react_char = (react == React.like)
+        ? (hasLiked ? 'n' : 'l')
+        : (hasDisliked ? 'n' : 'd');
 
     final linkInfo = await LocalDatabase.getLinkInfo(widget.linkId);
     final jsonResponse = await API.broadcastReact(
@@ -75,13 +79,13 @@ class _LinkPageState extends State<LinkPage> {
     LocalDatabase.updateReactions(newReactions);
 
     setState(() {
-        if (react == React.like) {
-          hasLiked = react_char == 'l';
-          hasDisliked = (react_char == 'n')? hasDisliked: false;
-        } else {
-          hasDisliked = react_char == 'd';
-          hasLiked = (react_char == 'n')? hasLiked: false;
-        }
+      if (react == React.like) {
+        hasLiked = react_char == 'l';
+        hasDisliked = (react_char == 'n') ? hasDisliked : false;
+      } else {
+        hasDisliked = react_char == 'd';
+        hasLiked = (react_char == 'n') ? hasLiked : false;
+      }
     });
 
     await _loadLinkInfo();
@@ -169,6 +173,25 @@ class _LinkPageState extends State<LinkPage> {
                         decoration: TextDecoration.underline,
                       ),
                     ),
+                  ),
+                ),
+                // Added tags to the widget tree
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Wrap(
+                    spacing: 8.0,
+                    runSpacing: 4.0,
+                    children: tags.map<Widget>((item) {
+                      return Chip(
+                        label: Text(
+                          item.toString(),
+                          style: const TextStyle(
+                            fontSize: 14.0,
+                          ),
+                        ),
+                        backgroundColor: Colors.grey[300],
+                      );
+                    }).toList(),
                   ),
                 ),
               ],
