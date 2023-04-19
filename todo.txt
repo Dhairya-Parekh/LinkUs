@@ -18,14 +18,12 @@ option to delete a Link
 
 
 todo ranjan:
-Double tap on react should remove it
 searching groups (invalid search should show no results)
 Resolve exception caught by widgets library
     1. setState called after dispose
     2. incorect use of parent data widget
 add member to group
 option to bookmark a link
-display tags on link page
 
 todo dhairya:
 cookies on frontend
