@@ -27,6 +27,7 @@ class _LinkPageState extends State<LinkPage> {
   bool isLoading = true;
   bool hasLiked = false;
   bool hasDisliked = false;
+  bool hasBookmarked = false;
   // ignore: prefer_typing_uninitialized_variables
   late final tags;
   // ignore: prefer_typing_uninitialized_variables
@@ -91,11 +92,35 @@ class _LinkPageState extends State<LinkPage> {
     await _loadLinkInfo();
   }
 
+  void _updateBookmark() async {
+    String action = hasBookmarked ? "unbookmark" : "bookmark";
+
+    LocalDatabase.updateBookmarks(widget.linkId, action);
+
+    setState(() {
+      hasBookmarked = !hasBookmarked;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Message'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              // Call the API to update bookmark
+              _updateBookmark();
+            },
+            icon: Icon(
+              hasBookmarked ? Icons.bookmark : Icons.bookmark_outline,
+              color: hasBookmarked
+                  ? Colors.yellow
+                  : null, // Optionally set the color
+            ),
+          ),
+        ],
       ),
       body: isLoading
           ? const Loading()

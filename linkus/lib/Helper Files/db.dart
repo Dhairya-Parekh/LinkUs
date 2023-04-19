@@ -159,21 +159,19 @@ class LocalDatabase {
     // Simulate network delay
     // await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
-    final List<Map<String, dynamic>> bookmars =
+    final List<Map<String, dynamic>> bookmarks =
         await db.rawQuery('SELECT * FROM bookmarks natural join links');
-    print(bookmars);
-    // Generate dummy data
-    final List<ShortLink> bookmarks = List.generate(
-      10,
-      (index) => ShortLink(
-        linkId: "${index + 1}",
-        title: 'Link ${index + 1}',
-        senderName: 'John Doe B',
-        timeStamp: DateTime.now(),
-      ),
-    );
 
-    return bookmarks;
+    final List<ShortLink> bookmarkList = bookmarks.map((bookmark) {
+      return ShortLink(
+        linkId: bookmark['linkId'],
+        title: bookmark['title'],
+        senderName: bookmark['senderName'],
+        timeStamp: DateTime.now(),
+      );
+    }).toList();
+
+    return bookmarkList;
   }
 
   static Future<Map<String, dynamic>> getGroupInfo(String groupId) async {
@@ -289,6 +287,24 @@ class LocalDatabase {
       print(e);
       return {};
     }
+  }
+
+  static Future<void> updateBookmarks(String linkId, String action) async {
+    // Simulate network delay
+
+    final Database db = await database;
+
+    // String query = 'DELETE FROM bookmarks';
+    // await db.rawDelete(query, [linkId]);
+
+    if (action == "bookmark") {
+      String query = 'INSERT INTO bookmarks VALUES (?)';
+      await db.rawInsert(query, [linkId]);
+    } else if (action == "unbookmark") {
+      String query = 'DELETE FROM bookmarks WHERE link_id = ?';
+      await db.rawDelete(query, [linkId]);
+    }
+    // await Future.delayed(const Duration(seconds: 3));
   }
 
   static Future<void> updateMessages(
