@@ -720,7 +720,7 @@ const get_removed_members = (body) => {
 const get_added_members = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, time_stamp } = body;
-    client.query('select users.user_name, group_actions.affected_id as user_id, group_actions.group_id, group_actions.affected_role as role from group_actions, users where users.user_id = group_actions.affected_id and receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp.toISOString(), GROUP_ACTION_ENUM.ADD], async(error, results) => {
+    client.query('select users.user_name, group_actions.affected_id as user_id, group_actions.group_id, group_actions.affected_role as role from group_actions, users where users.user_id = group_actions.affected_id and receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp.toISOString(), GROUP_ACTION_ENUM.ADD], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -729,6 +729,19 @@ const get_added_members = (body) => {
   })
 }
 
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const get_deleted_groups = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { user_id, time_stamp } = body;
+    client.query('select group_id from delete_groups where receiver_id = $1 and time_stamp >= $2', [user_id, time_stamp.toISOString()], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve(results.rows);
+    })
+  })
+}
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -783,6 +796,115 @@ const delete_old_links = () => {
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
+const check_admin = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { user_id, group_id } = body;
+    client.query('select roles from participants where user_id = $1 and group_id = $2', [user_id, group_id], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      if(results.rows.length == 0){
+        resolve({
+          success: false,
+          message: "You are not a member of this group"
+        })
+      }
+      else if(results.rows[0].roles != ROLE_ENUM.ADMIN){
+        resolve({
+          success: false,
+          message: "You are not an admin"
+        })
+      }
+      else{
+        resolve({
+          success: true,
+          message: "Group deleted"
+        })
+      }
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const leave_group = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { user_id, group_id } = body;
+    client.query('select roles from participants where user_id = $1 and group_id = $2', [user_id, group_id], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      if(results.rows.length == 0){
+        resolve({
+          success: false,
+          message: "You are not a member of this group"
+        })
+      }
+      else if(results.rows[0].roles != ROLE_ENUM.ADMIN){
+        client.query('remove from participants where user_id = $1 and group_id = $2', [user_id, group_id], (error, results1) => {
+          if (error) {
+            reject(error);
+          }
+          resolve({
+            success: true,
+            message: "You are no longer a member of this group"
+          })
+        })
+      }
+      else{
+        client.query('select * from participants where user_id != $1 and group_id = $2 and roles = $3', [user_id, group_id, ROLE_ENUM.ADMIN], (error, results2) => {
+          if (error) {
+            reject(error);
+          }
+          if(results.rows.length == 0){
+            resolve({
+              success: false,
+              message: "You cannot leave the group"
+            })
+          }
+          else{
+            resolve({
+              success: true,
+              message: "You are no longer a member of this group"
+            })
+          }
+        })
+      }
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const delete_group_action = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { delete_group_list } = body;
+    var values = delete_group_list
+    client.query(format('insert into delete_groups(receiver_id, group_id, time_stamp) values %L', values), [], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve();
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+const delete_group = (body) => {
+  return new Promise(function (resolve, reject) {
+    const { group_id } = body;
+    client.query('delete from groups where group_id = $1', [group_id], (error, results) => {
+      if (error) {
+        reject(error);
+      }
+      resolve();
+    })
+  })
+}
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
 module.exports = {
   reset,
   login,
@@ -811,7 +933,12 @@ module.exports = {
   get_role_changes,
   get_removed_members,
   get_added_members,
+  get_deleted_groups,
   get_new_groups,
   get_tags,
-  delete_old_links
+  delete_old_links,
+  check_admin,
+  delete_group_action,
+  delete_group,
+  leave_group
 }

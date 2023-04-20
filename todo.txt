@@ -1,10 +1,4 @@
 todo shikhar:
-server side delete data from tables
-check if the user is authenticated before processing requests
-error handling on
-    1. API data format Wrong
-    2. API data wrong information
-    3. API data not found
 
 todo naman:
 Refresh button on home page should work

@@ -380,6 +380,9 @@ Fetch Updates:
 				user_name: <string>,
 				roles: <string>
 			}>>
+		}>>,
+		deleted_groups: <list<{
+			group_id: <uuid type char 16>
 		}>>
 	}
 
@@ -465,6 +468,32 @@ Broadcast kick:
 	Body: {
 		user_id : <uuid type char 16>,
 		kicker_id : <uuid type char 16>,
+		group_id : <uuid type char 16>
+	}
+	Return: {
+		success : <bool>,
+		message : <string>,
+		time_stamp : <time_stamp>
+	}
+
+Delete group:
+	Type: post 
+	URL: /delete_group
+	Body: {
+		user_id : <uuid type char 16>,
+		group_id : <uuid type char 16>
+	}
+	Return: {
+		success : <bool>,
+		message : <string>,
+		time_stamp : <time_stamp>
+	}
+
+Leave group:
+	Type: post 
+	URL: /leave_group
+	Body: {
+		user_id : <uuid type char 16>,
 		group_id : <uuid type char 16>
 	}
 	Return: {
