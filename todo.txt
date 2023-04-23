@@ -9,10 +9,12 @@ Local API data connections
 check email sent is valid format
 SQFLite not for browser windows and linux
 option to delete a Link
+Handle invalid links in link page
+Order of groups in homepage??
 
 
 todo ranjan:
-Double tap on react should remove it
+Double tap on react should remove it. Currently two taps are needed after adding a react
 searching groups (invalid search should show no results)
 Resolve exception caught by widgets library
     1. setState called after dispose
@@ -22,8 +24,6 @@ option to bookmark a link
 display tags on link page
 
 todo dhairya:
-leave group for members
-leave group, for admins??
 option to delete a group??
 should be able to change role of self??
 offline login
