@@ -645,7 +645,7 @@ const get_new_messages = (body) => {
 const get_del_messages = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, time_stamp } = body;
-    client.query('select link_id from delete_messages where receiver_id = $1 and time_stamp >= $2', [user_id, time_stamp.toISOString()], (error, results) => {
+    client.query('select link_id from message_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp.toISOString(), MESSAGE_ACTION_ENUM.DELETE], (error, results) => {
       if (error) {
         reject(error);
       }

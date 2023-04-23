@@ -152,9 +152,10 @@ app.post('/create_group', (req, res) => {
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app.get('/get_updates', (req, res) => {
-  if (req.session.isAuthenticated) {
+  if(req.session.isAuthenticated){
     req.query["user_id"] = req.session.user_id;
-    all_updates = { "time_stamp": new Date() }
+    req.query["time_stamp"] = new Date(req.query.time_stamp);
+    all_updates = {"time_stamp": new Date()}
     query.get_new_messages(req.query)
       .then(async response => {
         all_updates["new_messages"] = response;
