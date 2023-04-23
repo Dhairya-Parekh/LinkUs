@@ -1,5 +1,4 @@
 todo shikhar:
-new group remove for loop 
 
 todo naman:
 Refresh button on home page should work
@@ -23,7 +22,6 @@ option to bookmark a link
 display tags on link page
 
 todo dhairya:
-cookies on frontend
 leave group for members
 leave group, for admins??
 option to delete a group??

@@ -841,7 +841,7 @@ const leave_group = (body) => {
         })
       }
       else if(results.rows[0].roles != ROLE_ENUM.ADMIN){
-        client.query('remove from participants where user_id = $1 and group_id = $2', [user_id, group_id], (error, results1) => {
+        client.query('delete from participants where user_id = $1 and group_id = $2', [user_id, group_id], (error, results1) => {
           if (error) {
             reject(error);
           }
@@ -856,7 +856,7 @@ const leave_group = (body) => {
           if (error) {
             reject(error);
           }
-          if(results.rows.length == 0){
+          if(results2.rows.length == 0){
             resolve({
               success: false,
               message: "You cannot leave the group"

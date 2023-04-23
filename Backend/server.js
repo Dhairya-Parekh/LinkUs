@@ -67,11 +67,9 @@ app.post('/login', (req, res) => {
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app.post('/authenticate', (req, res) => {
-  console.log(req.body)
   query.login(req.body)
     .then(response => {
       if (response.success) {
-        console.log(req.body)
         req.session.isAuthenticated = true;
         req.session.user_id = response.user_id;
       }
