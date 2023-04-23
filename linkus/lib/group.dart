@@ -18,12 +18,16 @@ class GroupPage extends StatefulWidget {
 class _GroupPageState extends State<GroupPage> {
   List<ShortLink> _links = [];
   bool _areLinksLoading = true;
+  bool _isMember = true;
 
   Future<void> _loadLinks() async {
     final links = await LocalDatabase.fetchLinks(widget.group.groupId);
+    final uinfo = await LocalDatabase.getGroupSpecificUserInfo(
+        widget.user.userId, widget.group.groupId);
     setState(() {
       _links = links;
       _areLinksLoading = false;
+      _isMember = uinfo["isMember"];
     });
   }
 
@@ -73,11 +77,15 @@ class _GroupPageState extends State<GroupPage> {
           ),
         ],
       ),
-      body: _areLinksLoading ? const Loading() : LinkList(links: _links, user: widget.user),
-      floatingActionButton: FloatingActionButton(
-        onPressed: showNewMessagePopUp,
-        child: const Icon(Icons.add),
-      ),
+      body: _areLinksLoading
+          ? const Loading()
+          : LinkList(links: _links, user: widget.user),
+      floatingActionButton: _isMember
+          ? FloatingActionButton(
+              onPressed: showNewMessagePopUp,
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 }

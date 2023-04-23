@@ -280,11 +280,48 @@ class LocalDatabase {
           'SELECT roles FROM participants WHERE group_id = ? AND user_id = ?';
       final List<Map<String, dynamic>> role =
           await db.rawQuery(query, [groupId, userId]);
-      final jsonResponse = {
-        "userId": userId,
-        "isAdmin": role.first["roles"] == "adm" ? true : false,
-      };
-      return jsonResponse;
+      // Check if user is the only admin in the group
+      if (role.isNotEmpty) {
+        if (role.first["roles"] == "adm") {
+          query =
+              'SELECT COUNT(*) as count FROM participants WHERE group_id = ? AND roles = \'adm\'';
+          final List<Map<String, dynamic>> admins =
+              await db.rawQuery(query, [groupId]);
+          if (admins.first["count"] == 1) {
+            final jsonResponse = {
+              "userId": userId,
+              "isMember": true,
+              "isAdmin": true,
+              "isSoleAdmin": true,
+            };
+            return jsonResponse;
+          } else {
+            final jsonResponse = {
+              "userId": userId,
+              "isMember": true,
+              "isAdmin": true,
+              "isSoleAdmin": false,
+            };
+            return jsonResponse;
+          }
+        } else {
+          final jsonResponse = {
+            "userId": userId,
+            "isMember": true,
+            "isAdmin": false,
+            "isSoleAdmin": false,
+          };
+          return jsonResponse;
+        }
+      } else {
+        final jsonResponse = {
+          "userId": userId,
+          "isMember": false,
+          "isAdmin": false,
+          "isSoleAdmin": false,
+        };
+        return jsonResponse;
+      }
     } catch (e) {
       print(e);
       return {};

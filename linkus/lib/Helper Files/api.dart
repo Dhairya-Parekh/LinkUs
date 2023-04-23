@@ -260,4 +260,23 @@ class API {
           'Failed to remove member. Error code ${response.statusCode}');
     }
   }
+
+  static Future<Map<String, dynamic>> broadcastLeave(
+      String userID, String groupID) async {
+    final url = Uri.parse('$_baseUrl/leave_group');
+    final response = await _client.post(url,
+        headers: _defaultHeaders,
+        body: jsonEncode({'user_id': userID, 'group_id': groupID}));
+    if (response.statusCode == 200) {
+      updateCookies(response);
+      final jsonResponse = jsonDecode(response.body);
+      return jsonResponse;
+    } else if (response.statusCode == 401) {
+      await handleSessionTimeout();
+      return await broadcastLeave(userID, groupID);
+    } else {
+      throw Exception(
+          'Failed to leave group. Error code ${response.statusCode}');
+    }
+  }
 }

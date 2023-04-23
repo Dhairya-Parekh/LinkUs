@@ -4,7 +4,8 @@ import 'package:linkus/Helper%20Files/api.dart';
 import 'package:linkus/Helper%20Files/db.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
 
-// TODO: Handle admin leaving group and deleting group
+// TODO: Handle deleting group
+// TODO: Take user info from parent widget
 
 class GroupInfoPage extends StatefulWidget {
   final Group group;
@@ -34,8 +35,61 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
   }
 
   Future<void> _leaveGroup() async {
-    // await LocalDatabase.leaveGroup(widget.group.id);
-    // Navigator.pop(context);
+    if (userInfo["isSoleAdmin"]) {
+      // Not allowed to leave group if you are the sole admin
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Error"),
+          content: const Text(
+              "You are the sole admin of this group. You cannot leave the group."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+    } else {
+      API
+          .broadcastLeave(widget.user.userId, widget.group.groupId)
+          .then((response) => {
+                if (response["success"] == true)
+                  {
+                    LocalDatabase.removeMembers([
+                      {
+                        "group_id": widget.group.groupId,
+                        "user_id": widget.user.userId,
+                      }
+                    ]).then((value) => {
+                          //Go back to home page after leaving group
+                          Navigator.popUntil(
+                              context, ModalRoute.withName('/home'))
+                        })
+                  }
+                else
+                  {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text("Error"),
+                        content: Text(response["message"]),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text("OK"),
+                          ),
+                        ],
+                      ),
+                    )
+                  }
+              });
+    }
   }
 
   Future<void> _changeMemberRole(int index, GroupRole role) async {
@@ -43,8 +97,6 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
       _isMemberInfoLoading = index;
     });
     String userID = groupInfo["members"][index]["userId"];
-    // Map<String, dynamic> response = await API.broadcastChangeRole(
-    //   widget.user.userId, widget.group.groupId, userID, role);
     API
         .broadcastChangeRole(
             userID, widget.group.groupId, widget.user.userId, role)
@@ -224,23 +276,25 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
                 const SizedBox(height: 16.0),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // leave group
-                    },
-                    child: const Text("Leave group"),
-                  ),
+                  child: userInfo["isMember"]
+                      ? ElevatedButton(
+                          onPressed: _leaveGroup,
+                          child: const Text("Leave group"),
+                        )
+                      : null,
                 ),
                 // Button to add members
                 const SizedBox(height: 16.0),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // add members
-                    },
-                    child: const Text("Add members"),
-                  ),
+                  child: userInfo["isAdmin"]
+                      ? ElevatedButton(
+                          onPressed: () {
+                            // add members
+                          },
+                          child: const Text("Add members"),
+                        )
+                      : null,
                 ),
               ],
             ),
