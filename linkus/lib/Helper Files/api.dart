@@ -2,6 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:linkus/Helper%20Files/db.dart';
+import 'package:linkus/Helper%20Files/local_storage.dart';
 
 // TODO: Add error handling
 // TODO: Remove Hardcoded response
@@ -13,6 +14,44 @@ class API {
     'content-type': 'application/json'
   };
 
+  static void updateCookies(http.Response response) {
+    String? cookies = response.headers['set-cookie'];
+    if (cookies != null) {
+      int index = cookies.indexOf(';');
+      _defaultHeaders['cookie'] =
+          (index == 1) ? cookies : cookies.substring(0, index);
+    }
+  }
+
+  static Future<void> handleSessionTimeout() async {
+    Map<String, dynamic> user = await getUserCredentials();
+    if (user['username'] != null && user['password'] != null) {
+      Map<String, dynamic> response =
+          await authenticate(user['username']!, user['password']!);
+      if (response['success'] == true) {
+        print('Session Timed Out. Reauthenticated');
+      } else {
+        throw Exception('Session Timed Out');
+      }
+    }
+  }
+
+  static Future<Map<String, dynamic>> authenticate(
+      String username, String password) async {
+    final url = Uri.parse('$_baseUrl/authenticate');
+    final response = await _client.post(url,
+        headers: _defaultHeaders,
+        body: jsonEncode({'user_name': username, 'password': password}));
+    if (response.statusCode == 200) {
+      updateCookies(response);
+      final jsonResponse = jsonDecode(response.body);
+      return jsonResponse;
+    } else {
+      throw Exception(
+          'Failed to authenticate. Error code ${response.statusCode}');
+    }
+  }
+
   static Future<Map<String, dynamic>> login(
       String username, String password) async {
     final url = Uri.parse('$_baseUrl/login');
@@ -20,6 +59,7 @@ class API {
         headers: _defaultHeaders,
         body: jsonEncode({'user_name': username, 'password': password}));
     if (response.statusCode == 200) {
+      updateCookies(response);
       final jsonResponse = jsonDecode(response.body);
       return jsonResponse;
     } else {
@@ -35,6 +75,7 @@ class API {
         body: jsonEncode(
             {'user_name': username, 'password': password, 'email': email}));
     if (response.statusCode == 200) {
+      updateCookies(response);
       final jsonResponse = jsonDecode(response.body);
       return jsonResponse;
     } else {
@@ -57,8 +98,12 @@ class API {
           'members': members
         }));
     if (response.statusCode == 200) {
+      updateCookies(response);
       final jsonResponse = jsonDecode(response.body);
       return jsonResponse;
+    } else if (response.statusCode == 401) {
+      await handleSessionTimeout();
+      return await createGroup(userId, groupName, groupInfo, members);
     } else {
       throw Exception(
           'Failed to create group. Error code ${response.statusCode}');
@@ -67,17 +112,22 @@ class API {
 
   static Future<Map<String, dynamic>> getUpdates(
       DateTime lastOpened, String userId) async {
-    try {
-      final url = Uri.parse(
-          '$_baseUrl/get_updates?time_stamp=${lastOpened.toIso8601String()}&user_id=$userId');
-      final response = await _client.get(
-        url,
-        headers: _defaultHeaders,
-      );
+    final url = Uri.parse(
+        '$_baseUrl/get_updates?time_stamp=${lastOpened.toIso8601String()}&user_id=$userId');
+    final response = await _client.get(
+      url,
+      headers: _defaultHeaders,
+    );
+    if (response.statusCode == 200) {
+      updateCookies(response);
       final jsonResponse = jsonDecode(response.body);
       return jsonResponse;
-    } catch (e) {
-      return {};
+    } else if (response.statusCode == 401) {
+      await handleSessionTimeout();
+      return await getUpdates(lastOpened, userId);
+    } else {
+      throw Exception(
+          'Failed to get updates. Error code ${response.statusCode}');
     }
   }
 
@@ -89,8 +139,12 @@ class API {
         body: jsonEncode(
             {'sender_id': senderID, 'group_id': groupID, 'link': link}));
     if (response.statusCode == 200) {
+      updateCookies(response);
       final jsonResponse = jsonDecode(response.body);
       return jsonResponse;
+    } else if (response.statusCode == 401) {
+      await handleSessionTimeout();
+      return await broadcastMessage(senderID, groupID, link);
     } else {
       throw Exception(
           'Failed to send message. Error code ${response.statusCode}');
@@ -109,8 +163,12 @@ class API {
           'react': react
         }));
     if (response.statusCode == 200) {
+      updateCookies(response);
       final jsonResponse = jsonDecode(response.body);
       return jsonResponse;
+    } else if (response.statusCode == 401) {
+      await handleSessionTimeout();
+      return await broadcastReact(senderID, linkID, groupID, react);
     } else {
       throw Exception('Failed to react. Error code ${response.statusCode}');
     }
@@ -124,8 +182,12 @@ class API {
         body: jsonEncode(
             {'user_id': userID, 'link_id': linkID, 'group_id': groupID}));
     if (response.statusCode == 200) {
+      updateCookies(response);
       final jsonResponse = jsonDecode(response.body);
       return jsonResponse;
+    } else if (response.statusCode == 401) {
+      await handleSessionTimeout();
+      return await broadcastDelete(userID, linkID, groupID);
     } else {
       throw Exception(
           'Failed to delete message. Error code ${response.statusCode}');
@@ -144,8 +206,12 @@ class API {
           'new_member_role': role.value
         }));
     if (response.statusCode == 200) {
+      updateCookies(response);
       final jsonResponse = jsonDecode(response.body);
       return jsonResponse;
+    } else if (response.statusCode == 401) {
+      await handleSessionTimeout();
+      return await broadcastAdd(userId, groupId, name, role);
     } else {
       throw Exception('Failed to add user. Error code ${response.statusCode}');
     }
@@ -163,8 +229,12 @@ class API {
           'role': role.value
         }));
     if (response.statusCode == 200) {
+      updateCookies(response);
       final jsonResponse = jsonDecode(response.body);
       return jsonResponse;
+    } else if (response.statusCode == 401) {
+      await handleSessionTimeout();
+      return await broadcastChangeRole(userID, groupID, changerID, role);
     } else {
       throw Exception(
           'Failed to change role. Error code ${response.statusCode}');
@@ -179,8 +249,12 @@ class API {
         body: jsonEncode(
             {'user_id': userID, 'kicker_id': kickerID, 'group_id': groupID}));
     if (response.statusCode == 200) {
+      updateCookies(response);
       final jsonResponse = jsonDecode(response.body);
       return jsonResponse;
+    } else if (response.statusCode == 401) {
+      await handleSessionTimeout();
+      return await broadcastKick(userID, kickerID, groupID);
     } else {
       throw Exception(
           'Failed to remove member. Error code ${response.statusCode}');

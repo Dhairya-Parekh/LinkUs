@@ -56,15 +56,13 @@ Future<User?> getUser() async {
   }
 }
 
-Future<Map<String, dynamic>> getUserInfo() async {
+Future<Map<String, dynamic>> getUserCredentials() async {
   await Future.delayed(const Duration(seconds: 3), () {});
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  final String username = prefs.getString('username') ?? 'Dummy username';
-  final String email = prefs.getString('email') ?? 'Dummy@email.com';
-  return {
-    "username": username,
-    "email": email,
-  };
+  String? username = prefs.getString('username');
+  String? password = prefs.getString('password');
+  String? userid = prefs.getString('userid');
+  return {'username': username, 'password': password, 'userid': userid};
 }
 
 Future<String> getUserId() async {
