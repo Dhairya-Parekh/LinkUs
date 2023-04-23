@@ -282,6 +282,9 @@ const add_tags = (body) => {
   return new Promise(function (resolve, reject) {
     const { tag_list } = body;
     var values = tag_list;
+    if(values.length == 0){
+      resolve()
+    }
     client.query(format('insert into tags (link_id, tags) values %L', values), [], (error, results) => {
       if (error) {
         reject(error);
@@ -297,6 +300,9 @@ const add_send_message_to_message_action = (body) => {
   return new Promise(function (resolve, reject) {
     const { add_message_list } = body;
     var values = add_message_list;
+    if(values.length == 0){
+      resolve()
+    }
     client.query(format('insert into message_actions (receiver_id, sender_id, link_id, time_stamp, action_type) values %L', values), [], (error, results) => {
       if (error) {
         reject(error);
@@ -369,6 +375,9 @@ const add_remove_user_to_group_action = (body) => {
   return new Promise(function (resolve, reject) {
     const { remove_member_list } = body;
     var values = remove_member_list;
+    if(values.length == 0){
+      resolve()
+    }
     client.query(format('insert into group_actions(receiver_id, group_id, affected_id, time_stamp, action_type) values %L', values), [], (error, results) => {
       if (error) {
         reject(error);
@@ -425,6 +434,9 @@ const add_change_role_to_group_action = (body) => {
   return new Promise(function (resolve, reject) {
     const { change_role_list } = body;
     var values = change_role_list;
+    if(values.length == 0){
+      resolve()
+    }
     client.query(format('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values %L', values), [], (error, results) => {
       if (error) {
         reject(error);
@@ -495,6 +507,9 @@ const add_new_member_to_group_action = (body) => {
   return new Promise(function (resolve, reject) {
     const { add_user_list } = body;
     var values = add_user_list;
+    if(values.length == 0){
+      resolve()
+    }
     client.query(format('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values %L', values), [], (error, results) => {
       if (error) {
         reject(error);
@@ -556,6 +571,9 @@ const add_delete_message_to_message_action = (body) => {
   return new Promise(function (resolve, reject) {
     const { delete_list } = body;
     var values = delete_list;
+    if(values.length == 0){
+      resolve()
+    }
     client.query(format('insert into message_actions(receiver_id, sender_id, link_id, time_stamp, action_type) values %L', values), [], (error, results) => {
       if (error) {
         reject(error);
@@ -616,7 +634,10 @@ const react_to_link = (body) => {
 const add_react_to_message_action = (body) => {
   return new Promise(function (resolve, reject) {
     const { react_list } = body;
-    var values = react_list
+    var values = react_list;
+    if(values.length == 0){
+      resolve()
+    }
     client.query(format('insert into message_actions(receiver_id, sender_id, link_id, time_stamp, action_type) values %L', values), [], (error, results) => {
       if (error) {
         reject(error);
@@ -879,7 +900,10 @@ const leave_group = (body) => {
 const delete_group_action = (body) => {
   return new Promise(function (resolve, reject) {
     const { delete_group_list } = body;
-    var values = delete_group_list
+    var values = delete_group_list;
+    if(values.length == 0){
+      resolve()
+    }
     client.query(format('insert into delete_groups(receiver_id, group_id, time_stamp) values %L', values), [], (error, results) => {
       if (error) {
         reject(error);

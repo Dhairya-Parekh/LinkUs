@@ -267,9 +267,11 @@ app.post('/send_message', (req, res) => {
                 }
                 add_message_list = { add_message_list: temp_list }
                 query.add_send_message_to_message_action(add_message_list)
+                .then(response3 => {
+                  res.status(200).send(response);
+                })
               })
           })
-        res.status(200).send(response);
       })
       .catch(error => {
         res.status(500).send(error);
