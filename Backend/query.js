@@ -41,6 +41,7 @@ client.connect((err) => {
     console.log('connected to database')
   }
 })
+
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 const reset = () => {
   return new Promise(function (resolve, reject) {
