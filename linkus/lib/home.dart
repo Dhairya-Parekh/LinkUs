@@ -89,28 +89,28 @@ class _HomePageState extends State<HomePage> {
               (message) => message as Map<String, dynamic>)
           .toList();
       // // // Modify the Jsons
-      // List<Map<String, dynamic>> changeRoleActions = [];
+      List<Map<String, dynamic>> changeRoleActions = [];
 
-      // for (Map<String, dynamic> changeRoleAction in changeRole) {
-      //   Map<String, dynamic> newChangeRoleAction = {};
-      //   newChangeRoleAction['userId'] = changeRoleAction['affectedId'];
-      //   newChangeRoleAction['groupId'] = changeRoleAction['groupId'];
-      //   newChangeRoleAction['role'] = changeRoleAction['affectedRole'] == 'adm'
-      //       ? GroupRole.admin
-      //       : changeRoleAction['affectedRole'] == 'mem'
-      //           ? GroupRole.member
-      //           : null;
-      //   changeRoleActions.add(newChangeRoleAction);
-      // }
+      for (Map<String, dynamic> changeRoleAction in changeRole) {
+        Map<String, dynamic> newChangeRoleAction = {};
+        newChangeRoleAction['user_id'] = changeRoleAction['affected_id'];
+        newChangeRoleAction['group_id'] = changeRoleAction['group_id'];
+        newChangeRoleAction['role'] = changeRoleAction['affected_role'] == 'adm'
+            ? GroupRole.admin
+            : changeRoleAction['affected_role'] == 'mem'
+                ? GroupRole.member
+                : null;
+        changeRoleActions.add(newChangeRoleAction);
+      }
 
       // // update local database
-      // await LocalDatabase.updateMessages(newMessages);
-      // await LocalDatabase.deleteMessages(deleteMessages);
-      // await LocalDatabase.updateReactions(react);
-      // await LocalDatabase.updateRoles(changeRoleActions);
-      // await LocalDatabase.removeMembers(removeMember);
-      // await LocalDatabase.addUsers(addUser);
       await LocalDatabase.getAdded(getAdded);
+      // await LocalDatabase.addUsers(addUser);
+      await LocalDatabase.removeMembers(removeMember);
+      await LocalDatabase.updateRoles(changeRoleActions);
+      await LocalDatabase.updateMessages(newMessages);
+      // await LocalDatabase.deleteMessages(deleteMessages);
+      await LocalDatabase.updateReactions(react);
       // // update last fetched time
       await setLastFetched(userId, DateTime.parse(updates['time_stamp']));
       // // reload groups

@@ -71,7 +71,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 const SizedBox(height: 20),
                 Expanded(
-                  child: LinkList(links: bookmarks, user: widget.user),
+                  child: LinkList(
+                      links: bookmarks, user: widget.user, groupId: "todo"),
                 ),
                 ElevatedButton(
                   onPressed: logout,

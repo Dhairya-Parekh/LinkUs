@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -110,6 +111,32 @@ class API {
     }
   }
 
+  // static Map<String, dynamic> formatUpdates(Map<String, dynamic> updates)
+  // {
+  //   Map<String, dynamic> formattedUpdates = {};
+  //   List<Map<String, dynamic>> newMessagesActions = [];
+  //   for(Map<String, dynamic> message in updates['new_messages'])
+  //   {
+  //     newMessagesActions.add({
+  //       'sender_id': message['sender_id'],
+  //       'group_id': message['group_id'],
+  //       'link_id': message['link_id'],
+  //       'title': message['title'],
+  //       'link': message['link'],
+  //       'info': message['info'],
+  //       'time_stamp': message['time_stamp'],
+
+  //     });
+  //   }
+  //   List<Map<String, dynamic>> deleteMessagesActions = [];
+  //   List<Map<String, dynamic>> reactionsActions = [];
+  //   List<Map<String, dynamic>> updateRolesActions = [];
+  //   List<Map<String, dynamic>> removeMembersActions = [];
+  //   List<Map<String, dynamic>> addUsersActions = [];
+  //   List<Map<String, dynamic>> getAddedActions = [];
+
+  // }
+
   static Future<Map<String, dynamic>> getUpdates(
       DateTime lastOpened, String userId) async {
     final url = Uri.parse(
@@ -121,6 +148,7 @@ class API {
     if (response.statusCode == 200) {
       updateCookies(response);
       final jsonResponse = jsonDecode(response.body);
+
       return jsonResponse;
     } else if (response.statusCode == 401) {
       await handleSessionTimeout();

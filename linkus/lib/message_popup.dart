@@ -100,19 +100,15 @@ class _MessagePopUpState extends State<MessagePopUp> {
 
     final jsonResponse =
         await API.broadcastMessage(widget.user.userId, widget.groupId, link);
-
     Map<String, dynamic> message = {
       'sender_id': widget.user.userId,
       'group_id': widget.groupId,
-      'link': {
-        'link_id': jsonResponse['link_id'],
-        'title': title,
-        'link': linkUrl,
-        'info': description,
-        'time_stamp':
-            DateTime.parse(jsonResponse['time_stamp']),
-        'tags': selectedTags,
-      },
+      'link_id': jsonResponse['link_id'],
+      'title': title,
+      'link': linkUrl,
+      'info': description,
+      'time_stamp': jsonResponse['time_stamp'],
+      'tags': selectedTags,
     };
 
     List<Map<String, dynamic>> newMessages = [message];

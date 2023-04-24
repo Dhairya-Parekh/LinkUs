@@ -11,7 +11,7 @@ SQFLite not for browser windows and linux
 option to delete a Link
 Handle invalid links in link page
 Order of groups in homepage??
-
+profile page
 
 todo ranjan:
 Double tap on react should remove it. Currently two taps are needed after adding a react

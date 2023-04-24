@@ -333,18 +333,21 @@ class LocalDatabase {
     // Simulate network delay
     // await Future.delayed(const Duration(seconds: 3));
     try {
+      print(newMessages);
       final Database db = await database;
       for (Map<String, dynamic> message in newMessages) {
+        print(message['tags']);
+        print((message['tags'].runtimeType));
         final String senderId = message['sender_id'];
         final String groupId = message['group_id'];
-        final Map<String, dynamic> linkInfo = message['link'];
-        final String linkId = linkInfo['link_id'];
-        final String title = linkInfo['title'];
-        final String link = linkInfo['link'];
-        final String info = linkInfo['info'];
-        final DateTime timeStamp = linkInfo['time_stamp'];
-        final List<String> tags = linkInfo['tags'];
-
+        final String linkId = message['link_id'];
+        final String title = message['title'];
+        final String link = message['link'];
+        final String info = message['info'];
+        final List<String> tags =
+            List<String>.from(message['tags'].map<String>((e) => e.toString()))
+                .toList();
+        final String timeStamp = message['time_stamp'];
         String query =
             "insert into links(link_id,sender_id,group_id,title,link,time_stamp,info) values"
             "('$linkId','$senderId','$groupId','$title','$link','$timeStamp','$info')";
@@ -379,7 +382,7 @@ class LocalDatabase {
     // await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
     for (Map<String, dynamic> reaction in reactions) {
-      final String userId = reaction['user_id'];
+      final String userId = reaction['sender_id'];
       final String linkId = reaction['link_id'];
       final String react = reaction['react'];
 
@@ -430,7 +433,7 @@ class LocalDatabase {
     // await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
     for (Map<String, dynamic> target in removeMember) {
-      final String userId = target['user_id'];
+      final String userId = target['affected_id'];
       final String groupId = target['group_id'];
       String query =
           "delete from participants where user_id = '$userId' and group_id = '$groupId'";
@@ -505,5 +508,22 @@ class LocalDatabase {
     } catch (e) {
       print(e);
     }
+  }
+
+  static Future<void> deleteLink(ShortLink link) async {
+    // Simulate network delay
+    // await Future.delayed(const Duration(seconds: 3));
+    final Database db = await database;
+    final String linkId = link.linkId;
+    String query = "delete from links where link_id = '$linkId'";
+    await db.rawDelete(query);
+  }
+
+  static Future<bool> isGroupAdmin(String userId, String groupId) async {
+    final Database db = await database;
+    final String query =
+        "select * from participants where user_id = '$userId' and group_id = '$groupId' and roles = 'adm'";
+    final List<Map<String, dynamic>> result = await db.rawQuery(query);
+    return result.isNotEmpty;
   }
 }

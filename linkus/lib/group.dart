@@ -79,7 +79,8 @@ class _GroupPageState extends State<GroupPage> {
       ),
       body: _areLinksLoading
           ? const Loading()
-          : LinkList(links: _links, user: widget.user),
+          : LinkList(
+              links: _links, user: widget.user, groupId: widget.group.groupId),
       floatingActionButton: _isMember
           ? FloatingActionButton(
               onPressed: showNewMessagePopUp,
