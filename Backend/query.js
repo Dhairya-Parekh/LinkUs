@@ -236,7 +236,7 @@ const add_all_to_participants = (body) => {
               if (error) {
                 reject(error);
               }
-              client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [results.rows[0].user_id, group_id, results.rows[0].user_id, role, time_stamp.toISOString(), GROUP_ACTION_ENUM.GET_ADDED], (error, results3) => {
+              client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [results.rows[0].user_id, group_id, results.rows[0].user_id, role, time_stamp, GROUP_ACTION_ENUM.GET_ADDED], (error, results3) => {
                 if (error) {
                   reject(error);
                 }
@@ -264,7 +264,7 @@ const new_message = (body) => {
     const { sender_id, group_id, link } = body;
     link_id = uuidv4();
     time_stamp = new Date();
-    client.query('insert into links (link_id, sender_id, group_id, title, link, info, time_stamp) values ($1, $2, $3, $4, $5, $6, $7)', [link_id, sender_id, group_id, link.title, link.link, link.info, time_stamp.toISOString()], (error, results) => {
+    client.query('insert into links (link_id, sender_id, group_id, title, link, info, time_stamp) values ($1, $2, $3, $4, $5, $6, $7)', [link_id, sender_id, group_id, link.title, link.link, link.info, time_stamp], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -354,7 +354,7 @@ const remove_from_participants = (body) => {
               reject(error);
             }
             time_stamp = new Date()
-            client.query('insert into group_actions(receiver_id, group_id, affected_id, time_stamp, action_type) values ($1, $2, $3, $4, $5)', [user_id, group_id, user_id, time_stamp.toISOString(), GROUP_ACTION_ENUM.REMOVE], (error, results) => {
+            client.query('insert into group_actions(receiver_id, group_id, affected_id, time_stamp, action_type) values ($1, $2, $3, $4, $5)', [user_id, group_id, user_id, time_stamp, GROUP_ACTION_ENUM.REMOVE], (error, results) => {
               if (error) {
                 reject(error);
               }
@@ -482,7 +482,7 @@ const add_one_to_participants = (body) => {
                 reject(error);
               }
               time_stamp = new Date();
-              client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [results1.rows[0].user_id, group_id, results1.rows[0].user_id, affected_role, time_stamp.toISOString(), GROUP_ACTION_ENUM.GET_ADDED], (error, results3) => {
+              client.query('insert into group_actions(receiver_id, group_id, affected_id, affected_role, time_stamp, action_type) values ($1, $2, $3, $4, $5, $6)', [results1.rows[0].user_id, group_id, results1.rows[0].user_id, affected_role, time_stamp, GROUP_ACTION_ENUM.GET_ADDED], (error, results3) => {
                 if (error) {
                   reject(error);
                 }
@@ -652,7 +652,7 @@ const add_react_to_message_action = (body) => {
 const get_new_messages = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, time_stamp } = body;
-    client.query('select links.link_id, links.sender_id, links.group_id, links.title, links.link, links.info from message_actions, links where message_actions.link_id = links.link_id and message_actions.receiver_id = $1 and message_actions.time_stamp >= $2 and message_actions.action_type = $3', [user_id, time_stamp.toISOString(), MESSAGE_ACTION_ENUM.RECEIVE], (error, results) => {
+    client.query('select links.link_id, links.sender_id, links.group_id, links.title, links.link, links.info, links.time_stamp from message_actions, links where message_actions.link_id = links.link_id and message_actions.receiver_id = $1 and message_actions.time_stamp >= $2 and message_actions.action_type = $3', [user_id, time_stamp, MESSAGE_ACTION_ENUM.RECEIVE], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -666,7 +666,7 @@ const get_new_messages = (body) => {
 const get_del_messages = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, time_stamp } = body;
-    client.query('select link_id from message_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp.toISOString(), MESSAGE_ACTION_ENUM.DELETE], (error, results) => {
+    client.query('select link_id from message_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, MESSAGE_ACTION_ENUM.DELETE], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -681,7 +681,7 @@ const get_reacts = (body) => {
   return new Promise(async (resolve, reject) => {
     const { user_id, time_stamp } = body;
     try {
-      const results = await client.query('select sender_id, link_id from message_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp.toISOString(), MESSAGE_ACTION_ENUM.REACT]);
+      const results = await client.query('select sender_id, link_id from message_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, MESSAGE_ACTION_ENUM.REACT]);
       const promises = [];
 
       for (let i = 0; i < results.rows.length; i++) {
@@ -713,7 +713,7 @@ const get_reacts = (body) => {
 const get_role_changes = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, time_stamp } = body;
-    client.query('select group_id, affected_id, affected_role from group_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp.toISOString(), GROUP_ACTION_ENUM.CHANGE], (error, results) => {
+    client.query('select group_id, affected_id, affected_role from group_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.CHANGE], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -727,7 +727,7 @@ const get_role_changes = (body) => {
 const get_removed_members = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, time_stamp } = body;
-    client.query('select affected_id, group_id from group_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp.toISOString(), GROUP_ACTION_ENUM.REMOVE], (error, results) => {
+    client.query('select affected_id, group_id from group_actions where receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.REMOVE], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -741,7 +741,7 @@ const get_removed_members = (body) => {
 const get_added_members = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, time_stamp } = body;
-    client.query('select users.user_name, group_actions.affected_id as user_id, group_actions.group_id, group_actions.affected_role as role from group_actions, users where users.user_id = group_actions.affected_id and receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp.toISOString(), GROUP_ACTION_ENUM.ADD], (error, results) => {
+    client.query('select users.user_name, group_actions.affected_id as user_id, group_actions.group_id, group_actions.affected_role as role from group_actions, users where users.user_id = group_actions.affected_id and receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.ADD], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -755,7 +755,7 @@ const get_added_members = (body) => {
 const get_deleted_groups = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, time_stamp } = body;
-    client.query('select group_id from delete_groups where receiver_id = $1 and time_stamp >= $2', [user_id, time_stamp.toISOString()], (error, results) => {
+    client.query('select group_id from delete_groups where receiver_id = $1 and time_stamp >= $2', [user_id, time_stamp], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -769,7 +769,7 @@ const get_deleted_groups = (body) => {
 const get_new_groups = (body) => {
   return new Promise(function (resolve, reject) {
     const { user_id, time_stamp } = body;
-    client.query('select group_actions.group_id, group_actions.affected_role, groups.group_name, groups.group_info from group_actions, groups where group_actions.group_id = groups.group_id and receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp.toISOString(), GROUP_ACTION_ENUM.GET_ADDED], (error, results) => {
+    client.query('select group_actions.group_id, group_actions.affected_role, groups.group_name, groups.group_info from group_actions, groups where group_actions.group_id = groups.group_id and receiver_id = $1 and time_stamp >= $2 and action_type = $3', [user_id, time_stamp, GROUP_ACTION_ENUM.GET_ADDED], (error, results) => {
       if (error) {
         reject(error);
       }
@@ -806,7 +806,7 @@ const delete_old_links = () => {
   return new Promise(function (resolve, reject) {
     const currentDate = new Date();
     const weekBeforeDate = new Date(currentDate.getTime() - (process.env.WINDOW_LENGTH * 24 * 60 * 60 * 1000));
-    client.query('delete from links where time_stamp < $1', [weekBeforeDate.toISOString()], (error, results) => {
+    client.query('delete from links where time_stamp < $1', [weekBeforeDate], (error, results) => {
       if (error) {
         reject(error);
       }

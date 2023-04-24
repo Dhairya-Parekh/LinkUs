@@ -152,7 +152,6 @@ app.post('/create_group', (req, res) => {
 app.get('/get_updates', (req, res) => {
   if(req.session.isAuthenticated){
     req.query["user_id"] = req.session.user_id;
-    req.query["time_stamp"] = new Date(req.query.time_stamp);
     all_updates = {"time_stamp": new Date()}
     query.get_new_messages(req.query)
       .then(async response => {
@@ -232,7 +231,6 @@ app.get('/get_updates', (req, res) => {
   }
 })
 
-
 //-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app.post('/send_message', (req, res) => {
@@ -260,7 +258,7 @@ app.post('/send_message', (req, res) => {
                     temp_user_list.push(response1[i].user_id)
                     temp_user_list.push(req.body.sender_id)
                     temp_user_list.push(response.link_id)
-                    temp_user_list.push(response.time_stamp.toISOString())
+                    temp_user_list.push(response.time_stamp)
                     temp_user_list.push(MESSAGE_ACTION_ENUM.RECEIVE)
                     temp_list.push(temp_user_list)
                   }
@@ -299,7 +297,7 @@ app.post('/react', (req, res) => {
                 temp_user_list.push(response1[i].user_id)
                 temp_user_list.push(req.session.user_id)
                 temp_user_list.push(req.body.link_id)
-                temp_user_list.push(response.time_stamp.toISOString())
+                temp_user_list.push(response.time_stamp)
                 temp_user_list.push(MESSAGE_ACTION_ENUM.REACT)
                 temp_list.push(temp_user_list)
               }
@@ -336,7 +334,7 @@ app.post('/delete_message', (req, res) => {
                   temp_user_list.push(response1[i].user_id)
                   temp_user_list.push(req.body.user_id)
                   temp_user_list.push(req.body.link_id)
-                  temp_user_list.push(response.time_stamp.toISOString())
+                  temp_user_list.push(response.time_stamp)
                   temp_user_list.push(MESSAGE_ACTION_ENUM.DELETE)
                   temp_list.push(temp_user_list)
                 }
@@ -375,7 +373,7 @@ app.post('/add_user', (req, res) => {
                   temp_user_list.push(req.body.group_id)
                   temp_user_list.push(response.new_member_id)
                   temp_user_list.push(req.body.new_member_role)
-                  temp_user_list.push(response.time_stamp.toISOString())
+                  temp_user_list.push(response.time_stamp)
                   temp_user_list.push(MESSAGE_ACTION_ENUM.ADD)
                   temp_list.push(temp_user_list)
                 }
@@ -414,7 +412,7 @@ app.post('/change_role', (req, res) => {
                   temp_user_list.push(req.body.group_id)
                   temp_user_list.push(req.body.user_id)
                   temp_user_list.push(req.body.role)
-                  temp_user_list.push(response.time_stamp.toISOString())
+                  temp_user_list.push(response.time_stamp)
                   temp_user_list.push(GROUP_ACTION_ENUM.CHANGE)
                   temp_list.push(temp_user_list)
                 }
@@ -452,7 +450,7 @@ app.post('/remove_member', (req, res) => {
                   temp_user_list.push(response1[i].user_id)
                   temp_user_list.push(req.body.group_id)
                   temp_user_list.push(req.body.user_id)
-                  temp_user_list.push(response.time_stamp.toISOString())
+                  temp_user_list.push(response.time_stamp)
                   temp_user_list.push(GROUP_ACTION_ENUM.REMOVE)
                   temp_list.push(temp_user_list)
                 }
@@ -499,7 +497,7 @@ app.post('/delete_group', (req, res) => {
                   temp_user_list = []
                   temp_user_list.push(response1[i].user_id)
                   temp_user_list.push(req.body.group_id)
-                  temp_user_list.push(response.time_stamp.toISOString())
+                  temp_user_list.push(response.time_stamp)
                   temp_list.push(temp_user_list)
                 }
               }
@@ -539,7 +537,7 @@ app.post('/leave_group', (req, res) => {
                   temp_user_list.push(response1[i].user_id)
                   temp_user_list.push(req.body.group_id)
                   temp_user_list.push(req.body.user_id)
-                  temp_user_list.push(response.time_stamp.toISOString())
+                  temp_user_list.push(response.time_stamp)
                   temp_user_list.push(GROUP_ACTION_ENUM.REMOVE)
                   temp_list.push(temp_user_list)
                 }
