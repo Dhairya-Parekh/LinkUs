@@ -5,7 +5,11 @@ Refresh button on home page should work
 Local API data connections  
     fetchLinks
     getGroupInfo
-    searching links => based on tags
+searching links based on tags
+searching links based on sender
+searching links based on content
+sorting messages based on time
+sorting messages based on reacts
 check email sent is valid format
 SQFLite not for browser windows and linux
 option to delete a Link
