@@ -15,26 +15,6 @@ class Group {
   }
 }
 
-class Link {
-  final String sender;
-  final String title;
-  final DateTime time;
-  final String description;
-  final int likes;
-  final int dislikes;
-  final String link;
-
-  Link({
-    required this.sender,
-    required this.title,
-    required this.time,
-    required this.description,
-    required this.likes,
-    required this.dislikes,
-    required this.link,
-  });
-}
-
 class ShortLink {
   final String linkId;
   final String senderName;
