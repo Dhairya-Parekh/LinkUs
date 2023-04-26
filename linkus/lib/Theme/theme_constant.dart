@@ -12,29 +12,35 @@ class CustomColorScheme{
   Color error = Colors.red;
   Color success = Colors.green;
   Color warning = Colors.yellow;
+  Color gradientStart = Colors.white;
+  Color gradientEnd = Colors.white;
 }
 
 class CustomTheme{
   static CustomColorScheme lightThemeColorScheme = CustomColorScheme()
   ..primary = const Color(0xFF2A2F4F)
-  ..secondary = const Color(0xFF917FB3)
-  ..onPrimary = const Color(0xFFFDE2F3)
-  ..onSecondary = const Color(0xFFE5BEEC)
-  ..primaryVariant = const Color(0xFF7A3E65)
+  ..secondary = const Color(0xFFE8175D)
+  ..onPrimary = const Color(0xFFCC527A)
+  ..onSecondary = const Color(0xFFA8A7A7)
+  ..primaryVariant = const Color(0xFFFC913A)
   ..secondaryVariant = const Color(0xFFA84448)
+  ..gradientStart = const Color(0xFF547980)
+  ..gradientEnd = const Color(0xFF2F9599 )
   ..background = const Color(0xFFF6E1C3)
-  ..onBackground = const Color(0xFFE9A178);
+  ..onBackground = const Color(0xFF355C7D);
 
 
   static CustomColorScheme darkThemeColorScheme = CustomColorScheme()
   ..primary = const Color(0xFF2A2F4F)
-  ..secondary = const Color(0xFF917FB3)
-  ..onPrimary = const Color(0xFFFDE2F3)
-  ..onSecondary = const Color(0xFFE5BEEC)
-  ..primaryVariant = const Color(0xFF7A3E65)
+  ..secondary = const Color(0xFFE8175D)
+  ..onPrimary = const Color(0xFFCC527A)
+  ..onSecondary = const Color(0xFFA8A7A7)
+  ..primaryVariant = const Color(0xFFFC913A)
   ..secondaryVariant = const Color(0xFFA84448)
+  ..gradientStart = const Color(0xFF547980)
+  ..gradientEnd = const Color(0xFF2F9599 )
   ..background = const Color(0xFFF6E1C3)
-  ..onBackground = const Color(0xFFE9A178);
+  ..onBackground = const Color(0xFF355C7D);
 
   static CustomColorScheme of(BuildContext context){
     return Theme.of(context).brightness == Brightness.light ? lightThemeColorScheme : darkThemeColorScheme;
