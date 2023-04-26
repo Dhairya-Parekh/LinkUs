@@ -18,6 +18,8 @@ class GroupInfoPage extends StatefulWidget {
 class _GroupInfoPageState extends State<GroupInfoPage> {
   // group description
   Map<String, dynamic> groupInfo = {};
+  final TextEditingController _usernameController = TextEditingController();
+  List<Map<String, dynamic>> users = [];
   bool _isGroupInfoLoading = true;
   int _isMemberInfoLoading = -1;
   Map<String, dynamic> userInfo = {};
