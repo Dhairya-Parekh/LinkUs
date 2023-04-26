@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:linkus/Theme/theme_constant.dart';
 
 class Welcome extends StatelessWidget {
+  const Welcome({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +24,7 @@ class Welcome extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   elevation: 4.0,
                   padding: const EdgeInsets.all(16.0),
-                  primary: const Color.fromARGB(255, 194, 80, 65),
+                  backgroundColor: CustomTheme.of(context).primary,
                 ),
                 child: const Text('Login'),
                 onPressed: () {
@@ -37,7 +40,7 @@ class Welcome extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   elevation: 4.0,
                   padding: const EdgeInsets.all(16.0),
-                  primary: const Color.fromARGB(255, 22, 101, 167),
+                  backgroundColor: CustomTheme.of(context).secondary,
                 ),
                 child: const Text('Register'),
                 onPressed: () {

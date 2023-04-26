@@ -15,6 +15,9 @@ class LinkUs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(),
+      darkTheme: ThemeData.dark(),
+      themeMode: ThemeMode.system,
       title: 'LinkUs',
       initialRoute: '/',
       routes: {
@@ -22,7 +25,7 @@ class LinkUs extends StatelessWidget {
         '/signup': (context) => const SignUpPage(),
         '/login': (context) => const LoginPage(),
         '/home': (context) => const App(),
-        '/welcome': (context) => Welcome(),
+        '/welcome': (context) => const Welcome(),
       },
     );
   }
