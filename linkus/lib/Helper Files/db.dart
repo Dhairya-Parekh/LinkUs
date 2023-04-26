@@ -437,7 +437,7 @@ class LocalDatabase {
       }
       // insert into participants
       query =
-          "insert into participants(user_id,group_id,role) values('$userId','$groupId','$role')";
+          "insert into participants(user_id,group_id,roles) values('$userId','$groupId','$role')";
       await db.rawInsert(query);
     }
   }
