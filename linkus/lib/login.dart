@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:linkus/Common%20Widgets/loading.dart';
 import 'package:linkus/Helper%20Files/api.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
+import 'package:linkus/Theme/theme_constant.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -66,120 +67,138 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
-      body: _isLoading
-          ? const Loading()
-          : Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const SizedBox(height: 50),
-                const Text(
-                  'Welcome!',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Sign in to continue',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-                const SizedBox(height: 50),
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const NeverScrollableScrollPhysics(),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+        body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  CustomTheme.of(context).gradientStart,
+                  CustomTheme.of(context).gradientEnd,
+                ],
+              ),
+            ),
+            child: _isLoading
+              ? const Loading()
+              : SizedBox(
+                height: MediaQuery.of(context).size.height,
+                child: SingleChildScrollView(
+                  child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
+                        const SizedBox(height: 100),
+                        Text(
+                          'Welcome!',
+                          style: TextStyle(
+                            color: CustomTheme.of(context).onBackground,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Sign in to continue',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.normal,
+                            color: CustomTheme.of(context).onBackground,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 100),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
                           child: TextField(
-                            focusNode: _usernameFocusNode,
                             controller: _usernameController,
+                            focusNode: _usernameFocusNode,
                             decoration: InputDecoration(
                               hintText: 'Username',
-                              fillColor: Colors.white,
+                              hintStyle: TextStyle(
+                                color: CustomTheme.of(context).onSecondary,
+                              ),
                               filled: true,
+                              fillColor: CustomTheme.of(context).secondary,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30),
+                                borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide.none,
                               ),
-                              hintStyle: const TextStyle(
-                                color: Colors.grey,
-                              ),
+                              contentPadding: const EdgeInsets.all(16),
                             ),
                           ),
                         ),
                         const SizedBox(height: 16),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
                           child: TextField(
                             controller: _passwordController,
                             obscureText: true,
                             decoration: InputDecoration(
                               hintText: 'Password',
-                              fillColor: Colors.white,
+                              hintStyle: TextStyle(
+                                color: CustomTheme.of(context).onSecondary,
+                              ),
                               filled: true,
+                              fillColor: CustomTheme.of(context).secondary,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(30),
+                                borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide.none,
                               ),
-                              hintStyle: const TextStyle(
-                                color: Colors.grey,
-                              ),
+                              contentPadding: const EdgeInsets.all(16),
                             ),
                           ),
                         ),
                         const SizedBox(height: 32),
-                        ElevatedButton(
-                          onPressed: _login,
-                          child: const Text('Login'),
-                          style: ElevatedButton.styleFrom(
-                            primary: Color.fromARGB(255, 194, 80, 65),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 60,
-                              vertical: 16,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 100),
+                          child: ElevatedButton(
+                            onPressed: _login,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              minimumSize: const Size(200, 40),
+                              backgroundColor: CustomTheme.of(context).primary,
                             ),
+                            child: Text('Login',
+                                style: TextStyle(
+                                  color: CustomTheme.of(context).onPrimary,
+                                )),
                           ),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           _errorMessage,
-                          style: const TextStyle(
-                            color: Colors.red,
+                          style: TextStyle(
+                            color: CustomTheme.of(context).error,
                           ),
+                          textAlign: TextAlign.center,
                         ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pushReplacementNamed(context, '/signup');
-                          },
-                          child: const Text("Don't have an account? Sign up!"),
-                        ),
+                        // const SizedBox(height: 16),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 100),
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.pushReplacementNamed(
+                                  context, '/signup');
+                            },
+                            child: Text(
+                              'Don\'t have an account? Sign up',
+                              style: TextStyle(
+                                color: CustomTheme.of(context).onBackground,
+                              ),
+                            ),
+                          ),
+                        )
                       ],
                     ),
-                  ),
                 ),
-              ],
-            ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(left: 16),
-        child: FloatingActionButton(
-          backgroundColor: Colors.white,
-          child: const Icon(
-            Icons.arrow_back_rounded,
-            color: Colors.black,
-            size: 30,
-          ),
-          onPressed: () {
-            Navigator.pushReplacementNamed(context, '/welcome');
-          },
+              ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
     );
   }
 }
