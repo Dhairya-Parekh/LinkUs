@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:linkus/Common%20Widgets/loading.dart';
 import 'package:linkus/Helper%20Files/db.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
+import 'package:linkus/Theme/theme_constant.dart';
 import 'package:linkus/home.dart';
 import 'package:linkus/profile.dart';
 import 'package:linkus/Helper%20Files/api.dart';
+import 'package:flutter_switch/flutter_switch.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -24,7 +26,6 @@ class _AppState extends State<App> {
   bool _isLoading = true;
 
   Future<void> _createGroup() async {
-    // Check if group name and at least one user has been entered
     if (_groupNameController.text.trim().isEmpty || users.isEmpty) {
       showDialog(
         context: context,
@@ -58,8 +59,6 @@ class _AppState extends State<App> {
           .createGroup(user?.userId, groupName, groupInfo, members)
           .then((jsonResponse) async {
         if (jsonResponse['success']) {
-          // Save the group to local database
-          // print(jsonResponse);
           LocalDatabase.getAdded([
             {
               'group_id': jsonResponse['group_id'],
@@ -74,7 +73,6 @@ class _AppState extends State<App> {
             Navigator.pushReplacementNamed(context, '/home');
           });
         } else {
-          // Group creation failed, display error message
           showDialog(
             context: context,
             builder: (context) {
@@ -111,6 +109,7 @@ class _AppState extends State<App> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Container(
+              decoration: BoxDecoration(color: CustomTheme.of(context).primary),
               height: MediaQuery.of(context).size.height * 0.8,
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -120,48 +119,51 @@ class _AppState extends State<App> {
                   Row(
                     children: [
                       Material(
-                        elevation: 4.0, // Set the elevation to 4.0
+                        color: CustomTheme.of(context).onPrimary,
                         shape: const CircleBorder(),
                         clipBehavior: Clip.hardEdge,
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_back),
+                          icon: Icon(Icons.arrow_back,
+                              color: CustomTheme.of(context).primary),
                           onPressed: () => Navigator.pop(context),
                         ),
                       ),
-                      const SizedBox(
-                          width:
-                              100), // Add some horizontal space between the IconButton and Text
-                      const Text(
+                      const SizedBox(width: 100),
+                      Text(
                         'New Group',
                         style: TextStyle(
-                            fontSize: 24.0), // Set the font size to 24.0
+                            color: CustomTheme.of(context).onPrimary,
+                            fontSize: 24.0),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16.0), // Add some vertical space
+                  const SizedBox(height: 16.0),
                   Row(
                     children: [
                       Expanded(
                         child: TextField(
                           controller: _usernameController,
                           decoration: InputDecoration(
+                            filled: true,
+                            fillColor: CustomTheme.of(context).secondary,
                             hintText: 'Enter Users',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                  8.0), // Add rounded borders
-                              borderSide: const BorderSide(
-                                  color: Colors.grey), // Add a grey border
+                            hintStyle: TextStyle(
+                              color: CustomTheme.of(context).onSecondary,
                             ),
-                            filled: true, // Fill the background color
-                            fillColor: Colors
-                                .white, // Set the background color to white
                             contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16.0, // Add some horizontal padding
-                              vertical: 12.0, // Add some vertical padding
+                              horizontal: 16.0,
+                              vertical: 12.0,
                             ),
-                            suffixIcon: const Icon(Icons
-                                .search), // Add a search icon on the right side
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide.none
+                            ),
+                            // suffixIcon: Icon(
+                            //   Icons.search,
+                            //   color: CustomTheme.of(context).onSecondary,
+                            // ),
                           ),
+                          style: TextStyle(color: CustomTheme.of(context).onSecondary),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -181,6 +183,12 @@ class _AppState extends State<App> {
                             }
                           });
                         },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: CustomTheme.of(context)
+                              .onSecondary, // set the background color
+                          foregroundColor: CustomTheme.of(context)
+                              .secondary, // set the text color
+                        ),
                         child: const Text('Add User'),
                       ),
                     ],
@@ -199,33 +207,41 @@ class _AppState extends State<App> {
                           },
                           background: Container(color: Colors.red),
                           child: ListTile(
-                            title: Text(user['username']),
+                            title: Text(
+                              user['username'],
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: CustomTheme.of(context).onPrimary
+                              ),
+                            ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                DropdownButton<String>(
-                                  value: user['role'] == GroupRole.admin
-                                      ? 'Admin'
-                                      : 'Member',
-                                  hint: const Text('Choose Role'),
-                                  items: <String>['Admin', 'Member']
-                                      .map((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value),
-                                    );
-                                  }).toList(),
-                                  onChanged: (String? selectedRole) {
+                                FlutterSwitch(
+                                  width: 100.0,
+                                  height: 40.0,
+                                  valueFontSize: 12.0,
+                                  toggleSize: 12.0,
+                                  activeToggleColor: CustomTheme.of(context).onPrimary,
+                                  inactiveToggleColor: CustomTheme.of(context).primary,
+                                  value: user['role'] == GroupRole.admin,
+                                  activeColor: CustomTheme.of(context).primary,
+                                  inactiveColor: CustomTheme.of(context).onPrimary,
+                                  borderRadius: 16.0,
+                                  padding: 8.0,
+                                  showOnOff: true,
+                                  onToggle: (value) {
                                     setState(() {
-                                      users[index]['role'] =
-                                          selectedRole == 'Admin'
-                                              ? GroupRole.admin
-                                              : GroupRole.member;
+                                      users[index]['role'] = value ? GroupRole.admin : GroupRole.member;
                                     });
                                   },
+                                  activeText: 'Admin',
+                                  activeTextColor: CustomTheme.of(context).onPrimary,
+                                  inactiveText: 'Member',
+                                  inactiveTextColor: CustomTheme.of(context).primary,
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.delete),
+                                  icon: Icon(Icons.delete, color: CustomTheme.of(context).onPrimary,),
                                   onPressed: () {
                                     setState(() {
                                       users.removeAt(index);
@@ -240,16 +256,15 @@ class _AppState extends State<App> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Positioned(
-                    bottom: 0.0,
-                    left: 0.0,
-                    right: 0.0,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 100),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        elevation: 4.0,
-                        backgroundColor: const Color.fromARGB(255, 194, 80, 65),
-                        padding: const EdgeInsets.all(16.0),
-                      ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          elevation: 4.0,
+                          backgroundColor: CustomTheme.of(context).secondary,
+                          foregroundColor: CustomTheme.of(context).onSecondary,
+                          minimumSize: const Size(200, 40)),
                       onPressed: () => _showCreateGroupScreen(),
                       child: const Text('Next'),
                     ),
@@ -277,6 +292,7 @@ class _AppState extends State<App> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Container(
+              decoration: BoxDecoration(color: CustomTheme.of(context).primary),
               height: MediaQuery.of(context).size.height * 0.8,
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -286,72 +302,70 @@ class _AppState extends State<App> {
                   Row(
                     children: [
                       Material(
-                        elevation: 4.0, // Set the elevation to 4.0
+                        color: CustomTheme.of(context).onPrimary,
                         shape: const CircleBorder(),
                         clipBehavior: Clip.hardEdge,
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_back),
+                          icon: Icon(Icons.arrow_back, color: CustomTheme.of(context).primary),
                           onPressed: () => Navigator.pop(context),
                         ),
                       ),
-                      const SizedBox(
-                          width:
-                              80), // Add some horizontal space between the IconButton and Text
-                      const Text(
+                      const SizedBox(width: 80),
+                      Text(
                         'Create Group',
                         style: TextStyle(
-                            fontSize: 24.0), // Set the font size to 24.0
+                          fontSize: 24.0,
+                          color: CustomTheme.of(context).onPrimary
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
                   TextField(
+                    style: TextStyle(
+                      color: CustomTheme.of(context).onSecondary,
+                    ),
                     controller: _groupNameController,
                     decoration: InputDecoration(
-                      hintText: 'Group Name',
-                      border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(8.0), // Add rounded borders
-                        borderSide: const BorderSide(
-                            color: Colors.grey), // Add a grey border
-                      ),
-                      filled: true, // Fill the background color
-                      fillColor:
-                          Colors.white, // Set the background color to white
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, // Add some horizontal padding
-                        vertical: 12.0, // Add some vertical padding
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                        borderSide: const BorderSide(
-                            color:
-                                Colors.blue), // Add a blue border when focused
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16.0), // Add some vertical spacing
-                  TextField(
-                    controller: _descriptionController,
-                    decoration: InputDecoration(
-                      hintText: 'Group Description',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                        borderSide: const BorderSide(color: Colors.grey),
-                      ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: CustomTheme.of(context).secondary,
+                      hintText: 'Group Name',
+                      hintStyle: TextStyle(
+                        color: CustomTheme.of(context).onSecondary,
+                      ),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16.0,
                         vertical: 12.0,
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                        borderSide: const BorderSide(color: Colors.blue),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none
                       ),
                     ),
                   ),
-
+                  const SizedBox(height: 16.0),
+                  TextField(
+                    style: TextStyle(
+                      color: CustomTheme.of(context).onSecondary,
+                    ),
+                    controller: _descriptionController,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: CustomTheme.of(context).secondary,
+                      hintText: 'Group Description',
+                      hintStyle: TextStyle(
+                        color: CustomTheme.of(context).onSecondary,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 12.0,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   Expanded(
                     child: ListView.builder(
@@ -359,23 +373,33 @@ class _AppState extends State<App> {
                         itemBuilder: (context, index) {
                           final user = users[index];
                           return ListTile(
-                            title: Text(user['username']),
-                            trailing:
-                                Text(user['role'].toString().split('.').last),
+                            title: Text(
+                              user['username'],
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: CustomTheme.of(context).onPrimary
+                              )
+                            ),
+                            trailing: Text(
+                              user['role'].toString().split('.').last,
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: CustomTheme.of(context).onPrimary
+                              )
+                            ),
                           );
                         }),
                   ),
                   const SizedBox(height: 16),
-                  Positioned(
-                    bottom: 0.0,
-                    left: 0.0,
-                    right: 0.0,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 100),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        elevation: 4.0,
-                        backgroundColor: const Color.fromARGB(255, 194, 80, 65),
-                        padding: const EdgeInsets.all(16.0),
-                      ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          elevation: 4.0,
+                          backgroundColor: CustomTheme.of(context).secondary,
+                          foregroundColor: CustomTheme.of(context).onSecondary,
+                          minimumSize: const Size(200, 40)),
                       onPressed: () => _createGroup(),
                       child: const Text('Create Group'),
                     ),
@@ -418,72 +442,7 @@ class _AppState extends State<App> {
         currentIndex: _currentIndex,
         onTap: (int index) {
           if (index == 1) {
-            // Create Group tab
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20.0),
-                  topRight: Radius.circular(20.0),
-                ),
-              ),
-              builder: (context) => Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 12.0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Material(
-                            elevation: 4.0, // Set the elevation to 4.0
-                            shape: const CircleBorder(),
-                            clipBehavior: Clip.hardEdge,
-                            child: IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                          ),
-                          const SizedBox(
-                              width:
-                                  50), // Add some horizontal space between the IconButton and Text
-                          const Text(
-                            'New',
-                            style: TextStyle(
-                                fontSize: 24.0), // Set the font size to 24.0
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16.0),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            elevation: 4.0,
-                            backgroundColor:
-                                const Color.fromARGB(255, 194, 80, 65),
-                            padding: const EdgeInsets.all(16.0),
-                          ),
-                          onPressed: () => _showAddMembersScreen(),
-                          child: const Text('Create a new group'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
+            _showAddMembersScreen();
           } else {
             setState(() {
               _currentIndex = index;
