@@ -120,16 +120,19 @@ class _SignUpPageState extends State<SignUpPage> {
                           decoration: InputDecoration(
                             hintText: 'Username',
                             hintStyle: TextStyle(
-                              color: CustomTheme.of(context).onSecondary,
+                              color: CustomTheme.of(context).primary,
                             ),
                             filled: true,
-                            fillColor: CustomTheme.of(context).secondary,
+                            fillColor: CustomTheme.of(context).onBackground,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide.none,
                             ),
                             contentPadding: const EdgeInsets.all(16),
                           ),
+                          style: TextStyle(
+                              color: CustomTheme.of(context).primary,
+                            ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -140,16 +143,19 @@ class _SignUpPageState extends State<SignUpPage> {
                           decoration: InputDecoration(
                             hintText: 'Email',
                             hintStyle: TextStyle(
-                              color: CustomTheme.of(context).onSecondary,
+                              color: CustomTheme.of(context).primary,
                             ),
                             filled: true,
-                            fillColor: CustomTheme.of(context).secondary,
+                            fillColor: CustomTheme.of(context).onBackground,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide.none,
                             ),
                             contentPadding: const EdgeInsets.all(16),
                           ),
+                          style: TextStyle(
+                              color: CustomTheme.of(context).primary,
+                            ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -161,16 +167,19 @@ class _SignUpPageState extends State<SignUpPage> {
                           decoration: InputDecoration(
                             hintText: 'Password',
                             hintStyle: TextStyle(
-                              color: CustomTheme.of(context).onSecondary,
+                              color: CustomTheme.of(context).primary,
                             ),
                             filled: true,
-                            fillColor: CustomTheme.of(context).secondary,
+                            fillColor: CustomTheme.of(context).onBackground,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide.none,
                             ),
                             contentPadding: const EdgeInsets.all(16),
                           ),
+                          style: TextStyle(
+                              color: CustomTheme.of(context).primary,
+                            ),
                         ),
                       ),
                       const SizedBox(height: 32),
