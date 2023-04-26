@@ -24,11 +24,15 @@ class Welcome extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   elevation: 4.0,
                   padding: const EdgeInsets.all(16.0),
-                  backgroundColor: CustomTheme.of(context).primary,
+                  backgroundColor: CustomTheme.of(context).secondary,
                 ),
-                child: const Text('Login'),
+                child: Text('Register',
+                    style: TextStyle(
+                      color: CustomTheme.of(context).onSecondary,
+                    )
+                ),
                 onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/login');
+                  Navigator.pushNamed(context, '/signup');
                 },
               ),
             ),
@@ -40,11 +44,15 @@ class Welcome extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   elevation: 4.0,
                   padding: const EdgeInsets.all(16.0),
-                  backgroundColor: CustomTheme.of(context).secondary,
+                  backgroundColor: CustomTheme.of(context).primary,
                 ),
-                child: const Text('Register'),
+                child: Text('Login',
+                style: TextStyle(
+                  color: CustomTheme.of(context).onPrimary,
+                )
+                ),
                 onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/signup');
+                  Navigator.pushNamed(context, '/login');
                 },
               ),
             ),
