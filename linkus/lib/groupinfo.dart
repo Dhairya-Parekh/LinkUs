@@ -204,8 +204,8 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
           print(e);
         });
       }
-      // ignore: use_build_context_synchronously
       // TODO; Make sure that the change is displayed without reload
+      // ignore: use_build_context_synchronously
       Navigator.pop(context, true);
     } catch (e) {
       print(e);

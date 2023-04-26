@@ -159,15 +159,15 @@ class LocalDatabase {
     // Simulate network delay
     // await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
-    final List<Map<String, dynamic>> bookmarks =
-        await db.rawQuery('SELECT * FROM bookmarks natural join links');
+    final List<Map<String, dynamic>> bookmarks = await db.rawQuery(
+        'SELECT bookmarks.*, links.*, users.user_name  FROM links  INNER JOIN users ON links.sender_id = users.user_id INNER JOIN bookmarks ON links.link_id = bookmarks.link_id');
 
     final List<ShortLink> bookmarkList = bookmarks.map((bookmark) {
       return ShortLink(
-        linkId: bookmark['linkId'],
+        linkId: bookmark['link_id'],
         title: bookmark['title'],
-        senderName: bookmark['senderName'],
-        timeStamp: DateTime.now(),
+        senderName: bookmark['user_name'],
+        timeStamp: DateTime.parse(bookmark["time_stamp"]),
       );
     }).toList();
 
@@ -208,7 +208,8 @@ class LocalDatabase {
     }
   }
 
-  static Future<Map<String, dynamic>> getLinkInfo(String linkId) async {
+  static Future<Map<String, dynamic>> getLinkInfo(
+      String linkId, String userId) async {
     // Simulate network delay
     // await Future.delayed(const Duration(seconds: 3));
 
@@ -246,6 +247,24 @@ class LocalDatabase {
     );
     final tags = tagResults.map((result) => result['tags']).toList();
 
+    final List<Map<String, dynamic>> bookmarkResults = await db.rawQuery(
+      'SELECT * FROM bookmarks WHERE link_id = ?',
+      [linkId],
+    );
+    final bool isBookmarked = bookmarkResults.isNotEmpty;
+
+    final List<Map<String, dynamic>> likeResults = await db.rawQuery(
+      'SELECT * FROM reacts WHERE user_id = ? AND link_id = ? AND react = \'l\'',
+      [userId, linkId],
+    );
+    final bool isLiked = likeResults.isNotEmpty;
+
+    final List<Map<String, dynamic>> dislikeResults = await db.rawQuery(
+      'SELECT * FROM reacts WHERE user_id = ? AND link_id = ? AND react = \'d\'',
+      [userId, linkId],
+    );
+    final bool isDisliked = dislikeResults.isNotEmpty;
+
     if (rawLinks.isNotEmpty) {
       final Map<String, dynamic> linkInfo = {
         "title": rawLinks[0]["title"],
@@ -257,6 +276,9 @@ class LocalDatabase {
         "timeStamp": DateTime.parse(rawLinks[0]["time_stamp"]),
         "likes": likesResult.first["count"],
         "dislikes": dislikesResult.first["count"],
+        "hasLiked": isLiked,
+        "hasDisliked": isDisliked,
+        "hasBookmarked": isBookmarked,
         "tags": tags,
       };
 

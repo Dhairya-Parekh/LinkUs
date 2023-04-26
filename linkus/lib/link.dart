@@ -29,11 +29,12 @@ class _LinkPageState extends State<LinkPage> {
   bool hasDisliked = false;
   bool hasBookmarked = false;
   // ignore: prefer_typing_uninitialized_variables
-  late final tags;
+  List<dynamic> tags = [];
   // ignore: prefer_typing_uninitialized_variables
 
   Future<void> _loadLinkInfo() async {
-    final linkInfo = await LocalDatabase.getLinkInfo(widget.linkId);
+    final linkInfo =
+        await LocalDatabase.getLinkInfo(widget.linkId, widget.user.userId);
     setState(() {
       title = linkInfo["title"];
       description = linkInfo["info"];
@@ -42,6 +43,9 @@ class _LinkPageState extends State<LinkPage> {
       dislikes = linkInfo["dislikes"];
       link = linkInfo["link"];
       timestamp = linkInfo["timeStamp"];
+      hasLiked = linkInfo["hasLiked"];
+      hasDisliked = linkInfo["hasDisliked"];
+      hasBookmarked = linkInfo["hasBookmarked"];
       isLoading = false;
       tags = linkInfo["tags"];
     });
@@ -66,7 +70,8 @@ class _LinkPageState extends State<LinkPage> {
         ? (hasLiked ? 'n' : 'l')
         : (hasDisliked ? 'n' : 'd');
 
-    final linkInfo = await LocalDatabase.getLinkInfo(widget.linkId);
+    final linkInfo =
+        await LocalDatabase.getLinkInfo(widget.linkId, widget.user.userId);
     final jsonResponse = await API.broadcastReact(
         linkInfo["senderId"], widget.linkId, linkInfo["groupId"], react_char);
 
