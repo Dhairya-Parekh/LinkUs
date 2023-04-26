@@ -17,15 +17,25 @@ class Group {
 
 class ShortLink {
   final String linkId;
+  final String link;
   final String senderName;
   final String title;
   final DateTime timeStamp;
+  final String info;
+  final List<String> tags;
+  final int likes;
+  final int dislikes;
 
   ShortLink({
     required this.linkId,
+    required this.link,
     required this.senderName,
     required this.title,
     required this.timeStamp,
+    required this.info,
+    required this.tags,
+    required this.likes,
+    required this.dislikes,
   });
 }
 
@@ -104,36 +114,31 @@ class LocalDatabase {
         .toList();
     return groups;
   }
-
-  static Future<List<ShortLink>> fetchLinks(String groupId) async {
-    // Simulate network delay
-    // await Future.delayed(const Duration(seconds: 3));
-
-    // Generate dummy data
-    // final List<ShortLink> links = List.generate(
-    //   10,
-    //   (index) => ShortLink(
-    //     linkId: "${index + 1}",
-    //     title: 'Link ${index + 1}',
-    //     senderName: 'John Doe S $groupId',
-    //     timeStamp: DateTime.now(),
-    //   ),
-    // );
+static Future<List<ShortLink>> fetchLinks(String groupId) async {
     final Database db = await database;
     String query =
-        'SELECT link_id,user_name,title,time_stamp FROM links join users on links.sender_id = users.user_id WHERE group_id = ?';
-    final List<Map<String, dynamic>> rawLinks =
-        await db.rawQuery(query, [groupId]);
-    final List<ShortLink> links = rawLinks
-        .map((link) => ShortLink(
-              linkId: link["link_id"],
-              title: link["title"],
-              senderName: link["user_name"],
-              timeStamp: DateTime.parse(link["time_stamp"]),
-            ))
-        .toList();
+        'SELECT link_id FROM links WHERE group_id = ?';
+    List<Map<String, dynamic>> rawLinks = await db.rawQuery(query, [groupId]);
+    List<String> linkIds = rawLinks.map((link) => link["link_id"] as String).toList();
+    List<ShortLink> links = [];
+    // for each link id, fetch the link info
+    for(String linkId in linkIds) {
+      Map<String,dynamic> linkInfo = await getLinkInfo(linkId);
+      links.add(ShortLink(
+        linkId: linkId,
+        link: linkInfo["link"],
+        senderName: linkInfo["senderName"],
+        title: linkInfo["title"],
+        timeStamp: linkInfo["timeStamp"],
+        info: linkInfo["info"],
+        tags: linkInfo["tags"],
+        likes: linkInfo["likes"],
+        dislikes: linkInfo["dislikes"],
+      ));
+    }
     return links;
   }
+
 
   static Future<List<ShortLink>> fetchBookmarks() async {
     // Simulate network delay
@@ -141,17 +146,9 @@ class LocalDatabase {
     final Database db = await database;
     final List<Map<String, dynamic>> bookmars =
         await db.rawQuery('SELECT * FROM bookmarks natural join links');
-    print(bookmars);
+    // print(bookmars);
     // Generate dummy data
-    final List<ShortLink> bookmarks = List.generate(
-      10,
-      (index) => ShortLink(
-        linkId: "${index + 1}",
-        title: 'Link ${index + 1}',
-        senderName: 'John Doe B',
-        timeStamp: DateTime.now(),
-      ),
-    );
+    final List<ShortLink> bookmarks = [];
 
     return bookmarks;
   }
@@ -208,7 +205,7 @@ class LocalDatabase {
 
     final Database db = await database;
     String query =
-        'SELECT user_name, group_id , sender_id, title, link, info, time_stamp FROM links join users on links.sender_id = users.user_id WHERE link_id = ?';
+        'SELECT user_name, title, link, info, time_stamp FROM links join users on links.sender_id = users.user_id WHERE link_id = ?';
     final List<Map<String, dynamic>> rawLinks =
         await db.rawQuery(query, [linkId]);
 
@@ -226,22 +223,19 @@ class LocalDatabase {
       'SELECT tags FROM tags WHERE link_id = ?',
       [linkId],
     );
-    final tags = tagResults.map((result) => result['tags']).toList();
+    final tags = tagResults.map((result) => result['tags'] as String).toList();
 
     if (rawLinks.isNotEmpty) {
       final Map<String, dynamic> linkInfo = {
         "title": rawLinks[0]["title"],
         "link": rawLinks[0]["link"],
         "info": rawLinks[0]["info"],
-        "senderId": rawLinks[0]["sender_id"],
-        "groupId": rawLinks[0]["group_id"],
         "senderName": rawLinks[0]["user_name"],
         "timeStamp": DateTime.parse(rawLinks[0]["time_stamp"]),
         "likes": likesResult.first["count"],
         "dislikes": dislikesResult.first["count"],
         "tags": tags,
       };
-
       return linkInfo;
     }
 
@@ -505,5 +499,12 @@ class LocalDatabase {
         "select * from participants where user_id = '$userId' and group_id = '$groupId' and roles = 'adm'";
     final List<Map<String, dynamic>> result = await db.rawQuery(query);
     return result.isNotEmpty;
+  }
+
+  static Future<List<String>> fetchUsersInGroup(String groupId) async {
+    final Database db = await database;
+    final String query = "select user_name from users where user_id in (select user_id from participants where group_id = '$groupId')";
+    final List<Map<String, dynamic>> result = await db.rawQuery(query);
+    return result.map((e) => e['user_name'] as String).toList();
   }
 }
