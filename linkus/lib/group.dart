@@ -3,6 +3,7 @@ import 'package:linkus/Common%20Widgets/link_list.dart';
 import 'package:linkus/Common%20Widgets/loading.dart';
 import 'package:linkus/Helper%20Files/db.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
+import 'package:linkus/Theme/theme_constant.dart';
 import 'package:linkus/groupinfo.dart';
 import 'package:linkus/message_popup.dart';
 
@@ -114,45 +115,48 @@ class _GroupPageState extends State<GroupPage> {
     });
   }
 
-  void showSortOptionsPopUp() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Sort Options'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: const Text('Sort by Time'),
-                onTap: () {
-                  // Handle sort by time
-                  _sortByTime();
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('Sort by Reacts'),
-                onTap: () {
-                  // Handle sort by reaction
-                  _sortByReacts();
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+void showSortOptionsPopUp() {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Sort by', textAlign: TextAlign.center, style: TextStyle(fontSize: 28, color: CustomTheme.of(context).onPrimary)),
+        backgroundColor: CustomTheme.of(context).primary,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text('Time', textAlign: TextAlign.center, style: TextStyle(fontSize: 24, color: CustomTheme.of(context).onSecondary)),
+              onTap: () {
+                // Handle sort by time
+                _sortByTime();
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text('Reacts', textAlign: TextAlign.center, style: TextStyle(fontSize: 24, color: CustomTheme.of(context).onSecondary)),
+              onTap: () {
+                // Handle sort by reaction
+                _sortByReacts();
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
   
   void showFilterOptionsPopUp() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Filter Options'),
-          content: StatefulBuilder(
+          title: Text('Filter by', textAlign: TextAlign.center, style: TextStyle(fontSize: 28, color: CustomTheme.of(context).onPrimary)),
+            backgroundColor: CustomTheme.of(context).primary,
+            content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return Wrap(
                 spacing: 16,
@@ -161,22 +165,43 @@ class _GroupPageState extends State<GroupPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Filter by Tags'),
-                      SizedBox(height: 8),
+                      Text('Tags', style: TextStyle(fontSize: 24, color: CustomTheme.of(context).onSecondary)),
+                      const SizedBox(height: 8),
                       Container(
                         height: 200,
-                        width: 150,
+                        width: 350,
                         decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.grey[300]!,
-                          ),
                           borderRadius: BorderRadius.circular(8),
+                          // color:  CustomTheme.of(context).onSecondary
                         ),
                         child: ListView.builder(
                           itemCount: _tags.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return CheckboxListTile(
-                              title: Text(_tags[index]),
+                          itemBuilder: (BuildContext context, int index) {return Theme(
+                            data: ThemeData(
+                              unselectedWidgetColor: CustomTheme.of(context).secondary,
+                              checkboxTheme: CheckboxThemeData(
+                                checkColor: MaterialStateProperty.resolveWith<Color?>(
+                                  (Set<MaterialState> states) {
+                                    if (states.contains(MaterialState.pressed)) {
+                                      return CustomTheme.of(context).onSecondary;
+                                    } else {
+                                      return CustomTheme.of(context).onSecondary;
+                                    }
+                                  },
+                                ),
+                                fillColor: MaterialStateProperty.resolveWith<Color?>(
+                                  (Set<MaterialState> states) {
+                                    if (states.contains(MaterialState.pressed)) {
+                                      return CustomTheme.of(context).secondary;
+                                    } else {
+                                      return CustomTheme.of(context).secondary;
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                            child: CheckboxListTile(
+                              title: Text(_tags[index], style: TextStyle(fontSize: 22, color: CustomTheme.of(context).secondary)),
                               value: _filteredTags.contains(_tags[index]),
                               onChanged: (bool? value) {
                                 setState(() {
@@ -187,33 +212,55 @@ class _GroupPageState extends State<GroupPage> {
                                   }
                                 });
                               },
-                            );
+                            ),
+                          );
                           },
                         ),
                       ),
                     ],
                   ),
-
+                  const SizedBox(height: 20),
                   // Column for user filtering
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Filter by Users'),
-                      SizedBox(height: 8),
+                      Text('Users', style: TextStyle(fontSize: 24, color: CustomTheme.of(context).onSecondary)),
+                      const SizedBox(height: 8),
                       Container(
                         height: 200,
-                        width: 150,
+                        width: 350,
                         decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.grey[300]!,
-                          ),
                           borderRadius: BorderRadius.circular(8),
+                          // color:  CustomTheme.of(context).onSecondary
                         ),
                         child: ListView.builder(
                           itemCount: _users.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return CheckboxListTile(
-                              title: Text(_users[index]),
+                          itemBuilder: (BuildContext context, int index) {return Theme(
+                            data: ThemeData(
+                              unselectedWidgetColor: CustomTheme.of(context).secondary,
+                              checkboxTheme: CheckboxThemeData(
+                                checkColor: MaterialStateProperty.resolveWith<Color?>(
+                                  (Set<MaterialState> states) {
+                                    if (states.contains(MaterialState.pressed)) {
+                                      return CustomTheme.of(context).onSecondary;
+                                    } else {
+                                      return CustomTheme.of(context).onSecondary;
+                                    }
+                                  },
+                                ),
+                                fillColor: MaterialStateProperty.resolveWith<Color?>(
+                                  (Set<MaterialState> states) {
+                                    if (states.contains(MaterialState.pressed)) {
+                                      return CustomTheme.of(context).secondary;
+                                    } else {
+                                      return CustomTheme.of(context).secondary;
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                            child: CheckboxListTile(
+                              title: Text(_users[index], style: TextStyle(fontSize: 22, color: CustomTheme.of(context).secondary)),
                               value: _filteredUsers.contains(_users[index]),
                               onChanged: (bool? value) {
                                 setState(() {
@@ -224,7 +271,8 @@ class _GroupPageState extends State<GroupPage> {
                                   }
                                 });
                               },
-                            );
+                            ),
+                          );
                           },
                         ),
                       ),
@@ -236,24 +284,43 @@ class _GroupPageState extends State<GroupPage> {
           ),
           actions: [
             // Button to apply filters
-            TextButton(
-              child: Text('Apply Filters'),
-              onPressed: () {
-                filterLinks();
-                Navigator.pop(context);
-              },
-            ),
-            // Button to clear all filters
-            TextButton(
-              child: Text('Clear Filters'),
-              onPressed: () {
-                _filteredTags.clear();
-                _filteredUsers.clear();
-                setState(() {
-                  _filteredLinks = _links;
-                });
-                Navigator.pop(context);
-              },
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Button to apply filters
+                TextButton(
+                  child: Text(
+                    'Apply Filters',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: CustomTheme.of(context).onPrimary,
+                    ),
+                  ),
+                  onPressed: () {
+                    filterLinks();
+                    Navigator.pop(context);
+                  },
+                ),
+
+                // Button to clear all filters
+                TextButton(
+                  child: Text(
+                    'Clear Filters',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: CustomTheme.of(context).onPrimary,
+                    ),
+                  ),
+                  onPressed: () {
+                    _filteredTags.clear();
+                    _filteredUsers.clear();
+                    setState(() {
+                      _filteredLinks = _links;
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
             ),
           ],
         );
@@ -351,40 +418,42 @@ class _GroupPageState extends State<GroupPage> {
         actions: [
           Visibility(
             visible: !_showSearchBar,
-            child: PopupMenuButton<String>(
-              onSelected: (String result) {
-                switch (result) {
-                  case 'search':
-                    setState(() {
-                      _showSearchBar = true;
-                      _searchedLinks = _filteredLinks;
-                    });
-                    break;
-                  case 'sort':
-                    // handle sort action
-                    showSortOptionsPopUp();
-                    break;
-                  case 'filter':
-                    setState(() {
-                      showFilterOptionsPopUp();    
-                    });
-                    break;
-                }
-              },
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                PopupMenuItem<String>(
-                  value: 'search',
-                  child: Text('Search'),
-                ),
-                PopupMenuItem<String>(
-                  value: 'sort',
-                  child: Text('Sort'),
-                ),
-                PopupMenuItem<String>(
-                  value: 'filter',
-                  child: Text('Filter'),
-                ),
-              ],
+            child: Container(
+              color:CustomTheme.of(context).secondary, 
+              child: PopupMenuButton<String>(
+                onSelected: (String result) {
+                  switch (result) {
+                    case 'search':
+                      setState(() {
+                        _showSearchBar = true;
+                        _searchedLinks = _filteredLinks;
+                      });
+                      break;
+                    case 'sort':
+                      showSortOptionsPopUp();
+                      break;
+                    case 'filter':
+                      setState(() {
+                        showFilterOptionsPopUp();    
+                      });
+                      break;
+                  }
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  PopupMenuItem<String>(
+                    value: 'search',
+                    child: Text('Search', style: TextStyle(fontSize: 18, color: CustomTheme.of(context).onSecondary)),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'sort',
+                    child: Text('Sort', style: TextStyle(fontSize: 18, color: CustomTheme.of(context).onSecondary)),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'filter',
+                    child: Text('Filter', style: TextStyle(fontSize: 18, color: CustomTheme.of(context).onSecondary)),
+                  ),
+                ],
+              ),
             ),
           ),
           Visibility(
@@ -394,19 +463,19 @@ class _GroupPageState extends State<GroupPage> {
                 padding: const EdgeInsets.only(right: 16.0),
                 child: Row(
                   children: [
-                    Padding(padding: const EdgeInsets.only(left: 30)),
+                    const Padding(padding: EdgeInsets.only(left: 30)),
                     Expanded(
                       child: TextField(
                         controller: _searchController,
                         onChanged: _searchLinks,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: 'Search...',
                           border: InputBorder.none,
                         ),
                       ),
                     ),
                     GestureDetector(
-                      child: Icon(Icons.clear),
+                      child: const Icon(Icons.clear),
                       onTap: () {
                         setState(() {
                           _showSearchBar = false;
