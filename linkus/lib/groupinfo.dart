@@ -3,6 +3,7 @@ import 'package:linkus/Common%20Widgets/loading.dart';
 import 'package:linkus/Helper%20Files/api.dart';
 import 'package:linkus/Helper%20Files/db.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
+import 'package:linkus/Theme/theme_constant.dart';
 
 // TODO: Handle deleting group
 // TODO: Take user info from parent widget
@@ -197,131 +198,185 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.group.groupName),
-      ),
-      body: _isGroupInfoLoading
-          ? const Loading()
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    "Members",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.0,
-                    ),
+      body: Container(
+        decoration: BoxDecoration(
+            gradient: LinearGradient(
+          colors: [
+            CustomTheme.of(context).gradientStart,
+            CustomTheme.of(context).gradientEnd,
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          tileMode: TileMode.clamp,
+        )),
+        child: _isGroupInfoLoading
+            ? const Loading()
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 50.0),
+                  Row(
+                    children: [
+                      IconButton(onPressed: (){Navigator.pop(context);}, icon: Icon(Icons.arrow_back, color: CustomTheme.of(context).onPrimary)),
+                      const SizedBox(width: 16.0),
+                      Text(
+                        widget.group.groupName,
+                        style: TextStyle(
+                          color: CustomTheme.of(context).onPrimary,
+                          fontSize: 24.0,
+                          fontWeight: FontWeight.bold
+                        ),
+                      )
+                    ]
                   ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: groupInfo["members"].length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return ListTile(
-                        title: Text(groupInfo["members"][index]["userName"]),
-                        trailing: userInfo["isAdmin"]
-                            ? _isMemberInfoLoading == index
-                                ? const CircularProgressIndicator()
-                                : _isMemberInfoLoading != -1
-                                    ? null
-                                    : PopupMenuButton<String>(
-                                        onSelected: (String value) {
-                                          if (value == "Make admin") {
-                                            _changeMemberRole(
-                                                index, GroupRole.admin);
-                                          } else if (value == "Make member") {
-                                            _changeMemberRole(
-                                                index, GroupRole.member);
-                                          } else if (value == "Kick") {
-                                            // kick member
-                                            _kickMember(index);
-                                          }
-                                        },
-                                        itemBuilder: (BuildContext context) {
-                                          return <PopupMenuEntry<String>>[
-                                            const PopupMenuItem<String>(
-                                              value: "Make member",
-                                              child: Text("Make member"),
-                                            ),
-                                            const PopupMenuItem<String>(
-                                              value: "Make admin",
-                                              child: Text("Make admin"),
-                                            ),
-                                            const PopupMenuItem<String>(
-                                              value: "Kick",
-                                              child: Text("Kick"),
-                                            ),
-                                          ];
-                                        },
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: groupInfo["members"].length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return ListTile(
+                          title: Text(
+                            groupInfo["members"][index]["userName"],
+                            style: TextStyle(
+                                color: CustomTheme.of(context).secondary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 22),
+                          ),
+                          trailing: userInfo["isAdmin"]
+                              ? _isMemberInfoLoading == index
+                                  ? const CircularProgressIndicator()
+                                  : _isMemberInfoLoading != -1
+                                      ? null
+                                      : PopupMenuTheme(
+                                          data: PopupMenuThemeData(
+                                            color: CustomTheme.of(context).onPrimary
+                                          ),                                          
+                                          child: PopupMenuButton<String>(
+                                            icon: Icon(Icons.more_vert, color: CustomTheme.of(context).onPrimary),
+                                            onSelected: (String value) {
+                                              if (value == "Make admin") {
+                                                _changeMemberRole(
+                                                    index, GroupRole.admin);
+                                              } else if (value == "Make member") {
+                                                _changeMemberRole(
+                                                    index, GroupRole.member);
+                                              } else if (value == "Kick") {
+                                                // kick member
+                                                _kickMember(index);
+                                              }
+                                            },
+                                            itemBuilder: (BuildContext context) {
+                                              return <PopupMenuEntry<String>>[
+                                                PopupMenuItem<String>(
+                                                  value: "Make member",
+                                                  child: Text("Make member", style: TextStyle(color: CustomTheme.of(context).primary)),
+                                                ),
+                                                PopupMenuItem<String>(
+                                                  value: "Make admin",
+                                                  child: Text("Make admin", style: TextStyle(color: CustomTheme.of(context).primary)),
+                                                ),
+                                                PopupMenuItem<String>(
+                                                  value: "Kick",
+                                                  child: Text("Kick", style: TextStyle(color: CustomTheme.of(context).primary)),
+                                                ),
+                                              ];
+                                            },
+                                          ),
                                       )
-                            : null,
-                        subtitle: Text(groupInfo["members"][index]["role"] ==
-                                GroupRole.admin
-                            ? "Admin"
-                            : "Member"),
-                      );
-                    },
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    "Description",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.0,
+                              : null,
+                          subtitle: Text(
+                            groupInfo["members"][index]["role"] ==
+                                    GroupRole.admin
+                                ? "Admin"
+                                : "Member",
+                            style: TextStyle(
+                                color: CustomTheme.of(context).onPrimary,
+                                fontSize: 16
+                              ),
+                          ),
+                        );
+                      },
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text(
-                    groupInfo["groupDesc"],
-                    style: const TextStyle(fontSize: 16.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Center(
+                      child: Text(
+                        groupInfo["groupDesc"],
+                        style: TextStyle(
+                          fontSize: 20.0,
+                          color: CustomTheme.of(context).primary
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                // Button to leave group
-                const SizedBox(height: 16.0),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: userInfo["isMember"]
-                      ? ElevatedButton(
-                          onPressed: _leaveGroup,
-                          child: const Text("Leave group"),
-                        )
-                      : null,
-                ),
-                // Button to add members
-                const SizedBox(height: 16.0),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: userInfo["isAdmin"]
-                      ? ElevatedButton(
-                          onPressed: () {
-                            // add members
-                          },
-                          child: const Text("Add members"),
-                        )
-                      : null,
-                ),
-                // Button to delete group
-                const SizedBox(height: 16.0),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: userInfo["isAdmin"]
-                      ? ElevatedButton(
-                          onPressed: () {
-                            // delete group
-                            _deleteGroup();
-                          },
-                          child: const Text("Delete group"),
-                        )
-                      : null,
-                ),
-              ],
-            ),
+                  // Button to add members
+                  const SizedBox(height: 16.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Center(
+                      child: userInfo["isAdmin"]
+                          ? ElevatedButton(
+                              onPressed: () {
+                                // add members
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    CustomTheme.of(context).primary,
+                                minimumSize: const Size(350, 40),
+                              ),
+                              child: Text("Add members",
+                                  style: TextStyle(
+                                    color: CustomTheme.of(context).onPrimary,
+                                  )),
+                            )
+                          : null,
+                    ),
+                  ),
+                  // Button to leave group
+                  const SizedBox(height: 5.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Center(
+                      child: userInfo["isAdmin"]
+                          ? ElevatedButton(
+                              onPressed: _leaveGroup,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: CustomTheme.of(context).error,
+                                minimumSize: const Size(350, 40),
+                              ),
+                              child: Text("Leave group",
+                                  style: TextStyle(
+                                    color: CustomTheme.of(context).onSecondary,
+                                  )),
+                            )
+                          : null,
+                    ),
+                  ),
+                  // Button to delete group
+                  const SizedBox(height: 5.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Center(
+                      child: userInfo["isAdmin"]
+                          ? ElevatedButton(
+                              onPressed: () {
+                                print("delete group");
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: CustomTheme.of(context).error,
+                                minimumSize: const Size(350, 40),
+                              ),
+                              child: Text("Delete group",
+                                  style: TextStyle(
+                                    color: CustomTheme.of(context).onSecondary,
+                                  )),
+                            )
+                          : null,
+                    ),
+                  ),
+                ],
+              ),
+      ),
     );
   }
 }
