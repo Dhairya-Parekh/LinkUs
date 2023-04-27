@@ -7,8 +7,6 @@ import 'package:linkus/Helper%20Files/local_storage.dart';
 import 'package:linkus/Theme/theme_constant.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-//TODO: Read tags from API. Currently using hardcoded tags
-
 class LinkPopUp extends StatefulWidget {
   final User user;
   final String linkId;
@@ -49,8 +47,7 @@ class _LinkPopUpState extends State<LinkPopUp> {
         title: response['title'],
         timeStamp: response['timeStamp'],
         info: response['info'],
-        // tags: response['tags'],
-        tags: ["tag1", "tag2"],
+        tags: response['tags'],
         likes: response['likes'],
         dislikes: response['dislikes'],
         hasLiked: response['hasLiked'],

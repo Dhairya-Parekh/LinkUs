@@ -100,7 +100,7 @@ class _GroupPageState extends State<GroupPage> {
     List<Link> filteredLinks = [];
     // are there any filters?
     if (_filteredTags.isEmpty && _filteredUsers.isEmpty) {
-      filteredLinks = _filteredLinks;
+      filteredLinks = _links;
     } else {
       // are user filters applied?
       if (_filteredUsers.isNotEmpty) {
@@ -110,7 +110,7 @@ class _GroupPageState extends State<GroupPage> {
           }
         }
       } else {
-        filteredLinks = _filteredLinks;
+        filteredLinks = _links;
       }
       // are tag filters applied?
       if (_filteredTags.isNotEmpty) {
