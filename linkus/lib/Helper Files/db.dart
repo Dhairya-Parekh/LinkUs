@@ -155,8 +155,8 @@ class LocalDatabase {
         title: linkInfo["title"],
         timeStamp: linkInfo["timeStamp"],
         info: linkInfo["info"],
-        // tags: linkInfo["tags"],
-        tags: ["tag1", "tag2"],
+        tags: linkInfo["tags"],
+        // tags: ["tag1", "tag2"],
         likes: linkInfo["likes"],
         dislikes: linkInfo["dislikes"],
         hasLiked: linkInfo["hasLiked"],
@@ -336,7 +336,7 @@ class LocalDatabase {
       'SELECT tags FROM tags WHERE link_id = ?',
       [linkId],
     );
-    final tags = tagResults.map((result) => result['tags']).toList();
+    final List<String> tags = tagResults.map((result) => result['tags'] as String).toList();
 
     final List<Map<String, dynamic>> bookmarkResults = await db.rawQuery(
       'SELECT * FROM bookmarks WHERE link_id = ?',
@@ -454,9 +454,7 @@ class LocalDatabase {
         final String title = message['title'];
         final String link = message['link'];
         final String info = message['info'];
-        final List<String> tags =
-            List<String>.from(message['tags'].map<String>((e) => e.toString()))
-                .toList();
+        final List<String> tags = message['tags'];
         final String timeStamp = message['time_stamp'];
         String query =
             "insert into links(link_id,sender_id,group_id,title,link,time_stamp,info) values"
@@ -530,7 +528,8 @@ class LocalDatabase {
     for (Map<String, dynamic> roleAction in updateRolesActions) {
       final String userId = roleAction['user_id'];
       final String groupId = roleAction['group_id'];
-      final String role = (roleAction['role'] as GroupRole).value;
+      // final String role = (roleAction['role'] as GroupRole).value;
+      final String role = roleAction['role'].value;
       String query =
           "update participants set roles = '$role' where user_id = '$userId' and group_id = '$groupId'";
       await db.rawInsert(query);
@@ -589,10 +588,7 @@ class LocalDatabase {
         String query =
             "insert into groups(group_id,group_name,group_info) values('$groupId','$groupName','$groupInfo')";
         await db.rawInsert(query);
-        final List<Map<String, dynamic>> members = target['members']
-            .map<Map<String, dynamic>>(
-                (message) => message as Map<String, dynamic>)
-            .toList();
+        final List<Map<String, dynamic>> members = target['members'];
         for (Map<String, dynamic> member in members) {
           final String userId = member['user_id'];
           final String userName = member['user_name'];

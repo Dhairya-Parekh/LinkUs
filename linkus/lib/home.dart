@@ -55,75 +55,30 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _areGroupsLoading = true;
     });
-    // get userid and last updated time
     final String userId = widget.user.userId;
     final DateTime lastFetched = await getLastFetched(userId);
-    // fetch updates from server
-    final Map<String, dynamic> updates =
-        await API.getUpdates(lastFetched, userId);
+    final Map<String, dynamic> updates = await API.getUpdates(lastFetched, userId);
     print(updates);
     try {
-      // Cast List<dynamic> to List<Map<String, dynamic>>
-      final List<Map<String, dynamic>> newMessages = updates['new_messages']
-          .map<Map<String, dynamic>>(
-              (message) => message as Map<String, dynamic>)
-          .toList();
-      final List<Map<String, dynamic>> deleteMessages =
-          updates['delete_messages']
-              .map<Map<String, dynamic>>(
-                  (message) => message as Map<String, dynamic>)
-              .toList();
-      final List<Map<String, dynamic>> react = updates['react']
-          .map<Map<String, dynamic>>(
-              (message) => message as Map<String, dynamic>)
-          .toList();
-      final List<Map<String, dynamic>> changeRole = updates['change_role']
-          .map<Map<String, dynamic>>(
-              (message) => message as Map<String, dynamic>)
-          .toList();
-      final List<Map<String, dynamic>> removeMember = updates['remove_member']
-          .map<Map<String, dynamic>>(
-              (message) => message as Map<String, dynamic>)
-          .toList();
-      final List<Map<String, dynamic>> addUser = updates['add_user']
-          .map<Map<String, dynamic>>(
-              (message) => message as Map<String, dynamic>)
-          .toList();
-      final List<Map<String, dynamic>> getAdded = updates['get_added']
-          .map<Map<String, dynamic>>(
-              (message) => message as Map<String, dynamic>)
-          .toList();
-      final List<Map<String, dynamic>> deletedGroups = updates['deleted_groups']
-          .map<Map<String, dynamic>>(
-              (message) => message as Map<String, dynamic>)
-          .toList();
-      // // // Modify the Jsons
-      List<Map<String, dynamic>> changeRoleActions = [];
+      List<Map<String, dynamic>> newMessagesActions = updates['new_messages_actions'];
+      List<Map<String, dynamic>> deleteMessagesActions = updates['delete_messages_actions'];
+      List<Map<String, dynamic>> reactActions = updates['react_actions'];
+      List<Map<String, dynamic>> changeRoleActions = updates['change_role_actions'];
+      List<Map<String, dynamic>> removeMemberActions = updates['remove_member_actions'];
+      List<Map<String, dynamic>> addUserActions = updates['add_user_actions'];
+      List<Map<String, dynamic>> getAddedActions = updates['get_added_actions'];
+      List<Map<String, dynamic>> deletedGroupsActions = updates['deleted_groups_actions'];
+      DateTime currentFetchedTime = DateTime.parse(updates['time_stamp']);
 
-      for (Map<String, dynamic> changeRoleAction in changeRole) {
-        Map<String, dynamic> newChangeRoleAction = {};
-        newChangeRoleAction['user_id'] = changeRoleAction['affected_id'];
-        newChangeRoleAction['group_id'] = changeRoleAction['group_id'];
-        newChangeRoleAction['role'] = changeRoleAction['affected_role'] == 'adm'
-            ? GroupRole.admin
-            : changeRoleAction['affected_role'] == 'mem'
-                ? GroupRole.member
-                : null;
-        changeRoleActions.add(newChangeRoleAction);
-      }
-
-      // // update local database
-      await LocalDatabase.getAdded(getAdded);
-      // await LocalDatabase.addUsers(addUser);
-      await LocalDatabase.removeMembers(removeMember);
+      await LocalDatabase.getAdded(getAddedActions);
+      await LocalDatabase.addUsers(addUserActions);
+      await LocalDatabase.removeMembers(removeMemberActions);
       await LocalDatabase.updateRoles(changeRoleActions);
-      await LocalDatabase.updateMessages(newMessages);
-      // await LocalDatabase.deleteMessages(deleteMessages);
-      await LocalDatabase.updateReactions(react);
-      await LocalDatabase.deleteGroups(deletedGroups);
-      // // update last fetched time
-      await setLastFetched(userId, DateTime.parse(updates['time_stamp']));
-      // // reload groups
+      await LocalDatabase.updateMessages(newMessagesActions);
+      await LocalDatabase.deleteMessages(deleteMessagesActions);
+      await LocalDatabase.updateReactions(reactActions);
+      await LocalDatabase.deleteGroups(deletedGroupsActions);
+      await setLastFetched(userId, currentFetchedTime);
       await _loadGroups();
     } catch (e) {
       print(e);

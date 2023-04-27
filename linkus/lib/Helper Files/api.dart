@@ -110,31 +110,57 @@ class API {
     }
   }
 
-  // static Map<String, dynamic> formatUpdates(Map<String, dynamic> updates)
-  // {
-  //   Map<String, dynamic> formattedUpdates = {};
-  //   List<Map<String, dynamic>> newMessagesActions = [];
-  //   for(Map<String, dynamic> message in updates['new_messages'])
-  //   {
-  //     newMessagesActions.add({
-  //       'sender_id': message['sender_id'],
-  //       'group_id': message['group_id'],
-  //       'link_id': message['link_id'],
-  //       'title': message['title'],
-  //       'link': message['link'],
-  //       'info': message['info'],
-  //       'time_stamp': message['time_stamp'],
+  static Map<String, dynamic> formatUpdates(Map<String, dynamic> updates)
+  {
+    Map<String, dynamic> formattedUpdates = {};
+    List<Map<String, dynamic>> newMessagesActions = updates['new_messages'].map<Map<String, dynamic>>((message) => message as Map<String, dynamic>).toList();
+    for (int i = 0; i < newMessagesActions.length; i++) {
+      List<String> tags = List<String>.from(newMessagesActions[i]['tags'].map<String>((e) => e.toString())).toList();
+      newMessagesActions[i]['tags'] = tags;
+    }
+    formattedUpdates['new_messages_actions'] = newMessagesActions;
 
-  //     });
-  //   }
-  //   List<Map<String, dynamic>> deleteMessagesActions = [];
-  //   List<Map<String, dynamic>> reactionsActions = [];
-  //   List<Map<String, dynamic>> updateRolesActions = [];
-  //   List<Map<String, dynamic>> removeMembersActions = [];
-  //   List<Map<String, dynamic>> addUsersActions = [];
-  //   List<Map<String, dynamic>> getAddedActions = [];
+     List<Map<String, dynamic>> deleteMessagesActions = updates['delete_messages'].map<Map<String, dynamic>>((message) => message as Map<String, dynamic>).toList(); 
+    formattedUpdates['delete_messages_actions'] = deleteMessagesActions;
 
-  // }
+     List<Map<String, dynamic>> reactActions = updates['react'].map<Map<String, dynamic>>((message) => message as Map<String, dynamic>).toList();
+    formattedUpdates['react_actions'] = reactActions;
+
+     List<Map<String, dynamic>> rawchangeRoleActions = updates['change_role'].map<Map<String, dynamic>>((message) => message as Map<String, dynamic>).toList();
+    List<Map<String, dynamic>> changeRoleActions = [];
+    for (Map<String, dynamic> changeRoleAction in rawchangeRoleActions) {
+        Map<String, dynamic> newChangeRoleAction = {};
+        newChangeRoleAction['user_id'] = changeRoleAction['affected_id'];
+        newChangeRoleAction['group_id'] = changeRoleAction['group_id'];
+        newChangeRoleAction['role'] = changeRoleAction['affected_role'] == 'adm'
+            ? GroupRole.admin
+            : changeRoleAction['affected_role'] == 'mem'
+                ? GroupRole.member
+                : null;
+        changeRoleActions.add(newChangeRoleAction);
+      }
+    formattedUpdates['change_role_actions'] = changeRoleActions;
+
+     List<Map<String, dynamic>> removeMemberActions = updates['remove_member'].map<Map<String, dynamic>>((message) => message as Map<String, dynamic>).toList();
+    formattedUpdates['remove_member_actions'] = removeMemberActions;
+
+     List<Map<String, dynamic>> addUserActions = updates['add_user'].map<Map<String, dynamic>>((message) => message as Map<String, dynamic>).toList();
+    formattedUpdates['add_user_actions'] = addUserActions;
+
+     List<Map<String, dynamic>> getAddedActions = updates['get_added'].map<Map<String, dynamic>>((message) => message as Map<String, dynamic>).toList();
+    for (int i=0; i < getAddedActions.length; i++) {
+      List<Map<String, dynamic>> members = getAddedActions[i]['members'].map<Map<String, dynamic>>((message) => message as Map<String, dynamic>).toList();
+      getAddedActions[i]['members'] = members;
+    }
+    formattedUpdates['get_added_actions'] = getAddedActions;
+
+     List<Map<String, dynamic>> deletedGroupsActions = updates['deleted_groups'].map<Map<String, dynamic>>((message) => message as Map<String, dynamic>).toList();
+    formattedUpdates['deleted_groups_actions'] = deletedGroupsActions;
+    
+    formattedUpdates['time_stamp'] = updates['time_stamp'];
+    print("formattedUpdates: $formattedUpdates");
+    return formattedUpdates;
+  }
 
   static Future<Map<String, dynamic>> getUpdates(
       DateTime lastOpened, String userId) async {
@@ -147,8 +173,7 @@ class API {
     if (response.statusCode == 200) {
       updateCookies(response);
       final jsonResponse = jsonDecode(response.body);
-
-      return jsonResponse;
+      return formatUpdates(jsonResponse);
     } else if (response.statusCode == 401) {
       await handleSessionTimeout();
       return await getUpdates(lastOpened, userId);

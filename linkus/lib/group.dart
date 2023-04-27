@@ -387,22 +387,24 @@ class _GroupPageState extends State<GroupPage> {
     List<Link> filteredLinks = [];
     // are there any filters?
     if (_filteredTags.isEmpty && _filteredUsers.isEmpty) {
-      filteredLinks = _filteredLinks;
+      filteredLinks = _links;
     } else {
       // are user filters applied?
       if (_filteredUsers.isNotEmpty) {
-        for (var link in _filteredLinks) {
+        for (var link in _links) {
           if (_filteredUsers.contains(link.senderName)) {
             filteredLinks.add(link);
           }
         }
       } else {
-        filteredLinks = _filteredLinks;
+        filteredLinks = _links;
       }
       // are tag filters applied?
       if (_filteredTags.isNotEmpty) {
+        print(_filteredTags);
         List<Link> tempLinks = [];
         for (var link in filteredLinks) {
+          print(link.tags);
           for (var tag in link.tags) {
             if (_filteredTags.contains(tag)) {
               tempLinks.add(link);

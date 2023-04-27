@@ -62,7 +62,7 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
                     LocalDatabase.removeMembers([
                       {
                         "group_id": widget.group.groupId,
-                        "user_id": widget.user.userId,
+                        "affected_id": widget.user.userId,
                       }
                     ]).then((value) => {
                           //Go back to home page after leaving group

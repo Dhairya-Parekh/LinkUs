@@ -485,7 +485,7 @@ Delete group:
 	}
 	Return: {
 		success : <bool>,
-		message : <string>,
+		message : <string>, 
 		time_stamp : <time_stamp>
 	}
 
