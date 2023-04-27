@@ -187,6 +187,7 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
     {
       await LocalDatabase.deleteGroup(groupID);
       Navigator.popUntil(context, ModalRoute.withName('/home'));
+      Navigator.pushReplacementNamed(context, '/home');
     }
   }
   @override
@@ -360,7 +361,7 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
                       child: userInfo["isAdmin"]
                           ? ElevatedButton(
                               onPressed: () {
-                                print("delete group");
+                                _deleteGroup();
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: CustomTheme.of(context).error,

@@ -157,7 +157,6 @@ class LocalDatabase {
         timeStamp: linkInfo["timeStamp"],
         info: linkInfo["info"],
         tags: linkInfo["tags"],
-        // tags: ["tag1", "tag2"],
         likes: linkInfo["likes"],
         dislikes: linkInfo["dislikes"],
         hasLiked: linkInfo["hasLiked"],
@@ -165,31 +164,20 @@ class LocalDatabase {
         hasBookmarked: linkInfo["hasBookmarked"],
       ));
     }
+    // write using join instead of for loop
     return links;
   }
 
-  //  TODO: Remove for loop, use Join
   static Future<List<ShortLink>> fetchBookmarks() async {
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
-    final List<Map<String, dynamic>> rawBookmarks =
-        await db.rawQuery('SELECT * FROM bookmarks natural join links');
-    // print(bookmars);
-    // Generate dummy data
-    List<String> bookmarkIds =
-        rawBookmarks.map((link) => link["link_id"] as String).toList();
-    List<ShortLink> bookmarks = [];
-    // for each link id, fetch the link info
-    for (String linkId in bookmarkIds) {
-      Map<String, dynamic> linkInfo = await getLinkInfo(linkId, _uid!);
-      bookmarks.add(ShortLink(
-        linkId: linkId,
-        senderName: linkInfo["senderName"],
-        title: linkInfo["title"],
-        timeStamp: linkInfo["timeStamp"],
-      ));
-    }
+    String query = "select link_id,title,time_stamp,user_name as sender_name from links natural join bookmarks join users on links.sender_id = users.user_id";
+    List<Map<String, dynamic>> rawBookmarks = await db.rawQuery(query);
+    List<ShortLink> bookmarks = rawBookmarks.map((link) => ShortLink(
+      linkId: link["link_id"],
+      senderName: link["sender_name"],
+      title: link["title"],
+      timeStamp: DateTime.parse(link["time_stamp"]),
+    )).toList();
     return bookmarks;
   }
 
@@ -302,21 +290,6 @@ class LocalDatabase {
   // TODO: Remove userID from getLinkInfo
   static Future<Map<String, dynamic>> getLinkInfo(
       String linkId, String userId) async {
-    // Simulate network delay
-    // await Future.delayed(const Duration(seconds: 3));
-
-    // Generate dummy data
-    // final linkInfo = {
-    //   "title": "Link $linkId",
-    //   "link": "https://www.google.com",
-    //   "info": "Lorem ipsum dolor sit amet, consectetur adipiscing",
-    //   "senderName": "John Doe",
-    //   "timeStamp": DateTime.now(),
-    //   "likes": 10,
-    //   "dislikes": 2,
-    //   "tags": ["tag1", "tag2", "tag3"],
-    // };
-
     final Database db = await database;
     String query =
         'SELECT user_name, group_id , sender_id, title, link, info, time_stamp FROM links join users on links.sender_id = users.user_id WHERE link_id = ?';
