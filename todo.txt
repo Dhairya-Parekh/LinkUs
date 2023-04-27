@@ -26,6 +26,7 @@ Resolve exception caught by widgets library
 add member to group
 option to bookmark a link
 display tags on link page
+Check Input field non-empty in reg and login
 
 todo dhairya:
 option to delete a group??

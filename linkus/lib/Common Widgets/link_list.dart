@@ -5,7 +5,7 @@ import 'package:linkus/Helper%20Files/local_storage.dart';
 import '../Helper Files/api.dart';
 
 class LinkList extends StatefulWidget {
-  final List<ShortLink> links;
+  final List<Link> links;
   final User user;
   final String groupId;
   const LinkList(
@@ -19,7 +19,7 @@ class LinkList extends StatefulWidget {
 }
 
 class _LinkListState extends State<LinkList> {
-  void _showOptions(BuildContext context, ShortLink link) async {
+  void _showOptions(BuildContext context, Link link) async {
     final canDeleteGlobal = await _canDeleteGlobal(link);
     List<Widget> options = [];
     options.add(
@@ -67,7 +67,7 @@ class _LinkListState extends State<LinkList> {
     );
   }
 
-  Future<bool> _canDeleteGlobal(ShortLink link) async {
+  Future<bool> _canDeleteGlobal(Link link) async {
     if (link.senderName == widget.user.username ||
         await LocalDatabase.isGroupAdmin(widget.user.userId, widget.groupId)) {
       return true;
@@ -75,14 +75,14 @@ class _LinkListState extends State<LinkList> {
     return false;
   }
 
-  Future<void> _deleteLocal(ShortLink link) async {
+  Future<void> _deleteLocal(Link link) async {
     await LocalDatabase.deleteLink(link);
     setState(() {
       widget.links.remove(link);
     });
   }
 
-  Future<void> _deleteGlobal(ShortLink link) async {
+  Future<void> _deleteGlobal(Link link) async {
     final Map<String, dynamic> response = await API.broadcastDelete(
       widget.user.userId,
       link.linkId,
@@ -98,7 +98,7 @@ class _LinkListState extends State<LinkList> {
     return ListView.builder(
       itemCount: widget.links.length,
       itemBuilder: (BuildContext context, int index) {
-        ShortLink message = widget.links[index];
+        Link message = widget.links[index];
         return GestureDetector(
           onTap: () {
             Navigator.push(

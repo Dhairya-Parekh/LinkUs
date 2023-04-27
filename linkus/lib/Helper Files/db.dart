@@ -15,7 +15,7 @@ class Group {
   }
 }
 
-class ShortLink {
+class Link {
   final String linkId;
   final String link;
   final String senderName;
@@ -23,10 +23,14 @@ class ShortLink {
   final DateTime timeStamp;
   final String info;
   final List<String> tags;
-  final int likes;
-  final int dislikes;
+  int likes;
+  int dislikes;
+  bool hasLiked;
+  bool hasDisliked;
+  bool hasBookmarked;
+  String? groupId;
 
-  ShortLink({
+  Link({
     required this.linkId,
     required this.link,
     required this.senderName,
@@ -36,6 +40,24 @@ class ShortLink {
     required this.tags,
     required this.likes,
     required this.dislikes,
+    required this.hasLiked,
+    required this.hasDisliked,
+    required this.hasBookmarked,
+    this.groupId,
+  });
+}
+
+class ShortLink {
+  final String linkId;
+  final String senderName;
+  final String title;
+  final DateTime timeStamp;
+
+  ShortLink({
+    required this.linkId,
+    required this.senderName,
+    required this.title,
+    required this.timeStamp,
   });
 }
 
@@ -114,43 +136,77 @@ class LocalDatabase {
         .toList();
     return groups;
   }
-static Future<List<ShortLink>> fetchLinks(String groupId) async {
+
+  //  TODO: Remove for loop, use Join
+  static Future<List<Link>> fetchLinks(String groupId) async {
     final Database db = await database;
-    String query =
-        'SELECT link_id FROM links WHERE group_id = ?';
+    String query = 'SELECT link_id FROM links WHERE group_id = ?';
     List<Map<String, dynamic>> rawLinks = await db.rawQuery(query, [groupId]);
-    List<String> linkIds = rawLinks.map((link) => link["link_id"] as String).toList();
-    List<ShortLink> links = [];
+    List<String> linkIds =
+        rawLinks.map((link) => link["link_id"] as String).toList();
+    List<Link> links = [];
     // for each link id, fetch the link info
-    for(String linkId in linkIds) {
-      Map<String,dynamic> linkInfo = await getLinkInfo(linkId);
-      links.add(ShortLink(
+    for (String linkId in linkIds) {
+      Map<String, dynamic> linkInfo = await getLinkInfo(linkId, _uid!);
+      links.add(Link(
         linkId: linkId,
         link: linkInfo["link"],
         senderName: linkInfo["senderName"],
         title: linkInfo["title"],
         timeStamp: linkInfo["timeStamp"],
         info: linkInfo["info"],
-        tags: linkInfo["tags"],
+        // tags: linkInfo["tags"],
+        tags: ["tag1", "tag2"],
         likes: linkInfo["likes"],
         dislikes: linkInfo["dislikes"],
+        hasLiked: linkInfo["hasLiked"],
+        hasDisliked: linkInfo["hasDisliked"],
+        hasBookmarked: linkInfo["hasBookmarked"],
       ));
     }
     return links;
   }
 
-
+  //  TODO: Remove for loop, use Join
   static Future<List<ShortLink>> fetchBookmarks() async {
     // Simulate network delay
-    // await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
-    final List<Map<String, dynamic>> bookmars =
+    final List<Map<String, dynamic>> rawBookmarks =
         await db.rawQuery('SELECT * FROM bookmarks natural join links');
     // print(bookmars);
     // Generate dummy data
-    final List<ShortLink> bookmarks = [];
-
+    List<String> bookmarkIds =
+        rawBookmarks.map((link) => link["link_id"] as String).toList();
+    List<ShortLink> bookmarks = [];
+    // for each link id, fetch the link info
+    for (String linkId in bookmarkIds) {
+      Map<String, dynamic> linkInfo = await getLinkInfo(linkId, _uid!);
+      bookmarks.add(ShortLink(
+        linkId: linkId,
+        senderName: linkInfo["senderName"],
+        title: linkInfo["title"],
+        timeStamp: linkInfo["timeStamp"],
+      ));
+    }
     return bookmarks;
+  }
+
+  static Future<void> updateBookmarks(String linkId, String action) async {
+    // Simulate network delay
+    final Database db = await database;
+
+    // String query = 'DELETE FROM bookmarks';
+    // await db.rawDelete(query, [linkId]);
+
+    if (action == "bookmark") {
+      String query = 'INSERT INTO bookmarks VALUES (?)';
+      await db.rawInsert(query, [linkId]);
+    } else if (action == "unbookmark") {
+      String query = 'DELETE FROM bookmarks WHERE link_id = ?';
+      await db.rawDelete(query, [linkId]);
+    }
+    // await Future.delayed(const Duration(seconds: 3));
   }
 
   static Future<Map<String, dynamic>> getGroupInfo(String groupId) async {
@@ -187,7 +243,64 @@ static Future<List<ShortLink>> fetchLinks(String groupId) async {
     }
   }
 
-  static Future<Map<String, dynamic>> getLinkInfo(String linkId) async {
+  // static Future<Map<String, dynamic>> getLinkInfo(String linkId) async {
+  //   // Simulate network delay
+  //   // await Future.delayed(const Duration(seconds: 3));
+
+  //   // Generate dummy data
+  //   // final linkInfo = {
+  //   //   "title": "Link $linkId",
+  //   //   "link": "https://www.google.com",
+  //   //   "info": "Lorem ipsum dolor sit amet, consectetur adipiscing",
+  //   //   "senderName": "John Doe",
+  //   //   "timeStamp": DateTime.now(),
+  //   //   "likes": 10,
+  //   //   "dislikes": 2,
+  //   //   "tags": ["tag1", "tag2", "tag3"],
+  //   // };
+
+  //   final Database db = await database;
+  //   String query =
+  //       'SELECT user_name, title, link, info, time_stamp FROM links join users on links.sender_id = users.user_id WHERE link_id = ?';
+  //   final List<Map<String, dynamic>> rawLinks =
+  //       await db.rawQuery(query, [linkId]);
+
+  //   final List<Map<String, dynamic>> likesResult = await db.rawQuery(
+  //     'SELECT COUNT(*) as count FROM reacts WHERE link_id = ? AND react = \'l\'',
+  //     [linkId],
+  //   );
+
+  //   final List<Map<String, dynamic>> dislikesResult = await db.rawQuery(
+  //     'SELECT COUNT(*) as count FROM reacts WHERE link_id = ? AND react = \'d\'',
+  //     [linkId],
+  //   );
+
+  //   final List<Map<String, dynamic>> tagResults = await db.rawQuery(
+  //     'SELECT tags FROM tags WHERE link_id = ?',
+  //     [linkId],
+  //   );
+  //   final tags = tagResults.map((result) => result['tags'] as String).toList();
+
+  //   if (rawLinks.isNotEmpty) {
+  //     final Map<String, dynamic> linkInfo = {
+  //       "title": rawLinks[0]["title"],
+  //       "link": rawLinks[0]["link"],
+  //       "info": rawLinks[0]["info"],
+  //       "senderName": rawLinks[0]["user_name"],
+  //       "timeStamp": DateTime.parse(rawLinks[0]["time_stamp"]),
+  //       "likes": likesResult.first["count"],
+  //       "dislikes": dislikesResult.first["count"],
+  //       "tags": tags,
+  //     };
+  //     return linkInfo;
+  //   }
+
+  //   return {};
+  // }
+
+  // TODO: Remove userID from getLinkInfo
+  static Future<Map<String, dynamic>> getLinkInfo(
+      String linkId, String userId) async {
     // Simulate network delay
     // await Future.delayed(const Duration(seconds: 3));
 
@@ -205,7 +318,7 @@ static Future<List<ShortLink>> fetchLinks(String groupId) async {
 
     final Database db = await database;
     String query =
-        'SELECT user_name, title, link, info, time_stamp FROM links join users on links.sender_id = users.user_id WHERE link_id = ?';
+        'SELECT user_name, group_id , sender_id, title, link, info, time_stamp FROM links join users on links.sender_id = users.user_id WHERE link_id = ?';
     final List<Map<String, dynamic>> rawLinks =
         await db.rawQuery(query, [linkId]);
 
@@ -223,17 +336,40 @@ static Future<List<ShortLink>> fetchLinks(String groupId) async {
       'SELECT tags FROM tags WHERE link_id = ?',
       [linkId],
     );
-    final tags = tagResults.map((result) => result['tags'] as String).toList();
+    final tags = tagResults.map((result) => result['tags']).toList();
+
+    final List<Map<String, dynamic>> bookmarkResults = await db.rawQuery(
+      'SELECT * FROM bookmarks WHERE link_id = ?',
+      [linkId],
+    );
+    final bool isBookmarked = bookmarkResults.isNotEmpty;
+
+    final List<Map<String, dynamic>> likeResults = await db.rawQuery(
+      'SELECT * FROM reacts WHERE user_id = ? AND link_id = ? AND react = \'l\'',
+      [userId, linkId],
+    );
+    final bool isLiked = likeResults.isNotEmpty;
+
+    final List<Map<String, dynamic>> dislikeResults = await db.rawQuery(
+      'SELECT * FROM reacts WHERE user_id = ? AND link_id = ? AND react = \'d\'',
+      [userId, linkId],
+    );
+    final bool isDisliked = dislikeResults.isNotEmpty;
 
     if (rawLinks.isNotEmpty) {
       final Map<String, dynamic> linkInfo = {
         "title": rawLinks[0]["title"],
         "link": rawLinks[0]["link"],
         "info": rawLinks[0]["info"],
+        "senderId": rawLinks[0]["sender_id"],
+        "groupId": rawLinks[0]["group_id"],
         "senderName": rawLinks[0]["user_name"],
         "timeStamp": DateTime.parse(rawLinks[0]["time_stamp"]),
         "likes": likesResult.first["count"],
         "dislikes": dislikesResult.first["count"],
+        "hasLiked": isLiked,
+        "hasDisliked": isDisliked,
+        "hasBookmarked": isBookmarked,
         "tags": tags,
       };
       return linkInfo;
@@ -484,7 +620,7 @@ static Future<List<ShortLink>> fetchLinks(String groupId) async {
     }
   }
 
-  static Future<void> deleteLink(ShortLink link) async {
+  static Future<void> deleteLink(Link link) async {
     // Simulate network delay
     // await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
@@ -503,7 +639,8 @@ static Future<List<ShortLink>> fetchLinks(String groupId) async {
 
   static Future<List<String>> fetchUsersInGroup(String groupId) async {
     final Database db = await database;
-    final String query = "select user_name from users where user_id in (select user_id from participants where group_id = '$groupId')";
+    final String query =
+        "select user_name from users where user_id in (select user_id from participants where group_id = '$groupId')";
     final List<Map<String, dynamic>> result = await db.rawQuery(query);
     return result.map((e) => e['user_name'] as String).toList();
   }
