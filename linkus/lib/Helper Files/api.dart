@@ -9,7 +9,7 @@ import 'package:linkus/Helper%20Files/local_storage.dart';
 // TODO: Remove Hardcoded response
 
 class API {
-  static const _baseUrl = 'http://192.168.0.113:8080';
+  static const _baseUrl = 'http://192.168.0.104:8080';
   static final _client = http.Client();
   static final Map<String, String> _defaultHeaders = {
     'content-type': 'application/json'
@@ -305,6 +305,24 @@ class API {
     } else {
       throw Exception(
           'Failed to leave group. Error code ${response.statusCode}');
+    }
+  }
+
+  static Future<Map<String, dynamic>> deleteGroup(String userID, String groupId) async{
+    final url = Uri.parse('$_baseUrl/delete_group');
+    final response = await _client.post(url,
+        headers: _defaultHeaders,
+        body: jsonEncode({'user_id': userID, 'group_id': groupId}));
+    if (response.statusCode == 200) {
+      updateCookies(response);
+      final jsonResponse = jsonDecode(response.body);
+      return jsonResponse;
+    } else if (response.statusCode == 401) {
+      await handleSessionTimeout();
+      return await deleteGroup(userID, groupId);
+    } else {
+      throw Exception(
+          'Failed to delete group. Error code ${response.statusCode}');
     }
   }
 }

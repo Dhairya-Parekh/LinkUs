@@ -88,6 +88,10 @@ class _HomePageState extends State<HomePage> {
           .map<Map<String, dynamic>>(
               (message) => message as Map<String, dynamic>)
           .toList();
+      final List<Map<String, dynamic>> deletedGroups = updates['deleted_groups']
+          .map<Map<String, dynamic>>(
+              (message) => message as Map<String, dynamic>)
+          .toList();
       // // // Modify the Jsons
       List<Map<String, dynamic>> changeRoleActions = [];
 
@@ -111,6 +115,7 @@ class _HomePageState extends State<HomePage> {
       await LocalDatabase.updateMessages(newMessages);
       // await LocalDatabase.deleteMessages(deleteMessages);
       await LocalDatabase.updateReactions(react);
+      await LocalDatabase.deleteGroups(deletedGroups);
       // // update last fetched time
       await setLastFetched(userId, DateTime.parse(updates['time_stamp']));
       // // reload groups

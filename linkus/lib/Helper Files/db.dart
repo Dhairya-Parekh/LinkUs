@@ -507,4 +507,18 @@ static Future<List<ShortLink>> fetchLinks(String groupId) async {
     final List<Map<String, dynamic>> result = await db.rawQuery(query);
     return result.map((e) => e['user_name'] as String).toList();
   }
+
+  static Future<void> deleteGroup(String groupId) async {
+    final Database db = await database;
+    String query = "delete from groups where group_id = '$groupId'";
+    await db.rawDelete(query);
+  }
+
+  static Future<void> deleteGroups(List<Map<String,dynamic>> deletedGroups) async
+  {
+    for(Map<String,dynamic> group in deletedGroups)
+    {
+      await deleteGroup(group['group_id'] as String);
+    }
+  }
 }

@@ -178,6 +178,16 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
     });
   }
 
+  Future<void> _deleteGroup() async {
+    String userID = widget.user.userId;
+    String groupID = widget.group.groupId;
+    Map<String,dynamic> response = await API.deleteGroup(userID, groupID); 
+    if(response["success"])
+    {
+      await LocalDatabase.deleteGroup(groupID);
+      Navigator.popUntil(context, ModalRoute.withName('/home'));
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -293,6 +303,20 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
                             // add members
                           },
                           child: const Text("Add members"),
+                        )
+                      : null,
+                ),
+                // Button to delete group
+                const SizedBox(height: 16.0),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: userInfo["isAdmin"]
+                      ? ElevatedButton(
+                          onPressed: () {
+                            // delete group
+                            _deleteGroup();
+                          },
+                          child: const Text("Delete group"),
                         )
                       : null,
                 ),
