@@ -45,17 +45,26 @@ class _LoginPageState extends State<LoginPage> {
 
     final jsonResponse = await API.login(username, password);
 
-    if (jsonResponse['success']) {
-      // Login successful, do something here (e.g. navigate to home page)
-      await saveCredentials(username, password, jsonResponse["user_id"],
-              jsonResponse["email"])
-          .then((res) {
-        Navigator.pushReplacementNamed(context, '/home');
-      });
-    } else {
+    try {
+      if (jsonResponse['success']) {
+        // Login successful, do something here (e.g. navigate to home page)
+        await saveCredentials(username, password, jsonResponse["user_id"],
+                jsonResponse["email"])
+            .then((res) {
+          Navigator.of(context)
+                .pushNamedAndRemoveUntil('/home', (route) => false);
+        });
+      } else {
+        // Login failed, display error message
+        setState(() {
+          _errorMessage = jsonResponse['message'];
+        });
+      }
+    } catch (e) {
       // Login failed, display error message
       setState(() {
-        _errorMessage = jsonResponse['message'];
+        _errorMessage =
+            'Something went wrong. Check your internet connection and try again.';
       });
     }
 

@@ -27,10 +27,14 @@ class _LinkPageState extends State<LinkPage> {
   bool isLoading = true;
   bool hasLiked = false;
   bool hasDisliked = false;
-
+  bool hasBookmarked = false;
+  // ignore: prefer_typing_uninitialized_variables
+  List<dynamic> tags = [];
+  // ignore: prefer_typing_uninitialized_variables
 
   Future<void> _loadLinkInfo() async {
-    final linkInfo = await LocalDatabase.getLinkInfo(widget.linkId);
+    final linkInfo =
+        await LocalDatabase.getLinkInfo(widget.linkId, widget.user.userId);
     setState(() {
       title = linkInfo["title"];
       description = linkInfo["info"];
@@ -39,7 +43,11 @@ class _LinkPageState extends State<LinkPage> {
       dislikes = linkInfo["dislikes"];
       link = linkInfo["link"];
       timestamp = linkInfo["timeStamp"];
+      hasLiked = linkInfo["hasLiked"];
+      hasDisliked = linkInfo["hasDisliked"];
+      hasBookmarked = linkInfo["hasBookmarked"];
       isLoading = false;
+      tags = linkInfo["tags"];
     });
   }
 
@@ -58,10 +66,12 @@ class _LinkPageState extends State<LinkPage> {
   }
 
   void _pressReactButton(React react) async {
-    
-    final react_char = (react == React.like) ? (hasLiked ? 'n' : 'l'): (hasDisliked ? 'n' : 'd');
+    final react_char = (react == React.like)
+        ? (hasLiked ? 'n' : 'l')
+        : (hasDisliked ? 'n' : 'd');
 
-    final linkInfo = await LocalDatabase.getLinkInfo(widget.linkId);
+    final linkInfo =
+        await LocalDatabase.getLinkInfo(widget.linkId, widget.user.userId);
     final jsonResponse = await API.broadcastReact(
         linkInfo["senderId"], widget.linkId, linkInfo["groupId"], react_char);
 
@@ -75,16 +85,26 @@ class _LinkPageState extends State<LinkPage> {
     LocalDatabase.updateReactions(newReactions);
 
     setState(() {
-        if (react == React.like) {
-          hasLiked = react_char == 'l';
-          hasDisliked = (react_char == 'n')? hasDisliked: false;
-        } else {
-          hasDisliked = react_char == 'd';
-          hasLiked = (react_char == 'n')? hasLiked: false;
-        }
+      if (react == React.like) {
+        hasLiked = react_char == 'l';
+        hasDisliked = (react_char == 'n') ? hasDisliked : false;
+      } else {
+        hasDisliked = react_char == 'd';
+        hasLiked = (react_char == 'n') ? hasLiked : false;
+      }
     });
 
     await _loadLinkInfo();
+  }
+
+  void _updateBookmark() async {
+    String action = hasBookmarked ? "unbookmark" : "bookmark";
+
+    LocalDatabase.updateBookmarks(widget.linkId, action);
+
+    setState(() {
+      hasBookmarked = !hasBookmarked;
+    });
   }
 
   @override
@@ -92,6 +112,20 @@ class _LinkPageState extends State<LinkPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Message'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              // Call the API to update bookmark
+              _updateBookmark();
+            },
+            icon: Icon(
+              hasBookmarked ? Icons.bookmark : Icons.bookmark_outline,
+              color: hasBookmarked
+                  ? Colors.yellow
+                  : null, // Optionally set the color
+            ),
+          ),
+        ],
       ),
       body: isLoading
           ? const Loading()
@@ -169,6 +203,25 @@ class _LinkPageState extends State<LinkPage> {
                         decoration: TextDecoration.underline,
                       ),
                     ),
+                  ),
+                ),
+                // Added tags to the widget tree
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Wrap(
+                    spacing: 8.0,
+                    runSpacing: 4.0,
+                    children: tags.map<Widget>((item) {
+                      return Chip(
+                        label: Text(
+                          item.toString(),
+                          style: const TextStyle(
+                            fontSize: 14.0,
+                          ),
+                        ),
+                        backgroundColor: Colors.grey[300],
+                      );
+                    }).toList(),
                   ),
                 ),
               ],

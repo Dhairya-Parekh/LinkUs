@@ -45,20 +45,26 @@ class _SignUpPageState extends State<SignUpPage> {
     final password = _passwordController.text.trim();
     final email = _emailController.text.trim();
 
-    final jsonResponse = await API.signup(username, email, password);
-
-    if (jsonResponse['success']) {
-      await saveCredentials(username, password, jsonResponse["user_id"],
-              jsonResponse["email"])
-          .then((res) {
-        Navigator.pushReplacementNamed(context, '/home');
-      });
-    } else {
+    try {
+      final jsonResponse = await API.signup(username, email, password);
+      if (jsonResponse['success']) {
+        await saveCredentials(username, password, jsonResponse["user_id"],
+                jsonResponse["email"])
+            .then((res) {
+          Navigator.of(context)
+              .pushNamedAndRemoveUntil('/home', (route) => false);
+        });
+      } else {
+        setState(() {
+          _errorMessage = jsonResponse['message'];
+        });
+      }
+    } catch (e) {
       setState(() {
-        _errorMessage = jsonResponse['message'];
+        _errorMessage =
+            'Something went wrong. Check your internet connection and try again.';
       });
     }
-
     setState(() {
       _isLoading = false;
     });
@@ -131,8 +137,8 @@ class _SignUpPageState extends State<SignUpPage> {
                             contentPadding: const EdgeInsets.all(16),
                           ),
                           style: TextStyle(
-                              color: CustomTheme.of(context).primary,
-                            ),
+                            color: CustomTheme.of(context).primary,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -154,8 +160,8 @@ class _SignUpPageState extends State<SignUpPage> {
                             contentPadding: const EdgeInsets.all(16),
                           ),
                           style: TextStyle(
-                              color: CustomTheme.of(context).primary,
-                            ),
+                            color: CustomTheme.of(context).primary,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -178,8 +184,8 @@ class _SignUpPageState extends State<SignUpPage> {
                             contentPadding: const EdgeInsets.all(16),
                           ),
                           style: TextStyle(
-                              color: CustomTheme.of(context).primary,
-                            ),
+                            color: CustomTheme.of(context).primary,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 32),
