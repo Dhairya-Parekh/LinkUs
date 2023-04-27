@@ -436,6 +436,7 @@ class _GroupPageState extends State<GroupPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: CustomTheme.of(context).secondary,
         title: GestureDetector(
           onTap: () {
             // navigate to group info page
@@ -449,12 +450,17 @@ class _GroupPageState extends State<GroupPage> {
               ),
             );
           },
-          child: Text(widget.group.groupName),
+          child: Text(
+            widget.group.groupName,
+            style: TextStyle(
+              color:  CustomTheme.of(context).onSecondary
+            )
+          ),
         ),
         leading: Visibility(
           visible: !_showSearchBar,
           child: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: Icon(Icons.arrow_back, color: CustomTheme.of(context).onSecondary),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -464,49 +470,46 @@ class _GroupPageState extends State<GroupPage> {
           Visibility(
             visible: !_showSearchBar,
             child: Container(
-              color: CustomTheme.of(context).secondary,
-              child: PopupMenuButton<String>(
-                onSelected: (String result) {
-                  switch (result) {
-                    case 'search':
-                      setState(() {
-                        _showSearchBar = true;
-                        _searchedLinks = _filteredLinks;
-                      });
-                      break;
-                    case 'sort':
-                      showSortOptionsPopUp();
-                      break;
-                    case 'filter':
-                      setState(() {
-                        showFilterOptionsPopUp();
-                      });
-                      break;
-                  }
-                },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  PopupMenuItem<String>(
-                    value: 'search',
-                    child: Text('Search',
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: CustomTheme.of(context).onSecondary)),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'sort',
-                    child: Text('Sort',
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: CustomTheme.of(context).onSecondary)),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'filter',
-                    child: Text('Filter',
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: CustomTheme.of(context).onSecondary)),
-                  ),
-                ],
+              color:CustomTheme.of(context).secondary, 
+              child: PopupMenuTheme(
+                data: PopupMenuThemeData(
+                  color: CustomTheme.of(context).secondary
+                ), 
+                child: PopupMenuButton<String>(
+                  icon: Icon(Icons.more_vert, color: CustomTheme.of(context).onSecondary),
+                  onSelected: (String result) {
+                    switch (result) {
+                      case 'search':
+                        setState(() {
+                          _showSearchBar = true;
+                          _searchedLinks = _filteredLinks;
+                        });
+                        break;
+                      case 'sort':
+                        showSortOptionsPopUp();
+                        break;
+                      case 'filter':
+                        setState(() {
+                          showFilterOptionsPopUp();    
+                        });
+                        break;
+                    }
+                  },
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                    PopupMenuItem<String>(
+                      value: 'search',
+                      child: Text('Search', style: TextStyle(fontSize: 18, color: CustomTheme.of(context).onSecondary)),
+                    ),
+                    PopupMenuItem<String>(
+                      value: 'sort',
+                      child: Text('Sort', style: TextStyle(fontSize: 18, color: CustomTheme.of(context).onSecondary)),
+                    ),
+                    PopupMenuItem<String>(
+                      value: 'filter',
+                      child: Text('Filter', style: TextStyle(fontSize: 18, color: CustomTheme.of(context).onSecondary)),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -520,16 +523,23 @@ class _GroupPageState extends State<GroupPage> {
                     const Padding(padding: EdgeInsets.only(left: 30)),
                     Expanded(
                       child: TextField(
+                        style: TextStyle(
+                          color: CustomTheme.of(context).onSecondary
+                        ),
+                        cursorColor: CustomTheme.of(context).onSecondary,
                         controller: _searchController,
                         onChanged: _searchLinks,
-                        decoration: const InputDecoration(
-                          hintText: 'Search...',
+                        decoration: InputDecoration(
+                          hintText: 'Search',
+                          hintStyle: TextStyle(
+                            color: CustomTheme.of(context).onSecondary
+                          ),
                           border: InputBorder.none,
                         ),
                       ),
                     ),
                     GestureDetector(
-                      child: const Icon(Icons.clear),
+                      child: Icon(Icons.clear, color: CustomTheme.of(context).onSecondary),
                       onTap: () {
                         setState(() {
                           _showSearchBar = false;
@@ -547,8 +557,9 @@ class _GroupPageState extends State<GroupPage> {
       body: _areLinksLoading ? const Loading() : getLinkList(),
       floatingActionButton: _isMember
           ? FloatingActionButton(
+              backgroundColor: CustomTheme.of(context).secondary,
               onPressed: showNewMessagePopUp,
-              child: const Icon(Icons.add),
+              child: Icon(Icons.add, color:CustomTheme.of(context).onSecondary),
             )
           : null,
     );
