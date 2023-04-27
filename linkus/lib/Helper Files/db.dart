@@ -139,6 +139,7 @@ class LocalDatabase {
 
   //  TODO: Remove for loop, use Join
   static Future<List<Link>> fetchLinks(String groupId) async {
+    await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
     String query = 'SELECT link_id FROM links WHERE group_id = ?';
     List<Map<String, dynamic>> rawLinks = await db.rawQuery(query, [groupId]);

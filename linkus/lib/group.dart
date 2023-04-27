@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:linkus/Common%20Widgets/group_list.dart';
 import 'package:linkus/Common%20Widgets/link_list.dart';
 import 'package:linkus/Common%20Widgets/loading.dart';
 import 'package:linkus/Helper%20Files/db.dart';
@@ -17,24 +18,18 @@ class GroupPage extends StatefulWidget {
 }
 
 class _GroupPageState extends State<GroupPage> {
+  final FocusNode _searchFocusNode = FocusNode();
   List<Link> _links = [];
   bool _areLinksLoading = true;
   bool _isMember = true;
   bool _showSearchBar = false;
-  bool _areFiltersApplied = false;
   final TextEditingController _searchController = TextEditingController();
-  List<String> _users = [];
-  List<String> _tags = [];
-  Set<String> _filteredUsers = {};
-  Set<String> _filteredTags = {};
+  final List<String> _users = [];
+  final List<String> _tags = [];
+  final Set<String> _filteredUsers = {};
+  final Set<String> _filteredTags = {};
   List<Link> _filteredLinks = [];
   List<Link> _searchedLinks = [];
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
 
   Future<void> _loadLinks() async {
     final links = await LocalDatabase.fetchLinks(widget.group.groupId);
@@ -70,16 +65,6 @@ class _GroupPageState extends State<GroupPage> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _loadLinks();
-    _loadUsers();
-    _loadTags();
-    // by default sort by time
-    _sortByTime();
-  }
-
   Future<void> showNewMessagePopUp() async {
     final result = await showDialog(
       context: context,
@@ -96,7 +81,7 @@ class _GroupPageState extends State<GroupPage> {
       await _loadLinks();
     }
   }
-
+  
   void _searchLinks(String query) {
     setState(() {
       if (query.isEmpty) {
@@ -108,6 +93,41 @@ class _GroupPageState extends State<GroupPage> {
                 link.info.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
+    });
+  }
+
+  void filterLinks() {
+    List<Link> filteredLinks = [];
+    // are there any filters?
+    if (_filteredTags.isEmpty && _filteredUsers.isEmpty) {
+      filteredLinks = _filteredLinks;
+    } else {
+      // are user filters applied?
+      if (_filteredUsers.isNotEmpty) {
+        for (var link in _filteredLinks) {
+          if (_filteredUsers.contains(link.senderName)) {
+            filteredLinks.add(link);
+          }
+        }
+      } else {
+        filteredLinks = _filteredLinks;
+      }
+      // are tag filters applied?
+      if (_filteredTags.isNotEmpty) {
+        List<Link> tempLinks = [];
+        for (var link in filteredLinks) {
+          for (var tag in link.tags) {
+            if (_filteredTags.contains(tag)) {
+              tempLinks.add(link);
+              break;
+            }
+          }
+        }
+        filteredLinks = tempLinks;
+      }
+    }
+    setState(() {
+      _filteredLinks = filteredLinks;
     });
   }
 
@@ -383,187 +403,226 @@ class _GroupPageState extends State<GroupPage> {
     );
   }
 
-  void filterLinks() {
-    List<Link> filteredLinks = [];
-    // are there any filters?
-    if (_filteredTags.isEmpty && _filteredUsers.isEmpty) {
-      filteredLinks = _links;
-    } else {
-      // are user filters applied?
-      if (_filteredUsers.isNotEmpty) {
-        for (var link in _links) {
-          if (_filteredUsers.contains(link.senderName)) {
-            filteredLinks.add(link);
-          }
-        }
-      } else {
-        filteredLinks = _links;
-      }
-      // are tag filters applied?
-      if (_filteredTags.isNotEmpty) {
-        print(_filteredTags);
-        List<Link> tempLinks = [];
-        for (var link in filteredLinks) {
-          print(link.tags);
-          for (var tag in link.tags) {
-            if (_filteredTags.contains(tag)) {
-              tempLinks.add(link);
-              break;
-            }
-          }
-        }
-        filteredLinks = tempLinks;
-      }
+  GroupMessageList getLinkList(){
+    if(_showSearchBar){
+      return GroupMessageList(
+        groupId: widget.group.groupId,
+        user: widget.user,
+        links: _searchedLinks,
+      );
     }
-    setState(() {
-      _filteredLinks = filteredLinks;
-    });
-  }
-
-  LinkList getLinkList() {
-    if (_showSearchBar) {
-      return LinkList(
-          links: _searchedLinks,
-          user: widget.user,
-          groupId: widget.group.groupId);
-    } else {
-      return LinkList(
-          links: _filteredLinks,
-          user: widget.user,
-          groupId: widget.group.groupId);
+    else{
+      return GroupMessageList(
+        groupId: widget.group.groupId,
+        user: widget.user,
+        links: _filteredLinks,
+      );
     }
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loadLinks();
+    _loadUsers();
+    _loadTags();
+    // by default sort by time
+    _sortByTime();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final header = _showSearchBar
+        ? Expanded(
+            child: TextField(
+              focusNode: _searchFocusNode,
+              controller: _searchController,
+              onChanged: _searchLinks,
+              decoration: const InputDecoration(
+                hintText: 'Search...',
+                border: InputBorder.none,
+              ),
+              style: TextStyle(
+                color: CustomTheme.of(context).onSecondary,
+                fontSize: 20,
+              ),
+            ),
+          )
+        : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 50),
+            child: TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => GroupInfoPage(
+                      group: widget.group,
+                      user: widget.user,
+                    ),
+                  ),
+                );
+              },
+              child: Text(
+                widget.group.groupName,
+                style: TextStyle(
+                  color: CustomTheme.of(context).onSecondary,
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          );
+
+    final content = _areLinksLoading ?
+       const Loading()
+      :
+      _showSearchBar
+        ? GroupMessageList(
+            groupId: widget.group.groupId,
+            user: widget.user,
+            links: _searchedLinks,
+          )
+        : GroupMessageList(
+            groupId: widget.group.groupId,
+            user: widget.user,
+            links: _filteredLinks,
+          );
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: CustomTheme.of(context).secondary,
-        title: GestureDetector(
-          onTap: () {
-            // navigate to group info page
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => GroupInfoPage(
-                  group: widget.group,
-                  user: widget.user,
-                ),
-              ),
-            );
-          },
-          child: Text(
-            widget.group.groupName,
-            style: TextStyle(
-              color:  CustomTheme.of(context).onSecondary
-            )
-          ),
-        ),
-        leading: Visibility(
-          visible: !_showSearchBar,
-          child: IconButton(
-            icon: Icon(Icons.arrow_back, color: CustomTheme.of(context).onSecondary),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        ),
-        actions: [
-          Visibility(
-            visible: !_showSearchBar,
-            child: Container(
-              color:CustomTheme.of(context).secondary, 
-              child: PopupMenuTheme(
-                data: PopupMenuThemeData(
-                  color: CustomTheme.of(context).secondary
-                ), 
-                child: PopupMenuButton<String>(
-                  icon: Icon(Icons.more_vert, color: CustomTheme.of(context).onSecondary),
-                  onSelected: (String result) {
-                    switch (result) {
-                      case 'search':
-                        setState(() {
-                          _showSearchBar = true;
-                          _searchedLinks = _filteredLinks;
-                        });
-                        break;
-                      case 'sort':
-                        showSortOptionsPopUp();
-                        break;
-                      case 'filter':
-                        setState(() {
-                          showFilterOptionsPopUp();    
-                        });
-                        break;
-                    }
-                  },
-                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                    PopupMenuItem<String>(
-                      value: 'search',
-                      child: Text('Search', style: TextStyle(fontSize: 18, color: CustomTheme.of(context).onSecondary)),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'sort',
-                      child: Text('Sort', style: TextStyle(fontSize: 18, color: CustomTheme.of(context).onSecondary)),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'filter',
-                      child: Text('Filter', style: TextStyle(fontSize: 18, color: CustomTheme.of(context).onSecondary)),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Visibility(
-            visible: _showSearchBar,
-            child: Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: Row(
-                  children: [
-                    const Padding(padding: EdgeInsets.only(left: 30)),
-                    Expanded(
-                      child: TextField(
-                        style: TextStyle(
-                          color: CustomTheme.of(context).onSecondary
-                        ),
-                        cursorColor: CustomTheme.of(context).onSecondary,
-                        controller: _searchController,
-                        onChanged: _searchLinks,
-                        decoration: InputDecoration(
-                          hintText: 'Search',
-                          hintStyle: TextStyle(
-                            color: CustomTheme.of(context).onSecondary
+      backgroundColor: Colors.transparent,
+      body: GestureDetector(
+        onTap: () {
+          if (_searchFocusNode.hasFocus) {
+            _searchFocusNode.unfocus();
+          }
+          setState(() {
+            _showSearchBar = false;
+          });
+        },
+        child: Container(
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+              colors: [
+                CustomTheme.of(context).gradientStart,
+                CustomTheme.of(context).gradientEnd,
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            )),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 50),
+                Container(
+                  decoration: const BoxDecoration(
+                    // color: CustomTheme.of(context).secondary,
+                    color: Colors.transparent,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: Icon(
+                            Icons.arrow_back,
+                            color: CustomTheme.of(context).onSecondary,
+                          )),
+                      header,
+                      // IconButton(
+                      //     onPressed: () {
+                      //       if(!_isSearching){
+                      //         _searchFocusNode.requestFocus();
+                      //       }
+                      //       setState(() {
+                      //         _isSearching = !_isSearching;
+                      //       });
+                      //       _searchController.clear();
+                      //     },
+                      //     icon: Icon(
+                      //       _isSearching ? Icons.close :
+                      //       Icons.search,
+                      //       color: CustomTheme.of(context).onSecondary,
+                      //     )),
+                      PopupMenuButton<String>(
+                        onSelected: (String result) {
+                          switch (result) {
+                            case 'search':
+                              setState(() {
+                                if(!_showSearchBar){
+                                  _searchFocusNode.requestFocus();
+                                }
+                                setState(() {
+                                  _showSearchBar = !_showSearchBar;
+                                });
+                                _searchController.clear();
+                                _searchedLinks = _filteredLinks;
+                              });
+                              break;
+                            case 'sort':
+                              showSortOptionsPopUp();
+                              break;
+                            case 'filter':
+                              setState(() {
+                                showFilterOptionsPopUp();
+                              });
+                              break;
+                          }
+                        },
+                        itemBuilder: (BuildContext context) =>
+                            <PopupMenuEntry<String>>[
+                          PopupMenuItem<String>(
+                            value: 'search',
+                            child: Text('Search',
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    color:
+                                        CustomTheme.of(context).onSecondary)),
                           ),
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      child: Icon(Icons.clear, color: CustomTheme.of(context).onSecondary),
-                      onTap: () {
-                        setState(() {
-                          _showSearchBar = false;
-                          _searchController.clear();
-                        });
-                      },
-                    ),
-                  ],
+                          PopupMenuItem<String>(
+                            value: 'sort',
+                            child: Text('Sort',
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    color:
+                                        CustomTheme.of(context).onSecondary)),
+                          ),
+                          PopupMenuItem<String>(
+                            value: 'filter',
+                            child: Text('Filter',
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    color:
+                                        CustomTheme.of(context).onSecondary)),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
                 ),
-              ),
-            ),
-          ),
-        ],
+                Expanded(child: content)
+              ],
+            )),
       ),
-      body: _areLinksLoading ? const Loading() : getLinkList(),
       floatingActionButton: _isMember
-          ? FloatingActionButton(
-              backgroundColor: CustomTheme.of(context).secondary,
-              onPressed: showNewMessagePopUp,
-              child: Icon(Icons.add, color:CustomTheme.of(context).onSecondary),
-            )
+          ? Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: FloatingActionButton(
+                onPressed: showNewMessagePopUp,
+                backgroundColor: CustomTheme.of(context).secondary,
+                child: Icon(Icons.message, color: CustomTheme.of(context).onSecondary,),
+              ),
+          )
           : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:linkus/Common%20Widgets/loading.dart';
 import 'package:linkus/Helper%20Files/api.dart';
 import 'package:linkus/Helper%20Files/db.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
+import 'package:linkus/Theme/theme_constant.dart';
 
 class Tech {
   String label;
@@ -60,6 +62,7 @@ class _MessagePopUpState extends State<MessagePopUp> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _linkController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  bool _isLoading = false;
   final List<Tech> _tags = [
     Tech("Fiction", Colors.brown, false),
     Tech("Novel", Colors.deepPurple, false),
@@ -72,7 +75,6 @@ class _MessagePopUpState extends State<MessagePopUp> {
 
   List<Widget> techChips() {
     return [
-      const Text('Tags:'),
       TechChips(
         techList: _tags,
         onSelected: (tech) {
@@ -83,6 +85,9 @@ class _MessagePopUpState extends State<MessagePopUp> {
   }
 
   Future<void> _addLink() async {
+    setState(() {
+      _isLoading = true;
+    });
     // Add link to database
 
     final title = _titleController.text.trim();
@@ -129,11 +134,15 @@ class _MessagePopUpState extends State<MessagePopUp> {
     // };
     // await API.addLink(widget.groupId, linkData);
     // Navigator.pop(context);
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: CustomTheme.of(context).primary,
       contentPadding: const EdgeInsets.all(16),
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -149,9 +158,12 @@ class _MessagePopUpState extends State<MessagePopUp> {
       ),
       content: SizedBox(
         width: double.maxFinite,
-        child: SingleChildScrollView(
+        child:  _isLoading
+            ? const Loading()
+            : SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextField(
                 controller: _titleController,
@@ -167,6 +179,7 @@ class _MessagePopUpState extends State<MessagePopUp> {
                 ),
               ),
               const SizedBox(height: 16),
+              const Text("Tags:",textAlign: TextAlign.end,),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -192,10 +205,28 @@ class _MessagePopUpState extends State<MessagePopUp> {
         ),
       ),
       actions: [
-        FloatingActionButton(
-          onPressed: _addLink,
-          child: const Icon(Icons.send),
-        ),
+        // FloatingActionButton(
+        //   onPressed: _addLink,
+        //   backgroundColor: CustomTheme.of(context).secondary,
+          // child: Icon(Icons.send,
+          //     color: CustomTheme.of(context).onSecondary
+          // ),
+
+        // ),
+        Stack(
+          children: [
+            ElevatedButton(
+              onPressed: _isLoading ? null : _addLink,
+              child: Icon(Icons.send,
+              color: CustomTheme.of(context).onSecondary
+          ),
+            ),
+            if (_isLoading)
+              const Positioned.fill(
+                child: CircularProgressIndicator(),
+              ),
+          ],
+        )
       ],
     );
   }
