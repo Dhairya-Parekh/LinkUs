@@ -529,8 +529,7 @@ class LocalDatabase {
     for (Map<String, dynamic> roleAction in updateRolesActions) {
       final String userId = roleAction['user_id'];
       final String groupId = roleAction['group_id'];
-      // final String role = (roleAction['role'] as GroupRole).value;
-      final String role = roleAction['role'].value;
+      final String role = (roleAction['role'] as GroupRole).value;
       String query =
           "update participants set roles = '$role' where user_id = '$userId' and group_id = '$groupId'";
       await db.rawInsert(query);
