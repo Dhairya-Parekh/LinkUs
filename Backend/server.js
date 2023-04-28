@@ -374,7 +374,7 @@ app.post('/add_user', (req, res) => {
                   temp_user_list.push(response.new_member_id)
                   temp_user_list.push(req.body.new_member_role)
                   temp_user_list.push(response.time_stamp)
-                  temp_user_list.push(MESSAGE_ACTION_ENUM.ADD)
+                  temp_user_list.push(GROUP_ACTION_ENUM.ADD)
                   temp_list.push(temp_user_list)
                 }
               }

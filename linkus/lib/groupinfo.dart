@@ -23,6 +23,8 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
   bool _isGroupInfoLoading = true;
   int _isMemberInfoLoading = -1;
   Map<String, dynamic> userInfo = {};
+  final TextEditingController _usernameController = TextEditingController();
+  List<Map<String, dynamic>> users = [];
 
   Future<void> _loadGroupInfo() async {
     final ginfo = await LocalDatabase.getGroupInfo(widget.group.groupId);
@@ -190,6 +192,254 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
       Navigator.pushReplacementNamed(context, '/home');
     }
   }
+  
+   Future<void> _addMember() async {
+    // Check if group name and at least one user has been entered
+    if (users.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content: const Text('Please enter at least one user.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
+    final members = users.map<Map<String, dynamic>>((user) {
+      return {
+        'user_name': user['username'],
+        'role': user['role'],
+        'group_id': widget.group.groupId,
+      };
+    }).toList();
+    try {
+      for (final member in members) {
+        await API
+            .broadcastAdd(
+          widget.user.userId,
+          widget.group.groupId,
+          member['user_name'],
+          member['role'],
+        )
+            .then((jsonResponse) async {
+          if (jsonResponse['success']) {
+            // Save the user to local database
+            final memberId = jsonResponse['new_member_id'];
+            final memberWithId = {
+              'user_name': member['user_name'],
+              'role': (member['role'] as GroupRole).value,
+              'group_id': widget.group.groupId,
+              'user_id': memberId,
+            };
+            await LocalDatabase.addUsers([memberWithId]);
+          } else {
+            // Display error message
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: const Text('Error'),
+                  content: Text(jsonResponse['message']),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('OK'),
+                    ),
+                  ],
+                );
+              },
+            );
+          }
+        }).catchError((e) {
+          print(e);
+        });
+      }
+      // TODO; Make sure that the change is displayed without reload
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context, true);
+      setState(() {
+      _loadGroupInfo();
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+   _showAddMembersScreen() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20.0),
+          topRight: Radius.circular(20.0),
+        ),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.8,
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Material(
+                        elevation: 4.0, // Set the elevation to 4.0
+                        shape: const CircleBorder(),
+                        clipBehavior: Clip.hardEdge,
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+                      const SizedBox(
+                          width:
+                              100), // Add some horizontal space between the IconButton and Text
+                      const Text(
+                        'New Group',
+                        style: TextStyle(
+                            fontSize: 24.0), // Set the font size to 24.0
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16.0), // Add some vertical space
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _usernameController,
+                          decoration: InputDecoration(
+                            hintText: 'Enter Users',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(
+                                  8.0), // Add rounded borders
+                              borderSide: const BorderSide(
+                                  color: Colors.grey), // Add a grey border
+                            ),
+                            filled: true, // Fill the background color
+                            fillColor: Colors
+                                .white, // Set the background color to white
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16.0, // Add some horizontal padding
+                              vertical: 12.0, // Add some vertical padding
+                            ),
+                            suffixIcon: const Icon(Icons
+                                .search), // Add a search icon on the right side
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            final username = _usernameController.text.trim();
+                            if (username.isNotEmpty &&
+                                !users
+                                    .map((user) => user['username'])
+                                    .contains(username)) {
+                              users.add({
+                                'username': username,
+                                'role': GroupRole.member
+                              });
+                              _usernameController.clear();
+                            }
+                          });
+                        },
+                        child: const Text('Add User'),
+                      ),
+                    ],
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: users.length,
+                      itemBuilder: (context, index) {
+                        final user = users[index];
+                        return Dismissible(
+                          key: Key(user['username']),
+                          onDismissed: (direction) {
+                            setState(() {
+                              users.removeAt(index);
+                            });
+                          },
+                          background: Container(color: Colors.red),
+                          child: ListTile(
+                            title: Text(user['username']),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                DropdownButton<String>(
+                                  value: user['role'] == GroupRole.admin
+                                      ? 'Admin'
+                                      : 'Member',
+                                  hint: const Text('Choose Role'),
+                                  items: <String>['Admin', 'Member']
+                                      .map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                  onChanged: (String? selectedRole) {
+                                    setState(() {
+                                      users[index]['role'] =
+                                          selectedRole == 'Admin'
+                                              ? GroupRole.admin
+                                              : GroupRole.member;
+                                    });
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    setState(() {
+                                      users.removeAt(index);
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Positioned(
+                    bottom: 0.0,
+                    left: 0.0,
+                    right: 0.0,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        elevation: 4.0,
+                        backgroundColor: const Color.fromARGB(255, 194, 80, 65),
+                        padding: const EdgeInsets.all(16.0),
+                      ),
+                      onPressed: () => _addMember(),
+                      child: const Text('Add'),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -318,7 +568,7 @@ class _GroupInfoPageState extends State<GroupInfoPage> {
                       child: userInfo["isAdmin"]
                           ? ElevatedButton(
                               onPressed: () {
-                                // add members
+                                _showAddMembersScreen();
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
