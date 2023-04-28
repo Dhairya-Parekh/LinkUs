@@ -101,7 +101,6 @@ class LocalDatabase {
     if (_database != null) {
       return _database!;
     }
-    print("Opening database $_uid");
     _database = await openDatabase(
       'linkus_local_$_uid.db',
       version: 1,
@@ -137,7 +136,7 @@ class LocalDatabase {
     return groups;
   }
 
-  //  TODO: Remove for loop, use Join
+  // optimisation: use join instead
   static Future<List<Link>> fetchLinks(String groupId) async {
     final Database db = await database;
     String query = 'SELECT link_id FROM links WHERE group_id = ?';
@@ -147,7 +146,7 @@ class LocalDatabase {
     List<Link> links = [];
     // for each link id, fetch the link info
     for (String linkId in linkIds) {
-      Map<String, dynamic> linkInfo = await getLinkInfo(linkId, _uid!);
+      Map<String, dynamic> linkInfo = await getLinkInfo(linkId);
       links.add(Link(
         linkId: linkId,
         link: linkInfo["link"],
@@ -163,7 +162,6 @@ class LocalDatabase {
         hasBookmarked: linkInfo["hasBookmarked"],
       ));
     }
-    // write using join instead of for loop
     return links;
   }
 
@@ -224,15 +222,14 @@ class LocalDatabase {
       };
       return groupInfo;
     } catch (e) {
-      print(e);
       return {};
     }
   }
 
-  // TODO: Remove userID from getLinkInfo
   static Future<Map<String, dynamic>> getLinkInfo(
-      String linkId, String userId) async {
+      String linkId) async {
     final Database db = await database;
+    final String userId = _uid!;
     String query =
         'SELECT user_name, group_id , sender_id, title, link, info, time_stamp FROM links join users on links.sender_id = users.user_id WHERE link_id = ?';
     final List<Map<String, dynamic>> rawLinks =
@@ -345,7 +342,6 @@ class LocalDatabase {
         return jsonResponse;
       }
     } catch (e) {
-      print(e);
       return {};
     }
   }
@@ -353,11 +349,8 @@ class LocalDatabase {
   static Future<void> updateMessages(
       List<Map<String, dynamic>> newMessages) async {
     try {
-      print(newMessages);
       final Database db = await database;
       for (Map<String, dynamic> message in newMessages) {
-        print(message['tags']);
-        print((message['tags'].runtimeType));
         final String senderId = message['sender_id'];
         final String groupId = message['group_id'];
         final String linkId = message['link_id'];
@@ -376,7 +369,7 @@ class LocalDatabase {
         }
       }
     } catch (e) {
-      print(e);
+      // ignore 
     }
   }
 
@@ -509,7 +502,7 @@ class LocalDatabase {
         }
       }
     } catch (e) {
-      print(e);
+      // ignore
     }
   }
 

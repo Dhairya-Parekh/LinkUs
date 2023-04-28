@@ -4,11 +4,12 @@ import 'dart:convert';
 import 'package:linkus/Helper%20Files/db.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
 
-// TODO: Add error handling
-// TODO: Remove Hardcoded response
+// Add error handling
+// Remove Hardcoded response
 
 class API {
   static const _baseUrl = 'https://linkus.onrender.com';
+  // static const _baseUrl = 'http://192.168.2.104:8080';
   static final _client = http.Client();
   static final Map<String, String> _defaultHeaders = {
     'content-type': 'application/json'
@@ -29,7 +30,6 @@ class API {
       Map<String, dynamic> response =
           await authenticate(user['username']!, user['password']!);
       if (response['success'] == true) {
-        print('Session Timed Out. Reauthenticated');
       } else {
         throw Exception('Session Timed Out');
       }
@@ -158,7 +158,6 @@ class API {
     formattedUpdates['deleted_groups_actions'] = deletedGroupsActions;
     
     formattedUpdates['time_stamp'] = updates['time_stamp'];
-    print("formattedUpdates: $formattedUpdates");
     return formattedUpdates;
   }
 

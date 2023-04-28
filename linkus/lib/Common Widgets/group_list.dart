@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:linkus/Common%20Widgets/loading.dart';
 import 'package:linkus/Helper%20Files/api.dart';
 import 'package:linkus/Helper%20Files/db.dart';
 import 'package:linkus/Helper%20Files/local_storage.dart';
@@ -57,7 +56,8 @@ class _GroupMessageListState extends State<GroupMessageList> {
         },
       ),
     );
-    final result = await showModalBottomSheet(
+    // ignore: use_build_context_synchronously
+    await showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
         return SafeArea(
@@ -201,6 +201,5 @@ class _GroupMessageListState extends State<GroupMessageList> {
               );
             },
           );
-    // : Placeholder();
   }
 }

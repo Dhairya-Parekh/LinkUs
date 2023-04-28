@@ -91,7 +91,6 @@ class _CreateGroupPopupState extends State<CreateGroupPopup> {
         }
       });
     } catch (e) {
-      print(e);
       showDialog(
         context: context,
         builder: (context) {

@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _loadGroups();
+    _refresh();
   }
 
   Future<void> _loadGroups() async {
@@ -61,7 +62,6 @@ class _HomePageState extends State<HomePage> {
       try {
         final Map<String, dynamic> updates =
             await API.getUpdates(lastFetched, userId);
-        print(updates);
         List<Map<String, dynamic>> newMessagesActions =
             updates['new_messages_actions'];
         List<Map<String, dynamic>> deleteMessagesActions =

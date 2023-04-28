@@ -6,8 +6,8 @@ import 'package:linkus/Helper%20Files/local_storage.dart';
 import 'package:linkus/Theme/theme_constant.dart';
 import 'package:linkus/add_member_popup.dart';
 
-// TODO: Handle deleting group
-// TODO: Take user info from parent widget
+
+
 
 class GroupInfoPage extends StatefulWidget {
   final Group group;

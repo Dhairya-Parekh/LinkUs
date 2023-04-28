@@ -36,7 +36,7 @@ class _LinkPopUpState extends State<LinkPopUp> {
 
   Future<void> loadLink() async {
     final response =
-        await LocalDatabase.getLinkInfo(widget.linkId, widget.user.userId);
+        await LocalDatabase.getLinkInfo(widget.linkId);
     setState(() {
       _isLoading = false;
       linkInfosys = response;

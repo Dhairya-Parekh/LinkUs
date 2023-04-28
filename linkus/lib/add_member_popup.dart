@@ -98,7 +98,6 @@ class _AddMemberPopupState extends State<AddMemberPopup> {
           throw e;
         });
       }
-      // TODO; Make sure that the change is displayed without reload
       // ignore: use_build_context_synchronously
       Navigator.pop(context, true);
     } catch (e) {

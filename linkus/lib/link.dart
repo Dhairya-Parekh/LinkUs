@@ -34,7 +34,7 @@ class _LinkPageState extends State<LinkPage> {
 
   Future<void> _loadLinkInfo() async {
     final linkInfo =
-        await LocalDatabase.getLinkInfo(widget.linkId, widget.user.userId);
+        await LocalDatabase.getLinkInfo(widget.linkId);
     setState(() {
       title = linkInfo["title"];
       description = linkInfo["info"];
@@ -66,19 +66,28 @@ class _LinkPageState extends State<LinkPage> {
   }
 
   void _pressReactButton(React react) async {
-    final react_char = (react == React.like)
+    final reactChar = (react == React.like)
         ? (hasLiked ? 'n' : 'l')
         : (hasDisliked ? 'n' : 'd');
 
     final linkInfo =
-        await LocalDatabase.getLinkInfo(widget.linkId, widget.user.userId);
+        await LocalDatabase.getLinkInfo(widget.linkId);
     final jsonResponse = await API.broadcastReact(
-        linkInfo["senderId"], widget.linkId, linkInfo["groupId"], react_char);
-
+        linkInfo["senderId"], widget.linkId, linkInfo["groupId"], reactChar);
+    if(!jsonResponse["success"])
+    {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(jsonResponse["message"]),
+        ),
+      );
+      return;
+    }
     Map<String, dynamic> reaction = {
       'user_id': widget.user.userId,
       'link_id': widget.linkId,
-      'react': react_char
+      'react': reactChar
     };
 
     List<Map<String, dynamic>> newReactions = [reaction];
@@ -86,11 +95,11 @@ class _LinkPageState extends State<LinkPage> {
 
     setState(() {
       if (react == React.like) {
-        hasLiked = react_char == 'l';
-        hasDisliked = (react_char == 'n') ? hasDisliked : false;
+        hasLiked = reactChar == 'l';
+        hasDisliked = (reactChar == 'n') ? hasDisliked : false;
       } else {
-        hasDisliked = react_char == 'd';
-        hasLiked = (react_char == 'n') ? hasLiked : false;
+        hasDisliked = reactChar == 'd';
+        hasLiked = (reactChar == 'n') ? hasLiked : false;
       }
     });
 
