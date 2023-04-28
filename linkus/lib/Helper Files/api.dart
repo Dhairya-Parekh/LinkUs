@@ -8,7 +8,7 @@ import 'package:linkus/Helper%20Files/local_storage.dart';
 // TODO: Remove Hardcoded response
 
 class API {
-  static const _baseUrl = 'http://192.168.2.106:8080';
+  static const _baseUrl = 'http://192.168.0.104:8080';
   static final _client = http.Client();
   static final Map<String, String> _defaultHeaders = {
     'content-type': 'application/json'

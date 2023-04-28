@@ -205,28 +205,14 @@ class _MessagePopUpState extends State<MessagePopUp> {
         ),
       ),
       actions: [
-        // FloatingActionButton(
-        //   onPressed: _addLink,
-        //   backgroundColor: CustomTheme.of(context).secondary,
-          // child: Icon(Icons.send,
-          //     color: CustomTheme.of(context).onSecondary
-          // ),
-
-        // ),
-        Stack(
-          children: [
-            ElevatedButton(
-              onPressed: _isLoading ? null : _addLink,
-              child: Icon(Icons.send,
+        FloatingActionButton(
+          onPressed: _addLink,
+          backgroundColor: CustomTheme.of(context).secondary,
+          child: Icon(Icons.send,
               color: CustomTheme.of(context).onSecondary
           ),
-            ),
-            if (_isLoading)
-              const Positioned.fill(
-                child: CircularProgressIndicator(),
-              ),
-          ],
-        )
+
+        ),
       ],
     );
   }

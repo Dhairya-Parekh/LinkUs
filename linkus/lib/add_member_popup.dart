@@ -6,99 +6,34 @@ import 'package:flutter_switch/flutter_switch.dart';
 import 'package:linkus/Helper%20Files/db.dart';
 import 'package:linkus/Helper%20Files/api.dart';
 
-class CreateGroupPopup extends StatefulWidget {
+class AddMemberPopup extends StatefulWidget {
   final User user;
-  const CreateGroupPopup({super.key, required this.user});
+  final Group group;
+  const AddMemberPopup({super.key, required this.user, required this.group});
 
   @override
-  State<CreateGroupPopup> createState() => _CreateGroupPopupState();
+  State<AddMemberPopup> createState() => _AddMemberPopupState();
 }
 
-class _CreateGroupPopupState extends State<CreateGroupPopup> {
+class _AddMemberPopupState extends State<AddMemberPopup> {
   final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _groupNameController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
   final _usernameFocusNode = FocusNode();
   List<Map<String, dynamic>> users = [];
   bool _isLoading = false;
-  bool _addedMembers = false;
 
-  Future<void> _createGroup() async {
-    if (_groupNameController.text.trim().isEmpty || users.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Error'),
-            content:
-                const Text('Please enter a group name and at least one user.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-      return;
-    }
+  Future<void> _addMember() async {
+    // Check if group name and at least one user has been entered
     setState(() {
       _isLoading = true;
     });
-    final groupName = _groupNameController.text.trim();
-    final groupInfo = _descriptionController.text.trim();
-    final members = users.map<Map<String, dynamic>>((user) {
-      return {
-        'participant_name': user['username'],
-        'role': (user['role'] as GroupRole).value,
-      };
-    }).toList();
-    try {
-      await API
-          .createGroup(widget.user.userId, groupName, groupInfo, members)
-          .then((jsonResponse) async {
-        if (jsonResponse['success']) {
-          LocalDatabase.getAdded([
-            {
-              'group_id': jsonResponse['group_id'],
-              'group_name': groupName,
-              'group_info': groupInfo,
-              'members': jsonResponse['members']
-                  .map<Map<String, dynamic>>(
-                      (message) => message as Map<String, dynamic>)
-                  .toList(),
-            }
-          ]).then((value) {
-            Navigator.pushReplacementNamed(context, '/home');
-          });
-        } else {
-          await showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text('Error'),
-                content: Text(jsonResponse['message']),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
-        }
-      });
-    } catch (e) {
-      print(e);
+
+    if (users.isEmpty) {
       showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
             title: const Text('Error'),
-            content: const Text(
-                'An error occurred while creating the group. Check your internet connection and try again.'),
+            content: const Text('Please enter at least one user.'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
@@ -108,6 +43,81 @@ class _CreateGroupPopupState extends State<CreateGroupPopup> {
           );
         },
       );
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    final members = users.map<Map<String, dynamic>>((user) {
+      return {
+        'user_name': user['username'],
+        'role': user['role'],
+        'group_id': widget.group.groupId,
+      };
+    }).toList();
+    try {
+      for (final member in members) {
+        await API
+            .broadcastAdd(
+          widget.user.userId,
+          widget.group.groupId,
+          member['user_name'],
+          member['role'],
+        )
+            .then((jsonResponse) async {
+          if (jsonResponse['success']) {
+            // Save the user to local database
+            final memberId = jsonResponse['new_member_id'];
+            final memberWithId = {
+              'user_name': member['user_name'],
+              'role': (member['role'] as GroupRole).value,
+              'group_id': widget.group.groupId,
+              'user_id': memberId,
+            };
+            await LocalDatabase.addUsers([memberWithId]);
+          } else {
+            // Display error message
+            await showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: const Text('Error'),
+                  content: Text("User ${member['user_name']} not found."),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('OK'),
+                    ),
+                  ],
+                );
+              },
+            );
+          }
+        }).catchError((e) {
+          throw e;
+        });
+      }
+      // TODO; Make sure that the change is displayed without reload
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context, true);
+    } catch (e) {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Error'),
+              content:
+                  const Text('Please check your internet connection and try again.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
     }
     setState(() {
       _isLoading = false;
@@ -132,7 +142,7 @@ class _CreateGroupPopupState extends State<CreateGroupPopup> {
             ),
             const SizedBox(width: 100),
             Text(
-              'New Group',
+              'Add Members',
               style: TextStyle(
                   color: CustomTheme.of(context).onPrimary, fontSize: 24.0),
             ),
@@ -267,117 +277,8 @@ class _CreateGroupPopupState extends State<CreateGroupPopup> {
                 backgroundColor: CustomTheme.of(context).secondary,
                 foregroundColor: CustomTheme.of(context).onSecondary,
                 minimumSize: const Size(200, 40)),
-            onPressed: () {
-              setState(() {
-                _addedMembers = true;
-              });
-            },
+            onPressed: _addMember,
             child: const Text('Next'),
-          ),
-        ),
-      ],
-    );
-
-    final createGroupScreen = Column(
-      children: [
-        Row(
-          children: [
-            Material(
-              color: CustomTheme.of(context).onPrimary,
-              shape: const CircleBorder(),
-              clipBehavior: Clip.hardEdge,
-              child: IconButton(
-                icon: Icon(Icons.arrow_back,
-                    color: CustomTheme.of(context).primary),
-                onPressed: () {
-                  setState(() {
-                    _addedMembers = false;
-                  });
-                },
-              ),
-            ),
-            const SizedBox(width: 80),
-            Text(
-              'Create Group',
-              style: TextStyle(
-                  fontSize: 24.0, color: CustomTheme.of(context).onPrimary),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          style: TextStyle(
-            color: CustomTheme.of(context).onSecondary,
-          ),
-          controller: _groupNameController,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: CustomTheme.of(context).secondary,
-            hintText: 'Group Name',
-            hintStyle: TextStyle(
-              color: CustomTheme.of(context).onSecondary,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 12.0,
-            ),
-            border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextField(
-          style: TextStyle(
-            color: CustomTheme.of(context).onSecondary,
-          ),
-          controller: _descriptionController,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: CustomTheme.of(context).secondary,
-            hintText: 'Group Description',
-            hintStyle: TextStyle(
-              color: CustomTheme.of(context).onSecondary,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 12.0,
-            ),
-            border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Expanded(
-          child: ListView.builder(
-              itemCount: users.length,
-              itemBuilder: (context, index) {
-                final user = users[index];
-                return ListTile(
-                  title: Text(user['username'],
-                      style: TextStyle(
-                          fontSize: 20,
-                          color: CustomTheme.of(context).onPrimary)),
-                  trailing: Text(user['role'].toString().split('.').last,
-                      style: TextStyle(
-                          fontSize: 20,
-                          color: CustomTheme.of(context).onPrimary)),
-                );
-              }),
-        ),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 100),
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                elevation: 4.0,
-                backgroundColor: CustomTheme.of(context).secondary,
-                foregroundColor: CustomTheme.of(context).onSecondary,
-                minimumSize: const Size(200, 40)),
-            onPressed: () => _createGroup(),
-            child: const Text('Create Group'),
           ),
         ),
       ],
@@ -395,13 +296,9 @@ class _CreateGroupPopupState extends State<CreateGroupPopup> {
             topRight: Radius.circular(20.0),
           ),
         ),
-        // height: MediaQuery.of(context).size.height * 0.8,
+        height: MediaQuery.of(context).size.height * 0.8,
         padding: const EdgeInsets.all(16),
-        child: _isLoading
-            ? const Loading()
-            : _addedMembers
-                ? createGroupScreen
-                : addMemberScreen,
+        child: _isLoading ? const Loading() : addMemberScreen,
       ),
     );
   }

@@ -37,7 +37,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _searchGroups(String query) {
-    if(query.isEmpty){
+    if (query.isEmpty) {
       setState(() {
         _searchedGroups = groups;
       });
@@ -56,40 +56,64 @@ class _HomePageState extends State<HomePage> {
       _areGroupsLoading = true;
     });
     final String userId = widget.user.userId;
-    final DateTime lastFetched = await getLastFetched(userId);
-    final Map<String, dynamic> updates = await API.getUpdates(lastFetched, userId);
-    print(updates);
-    try {
-      List<Map<String, dynamic>> newMessagesActions = updates['new_messages_actions'];
-      List<Map<String, dynamic>> deleteMessagesActions = updates['delete_messages_actions'];
-      List<Map<String, dynamic>> reactActions = updates['react_actions'];
-      List<Map<String, dynamic>> changeRoleActions = updates['change_role_actions'];
-      List<Map<String, dynamic>> removeMemberActions = updates['remove_member_actions'];
-      List<Map<String, dynamic>> addUserActions = updates['add_user_actions'];
-      List<Map<String, dynamic>> getAddedActions = updates['get_added_actions'];
-      List<Map<String, dynamic>> deletedGroupsActions = updates['deleted_groups_actions'];
-      DateTime currentFetchedTime = DateTime.parse(updates['time_stamp']);
+    await getLastFetched(userId).then(
+      (DateTime lastFetched) async {
+      try {
+        final Map<String, dynamic> updates =
+            await API.getUpdates(lastFetched, userId);
+        print(updates);
+        List<Map<String, dynamic>> newMessagesActions =
+            updates['new_messages_actions'];
+        List<Map<String, dynamic>> deleteMessagesActions =
+            updates['delete_messages_actions'];
+        List<Map<String, dynamic>> reactActions = updates['react_actions'];
+        List<Map<String, dynamic>> changeRoleActions =
+            updates['change_role_actions'];
+        List<Map<String, dynamic>> removeMemberActions =
+            updates['remove_member_actions'];
+        List<Map<String, dynamic>> addUserActions = updates['add_user_actions'];
+        List<Map<String, dynamic>> getAddedActions = updates['get_added_actions'];
+        List<Map<String, dynamic>> deletedGroupsActions =
+            updates['deleted_groups_actions'];
+        DateTime currentFetchedTime = DateTime.parse(updates['time_stamp']);
 
-      await LocalDatabase.getAdded(getAddedActions);
-      await LocalDatabase.addUsers(addUserActions);
-      await LocalDatabase.removeMembers(removeMemberActions);
-      await LocalDatabase.updateRoles(changeRoleActions);
-      await LocalDatabase.updateMessages(newMessagesActions);
-      await LocalDatabase.deleteMessages(deleteMessagesActions);
-      await LocalDatabase.updateReactions(reactActions);
-      await LocalDatabase.deleteGroups(deletedGroupsActions);
-      await setLastFetched(userId, currentFetchedTime);
-      await _loadGroups();
-    } catch (e) {
-      print(e);
+        await LocalDatabase.getAdded(getAddedActions);
+        await LocalDatabase.addUsers(addUserActions);
+        await LocalDatabase.removeMembers(removeMemberActions);
+        await LocalDatabase.updateRoles(changeRoleActions);
+        await LocalDatabase.updateMessages(newMessagesActions);
+        await LocalDatabase.deleteMessages(deleteMessagesActions);
+        await LocalDatabase.updateReactions(reactActions);
+        await LocalDatabase.deleteGroups(deletedGroupsActions);
+        await setLastFetched(userId, currentFetchedTime);
+        await _loadGroups();
+      } catch (e) {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Error'),
+              content:
+                  const Text('Please check your internet connection and try again.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
     }
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.transparent,
-      body: GestureDetector(
+        body: GestureDetector(
           onTap: () {
             FocusScope.of(context).unfocus();
           },
@@ -177,63 +201,65 @@ class _HomePageState extends State<HomePage> {
                     ? const Loading()
                     : Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: _searchedGroups.isEmpty ? Center(
-                          child: Text("No groups found",
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: CustomTheme.of(context).onSecondary
-                            )
-                          ),
-                        )
-                        : GridView.builder(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 1,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 8,
-                          ),
-                          itemCount: _searchedGroups.length,
-                          itemBuilder: (context, index) {
-                            final group = _searchedGroups[index];
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => GroupPage(
-                                      group: group,
-                                      user: widget.user,
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Card(
-                                color: CustomTheme.of(context).primary,
-                                elevation: 8,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20.0)),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        group.groupName,
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          color:
-                                              CustomTheme.of(context).onPrimary,
+                        child: _searchedGroups.isEmpty
+                            ? Center(
+                                child: Text("No groups found",
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        color: CustomTheme.of(context)
+                                            .onSecondary)),
+                              )
+                            : GridView.builder(
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  childAspectRatio: 1,
+                                  crossAxisSpacing: 10,
+                                  mainAxisSpacing: 8,
+                                ),
+                                itemCount: _searchedGroups.length,
+                                itemBuilder: (context, index) {
+                                  final group = _searchedGroups[index];
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => GroupPage(
+                                            group: group,
+                                            user: widget.user,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Card(
+                                      color: CustomTheme.of(context).primary,
+                                      elevation: 8,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20.0)),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              group.groupName,
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                color: CustomTheme.of(context)
+                                                    .onPrimary,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                          ],
                                         ),
                                       ),
-                                      const SizedBox(height: 8),
-                                    ],
-                                  ),
-                                ),
+                                    ),
+                                  );
+                                },
                               ),
-                            );
-                          },
-                        ),
                       ),
               )
             ],
