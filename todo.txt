@@ -1,32 +1,19 @@
 todo shikhar:
+leave group not available to members
+Fetch updates showing wrong updates.
 
 todo naman:
-Refresh button on home page should work
-Local API data connections  
-    fetchLinks
-    getGroupInfo
-searching links based on tags
-searching links based on sender
-searching links based on content
-sorting messages based on time
-sorting messages based on reacts
-check email sent is valid format
-SQFLite not for browser windows and linux
-option to delete a Link
-Handle invalid links in link page
-Order of groups in homepage??
-profile page
+---> SQFLite not for browser windows and linux
+// option to delete a Link
+Order of groups in homepage
+    -Newest Message
 
 todo ranjan:
-Double tap on react should remove it. Currently two taps are needed after adding a react
-searching groups (invalid search should show no results)
 Resolve exception caught by widgets library
     1. setState called after dispose
-    2. incorect use of parent data widget
 add member to group
-option to bookmark a link
-display tags on link page
 Check Input field non-empty in reg and login
+check email sent is valid format
 
 todo dhairya:
 option to delete a group??
