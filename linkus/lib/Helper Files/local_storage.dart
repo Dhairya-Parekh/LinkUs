@@ -9,7 +9,6 @@ class User{
 
 Future<bool> checkAuthentication() async {
   // Check if user is authenticated
-  await Future.delayed(const Duration(seconds: 3), () {});
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? username = prefs.getString('username');
   String? password = prefs.getString('password');
@@ -24,7 +23,6 @@ Future<bool> checkAuthentication() async {
 
 Future<void> removeCredentials() async {
   // Logout user
-  await Future.delayed(const Duration(seconds: 3), () {});
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.remove('username');
   prefs.remove('password');
@@ -34,7 +32,6 @@ Future<void> removeCredentials() async {
 
 Future<void> saveCredentials(String username, String password, String userId, String email) async {
   // Login user
-  await Future.delayed(const Duration(seconds: 3), () {});
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.setString('username', username);
   prefs.setString('password', password);
@@ -44,7 +41,6 @@ Future<void> saveCredentials(String username, String password, String userId, St
 
 Future<User?> getUser() async {
   // Login user
-  await Future.delayed(const Duration(seconds: 3), () {});
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? username = prefs.getString('username');
   String? userid = prefs.getString('userid');
@@ -57,7 +53,6 @@ Future<User?> getUser() async {
 }
 
 Future<Map<String, dynamic>> getUserCredentials() async {
-  await Future.delayed(const Duration(seconds: 3), () {});
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? username = prefs.getString('username');
   String? password = prefs.getString('password');
@@ -66,14 +61,12 @@ Future<Map<String, dynamic>> getUserCredentials() async {
 }
 
 Future<String> getUserId() async {
-  await Future.delayed(const Duration(seconds: 3), () {});
   SharedPreferences prefs = await SharedPreferences.getInstance();
   final String userid = prefs.getString('userid') ?? "";
   return userid;
 }
 
 Future<DateTime> getLastFetched(String userId) async {
-  // await Future.delayed(const Duration(seconds: 3), () {});
   SharedPreferences prefs = await SharedPreferences.getInstance();
   final String? lastFetchedString = prefs.getString('last_fetched_$userId');
   final DateTime lastFetched = lastFetchedString != null
@@ -83,7 +76,6 @@ Future<DateTime> getLastFetched(String userId) async {
 }
 
 Future<void> setLastFetched(String userId,DateTime lastFetched) async {
-  // await Future.delayed(const Duration(seconds: 3), () {});
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.setString('last_fetched_$userId', lastFetched.toIso8601String());
 }

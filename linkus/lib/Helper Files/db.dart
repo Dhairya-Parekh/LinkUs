@@ -139,7 +139,6 @@ class LocalDatabase {
 
   //  TODO: Remove for loop, use Join
   static Future<List<Link>> fetchLinks(String groupId) async {
-    await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
     String query = 'SELECT link_id FROM links WHERE group_id = ?';
     List<Map<String, dynamic>> rawLinks = await db.rawQuery(query, [groupId]);
@@ -195,13 +194,11 @@ class LocalDatabase {
       String query = 'DELETE FROM bookmarks WHERE link_id = ?';
       await db.rawDelete(query, [linkId]);
     }
-    // await Future.delayed(const Duration(seconds: 3));
   }
 
   static Future<Map<String, dynamic>> getGroupInfo(String groupId) async {
     // Simulate network delay
     try {
-      // await Future.delayed(const Duration(seconds: 3));
       final Database db = await database;
       String query =
           'SELECT group_name, group_info FROM groups WHERE group_id = ?';
@@ -231,61 +228,6 @@ class LocalDatabase {
       return {};
     }
   }
-
-  // static Future<Map<String, dynamic>> getLinkInfo(String linkId) async {
-  //   // Simulate network delay
-  //   // await Future.delayed(const Duration(seconds: 3));
-
-  //   // Generate dummy data
-  //   // final linkInfo = {
-  //   //   "title": "Link $linkId",
-  //   //   "link": "https://www.google.com",
-  //   //   "info": "Lorem ipsum dolor sit amet, consectetur adipiscing",
-  //   //   "senderName": "John Doe",
-  //   //   "timeStamp": DateTime.now(),
-  //   //   "likes": 10,
-  //   //   "dislikes": 2,
-  //   //   "tags": ["tag1", "tag2", "tag3"],
-  //   // };
-
-  //   final Database db = await database;
-  //   String query =
-  //       'SELECT user_name, title, link, info, time_stamp FROM links join users on links.sender_id = users.user_id WHERE link_id = ?';
-  //   final List<Map<String, dynamic>> rawLinks =
-  //       await db.rawQuery(query, [linkId]);
-
-  //   final List<Map<String, dynamic>> likesResult = await db.rawQuery(
-  //     'SELECT COUNT(*) as count FROM reacts WHERE link_id = ? AND react = \'l\'',
-  //     [linkId],
-  //   );
-
-  //   final List<Map<String, dynamic>> dislikesResult = await db.rawQuery(
-  //     'SELECT COUNT(*) as count FROM reacts WHERE link_id = ? AND react = \'d\'',
-  //     [linkId],
-  //   );
-
-  //   final List<Map<String, dynamic>> tagResults = await db.rawQuery(
-  //     'SELECT tags FROM tags WHERE link_id = ?',
-  //     [linkId],
-  //   );
-  //   final tags = tagResults.map((result) => result['tags'] as String).toList();
-
-  //   if (rawLinks.isNotEmpty) {
-  //     final Map<String, dynamic> linkInfo = {
-  //       "title": rawLinks[0]["title"],
-  //       "link": rawLinks[0]["link"],
-  //       "info": rawLinks[0]["info"],
-  //       "senderName": rawLinks[0]["user_name"],
-  //       "timeStamp": DateTime.parse(rawLinks[0]["time_stamp"]),
-  //       "likes": likesResult.first["count"],
-  //       "dislikes": dislikesResult.first["count"],
-  //       "tags": tags,
-  //     };
-  //     return linkInfo;
-  //   }
-
-  //   return {};
-  // }
 
   // TODO: Remove userID from getLinkInfo
   static Future<Map<String, dynamic>> getLinkInfo(
@@ -354,10 +296,6 @@ class LocalDatabase {
 
   static Future<Map<String, dynamic>> getGroupSpecificUserInfo(
       String userId, String groupId) async {
-    // Simulate network delay
-    // await Future.delayed(const Duration(seconds: 3));
-    // TODO: Implement this method with actual database
-    // Generate dummy data
     try {
       final Database db = await database;
       String query =
@@ -414,8 +352,6 @@ class LocalDatabase {
 
   static Future<void> updateMessages(
       List<Map<String, dynamic>> newMessages) async {
-    // Simulate network delay
-    // await Future.delayed(const Duration(seconds: 3));
     try {
       print(newMessages);
       final Database db = await database;
@@ -446,8 +382,6 @@ class LocalDatabase {
 
   static Future<void> deleteMessages(
       List<Map<String, dynamic>> deleteMessages) async {
-    // Simulate network delay
-    // await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
     for (Map<String, dynamic> message in deleteMessages) {
       final String linkId = message['link_id'];
@@ -460,8 +394,6 @@ class LocalDatabase {
 
   static Future<void> updateReactions(
       List<Map<String, dynamic>> reactions) async {
-    // Simulate network delay
-    // await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
     for (Map<String, dynamic> reaction in reactions) {
       final String userId = reaction['sender_id'];
@@ -496,8 +428,6 @@ class LocalDatabase {
 
   static Future<void> updateRoles(
       List<Map<String, dynamic>> updateRolesActions) async {
-    // Simulate network delay
-    // await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
     for (Map<String, dynamic> roleAction in updateRolesActions) {
       final String userId = roleAction['user_id'];
@@ -511,8 +441,6 @@ class LocalDatabase {
 
   static Future<void> removeMembers(
       List<Map<String, dynamic>> removeMember) async {
-    // Simulate network delay
-    // await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
     for (Map<String, dynamic> target in removeMember) {
       final String userId = target['affected_id'];
@@ -524,8 +452,6 @@ class LocalDatabase {
   }
 
   static Future<void> addUsers(List<Map<String, dynamic>> addUser) async {
-    // Simulate network delay
-    // await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
     for (Map<String, dynamic> target in addUser) {
       final String userId = target['user_id'];
@@ -549,8 +475,6 @@ class LocalDatabase {
   }
 
   static Future<void> getAdded(List<Map<String, dynamic>> addGroup) async {
-    // Simulate network delay
-    // await Future.delayed(const Duration(seconds: 3));
     try {
       final Database db = await database;
       for (Map<String, dynamic> target in addGroup) {
@@ -590,8 +514,6 @@ class LocalDatabase {
   }
 
   static Future<void> deleteLink(Link link) async {
-    // Simulate network delay
-    // await Future.delayed(const Duration(seconds: 3));
     final Database db = await database;
     final String linkId = link.linkId;
     String query = "delete from links where link_id = '$linkId'";
