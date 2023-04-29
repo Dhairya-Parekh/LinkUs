@@ -167,14 +167,17 @@ class LocalDatabase {
 
   static Future<List<ShortLink>> fetchBookmarks() async {
     final Database db = await database;
-    String query = "select link_id,title,time_stamp,user_name as sender_name from links natural join bookmarks join users on links.sender_id = users.user_id";
+    String query =
+        "select link_id,title,time_stamp,user_name as sender_name from links natural join bookmarks join users on links.sender_id = users.user_id";
     List<Map<String, dynamic>> rawBookmarks = await db.rawQuery(query);
-    List<ShortLink> bookmarks = rawBookmarks.map((link) => ShortLink(
-      linkId: link["link_id"],
-      senderName: link["sender_name"],
-      title: link["title"],
-      timeStamp: DateTime.parse(link["time_stamp"]),
-    )).toList();
+    List<ShortLink> bookmarks = rawBookmarks
+        .map((link) => ShortLink(
+              linkId: link["link_id"],
+              senderName: link["sender_name"],
+              title: link["title"],
+              timeStamp: DateTime.parse(link["time_stamp"]),
+            ))
+        .toList();
     return bookmarks;
   }
 
@@ -186,11 +189,19 @@ class LocalDatabase {
     // await db.rawDelete(query, [linkId]);
 
     if (action == "bookmark") {
-      String query = 'INSERT INTO bookmarks VALUES (?)';
-      await db.rawInsert(query, [linkId]);
+      try {
+        String query = 'INSERT INTO bookmarks VALUES (?)';
+        await db.rawInsert(query, [linkId]);
+      } catch (e) {
+        // ignore
+      }
     } else if (action == "unbookmark") {
-      String query = 'DELETE FROM bookmarks WHERE link_id = ?';
-      await db.rawDelete(query, [linkId]);
+      try {
+        String query = 'DELETE FROM bookmarks WHERE link_id = ?';
+        await db.rawDelete(query, [linkId]);
+      } catch (e) {
+        // ignore
+      }
     }
   }
 
@@ -226,8 +237,7 @@ class LocalDatabase {
     }
   }
 
-  static Future<Map<String, dynamic>> getLinkInfo(
-      String linkId) async {
+  static Future<Map<String, dynamic>> getLinkInfo(String linkId) async {
     final Database db = await database;
     final String userId = _uid!;
     String query =
@@ -249,7 +259,8 @@ class LocalDatabase {
       'SELECT tags FROM tags WHERE link_id = ?',
       [linkId],
     );
-    final List<String> tags = tagResults.map((result) => result['tags'] as String).toList();
+    final List<String> tags =
+        tagResults.map((result) => result['tags'] as String).toList();
 
     final List<Map<String, dynamic>> bookmarkResults = await db.rawQuery(
       'SELECT * FROM bookmarks WHERE link_id = ?',
@@ -369,7 +380,7 @@ class LocalDatabase {
         }
       }
     } catch (e) {
-      // ignore 
+      // ignore
     }
   }
 
@@ -378,10 +389,14 @@ class LocalDatabase {
     final Database db = await database;
     for (Map<String, dynamic> message in deleteMessages) {
       final String linkId = message['link_id'];
-      String query = "delete from links where link_id = '$linkId'";
-      await db.rawDelete(query);
-      query = "delete from tags where link_id = '$linkId'";
-      await db.rawDelete(query);
+      try {
+        String query = "delete from links where link_id = '$linkId'";
+        await db.rawDelete(query);
+        query = "delete from tags where link_id = '$linkId'";
+        await db.rawDelete(query);
+      } catch (e) {
+        // ignore
+      }
     }
   }
 
@@ -397,24 +412,27 @@ class LocalDatabase {
           "SELECT react FROM reacts WHERE user_id = '$userId' AND link_id = '$linkId'";
 
       final List<Map<String, dynamic>> result = await db.rawQuery(querySelect);
-
-      if (result.isNotEmpty) {
-        if (react == 'n') {
-          // If the existing reaction is 'n', delete the row
-          final String queryDelete =
-              "DELETE FROM reacts WHERE user_id = '$userId' AND link_id = '$linkId'";
-          await db.rawDelete(queryDelete);
+      try {
+        if (result.isNotEmpty) {
+          if (react == 'n') {
+            // If the existing reaction is 'n', delete the row
+            final String queryDelete =
+                "DELETE FROM reacts WHERE user_id = '$userId' AND link_id = '$linkId'";
+            await db.rawDelete(queryDelete);
+          } else {
+            // Otherwise, update the existing row with the new reaction
+            final String queryUpdate =
+                "UPDATE reacts SET react = '$react' WHERE user_id = '$userId' AND link_id = '$linkId'";
+            await db.rawUpdate(queryUpdate);
+          }
         } else {
-          // Otherwise, update the existing row with the new reaction
-          final String queryUpdate =
-              "UPDATE reacts SET react = '$react' WHERE user_id = '$userId' AND link_id = '$linkId'";
-          await db.rawUpdate(queryUpdate);
+          // If there is no existing row, insert a new row with the given user_id, link_id, and react
+          final String queryInsert =
+              "INSERT INTO reacts(user_id, link_id, react) VALUES ('$userId', '$linkId', '$react')";
+          await db.rawInsert(queryInsert);
         }
-      } else {
-        // If there is no existing row, insert a new row with the given user_id, link_id, and react
-        final String queryInsert =
-            "INSERT INTO reacts(user_id, link_id, react) VALUES ('$userId', '$linkId', '$react')";
-        await db.rawInsert(queryInsert);
+      } catch (e) {
+        // ignore
       }
     }
   }
@@ -426,9 +444,13 @@ class LocalDatabase {
       final String userId = roleAction['user_id'];
       final String groupId = roleAction['group_id'];
       final String role = (roleAction['role'] as GroupRole).value;
-      String query =
-          "update participants set roles = '$role' where user_id = '$userId' and group_id = '$groupId'";
-      await db.rawInsert(query);
+      try {
+        String query =
+            "update participants set roles = '$role' where user_id = '$userId' and group_id = '$groupId'";
+        await db.rawInsert(query);
+      } catch (e) {
+        // ignore
+      }
     }
   }
 
@@ -438,9 +460,13 @@ class LocalDatabase {
     for (Map<String, dynamic> target in removeMember) {
       final String userId = target['affected_id'];
       final String groupId = target['group_id'];
-      String query =
-          "delete from participants where user_id = '$userId' and group_id = '$groupId'";
-      await db.rawDelete(query);
+      try {
+        String query =
+            "delete from participants where user_id = '$userId' and group_id = '$groupId'";
+        await db.rawDelete(query);
+      } catch (e) {
+        // ignore
+      }
     }
   }
 
@@ -452,18 +478,18 @@ class LocalDatabase {
       final String userName = target['user_name'];
       final String role = target['role'];
       // insert into users
-      String query =
-          "insert into users(user_id,user_name) values('$userId','$userName')";
 
       try {
+        String query =
+            "insert into users(user_id,user_name) values('$userId','$userName')";
+        await db.rawInsert(query);
+        // insert into participants
+        query =
+            "insert into participants(user_id,group_id,roles) values('$userId','$groupId','$role')";
         await db.rawInsert(query);
       } catch (e) {
         // ignore
       }
-      // insert into participants
-      query =
-          "insert into participants(user_id,group_id,roles) values('$userId','$groupId','$role')";
-      await db.rawInsert(query);
     }
   }
 
@@ -509,8 +535,12 @@ class LocalDatabase {
   static Future<void> deleteLink(Link link) async {
     final Database db = await database;
     final String linkId = link.linkId;
-    String query = "delete from links where link_id = '$linkId'";
-    await db.rawDelete(query);
+    try {
+      String query = "delete from links where link_id = '$linkId'";
+      await db.rawDelete(query);
+    } catch (e) {
+      // ignore
+    }
   }
 
   static Future<bool> isGroupAdmin(String userId, String groupId) async {
@@ -531,14 +561,17 @@ class LocalDatabase {
 
   static Future<void> deleteGroup(String groupId) async {
     final Database db = await database;
-    String query = "delete from groups where group_id = '$groupId'";
-    await db.rawDelete(query);
+    try {
+      String query = "delete from groups where group_id = '$groupId'";
+      await db.rawDelete(query);
+    } catch (e) {
+      // ignore
+    }
   }
 
-  static Future<void> deleteGroups(List<Map<String,dynamic>> deletedGroups) async
-  {
-    for(Map<String,dynamic> group in deletedGroups)
-    {
+  static Future<void> deleteGroups(
+      List<Map<String, dynamic>> deletedGroups) async {
+    for (Map<String, dynamic> group in deletedGroups) {
       await deleteGroup(group['group_id'] as String);
     }
   }
